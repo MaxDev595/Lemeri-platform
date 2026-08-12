@@ -18,11 +18,11 @@ const formLocale=(formData:FormData):Locale=>formData.get("locale")==="en"?"en":
 
 export async function register(_: AuthState, formData: FormData): Promise<AuthState> {
   const locale=formLocale(formData);const t=createTranslator(locale);
-  if(!(await guardServerAction("auth:register",5,15*60)).allowed)return{error:t("auth.rateLimited")};
   const parsed = registerSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: t("auth.checkData") };
   const { name, email, password, company } = parsed.data;
   try {
+    if(!(await guardServerAction("auth:register",5,15*60)).allowed)return{error:t("auth.rateLimited")};
     const user = await db.$transaction(async tx => tx.user.create({
       data: {
         name, email, passwordHash: await hashPassword(password),
@@ -32,6 +32,7 @@ export async function register(_: AuthState, formData: FormData): Promise<AuthSt
     await createSession(user.id);
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") return { error: t("auth.accountExists") };
+    console.error("Registration failed",error);
     return { error: t("auth.createFailed") };
   }
   redirect("/onboarding");

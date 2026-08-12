@@ -11,5 +11,5 @@ import { getPublicLocale } from "@/lib/public-locale";
 export default async function RegisterPage({searchParams}:{searchParams:Promise<{lang?:string}>}) {
   if (await getSessionUser()) redirect("/app");
   const locale=await getPublicLocale((await searchParams).lang);const t=createTranslator(locale);
-  return <AuthShell locale={locale} path="/register" title={t("auth.registerTitle")} copy={t("auth.registerCopy")} footer={<>{t("auth.haveAccount")} <Link href={localeHref("/login",locale)}>{t("auth.login")}</Link></>}><AuthForm locale={locale} action={register} mode="register"/></AuthShell>;
+  return <AuthShell compact locale={locale} path="/register" title={t("auth.registerTitle")} copy={t("auth.registerCopy")} footer={<>{t("auth.haveAccount")} <Link href={localeHref("/login",locale)}>{t("auth.login")}</Link></>}><AuthForm locale={locale} action={register} mode="register"/></AuthShell>;
 }
