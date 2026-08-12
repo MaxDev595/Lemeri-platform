@@ -1,5 +1,11 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
+import { neonConfig } from "@neondatabase/serverless";
+
+// PrismaNeon uses Pool.query(). In Workers it must travel over Neon's HTTP
+// transport; otherwise the driver attempts to open a socket and workerd throws
+// ENOENT before the first query.
+neonConfig.poolQueryViaFetch = true;
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 // Next/OpenNext import route modules while collecting build metadata. Do not
