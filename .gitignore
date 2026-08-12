@@ -1,8 +1,11 @@
 ﻿node_modules/
 .next/
+.open-next/
+.wrangler/
 .npm-cache/
 work/
 outputs/
 *.log
 .env
 .env.local
+.dev.vars

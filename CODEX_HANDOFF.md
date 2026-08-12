@@ -435,3 +435,15 @@ npm audit --omit=dev --audit-level=moderate
 npm run build
 npm run db:deploy
 ```
+
+## Cloudflare Workers adaptation — 2026-08-12
+
+- Добавлены зафиксированные `@opennextjs/cloudflare@1.20.2` и `wrangler@4.122.0`, а также команды `build:cloudflare`, `deploy:cloudflare`, `preview:cloudflare`.
+- Добавлены `open-next.config.ts` и `wrangler.jsonc` с `nodejs_compat`, Worker entrypoint и static assets binding.
+- Node.js `src/proxy.ts` заменён на поддерживаемый OpenNext Edge Middleware `src/middleware.ts`; защита same-origin мутаций и request-id сохранена.
+- Prisma переведён на JavaScript engine (`engineType = "client"`) и официальный PostgreSQL adapter `@prisma/adapter-pg`, чтобы исключить несовместимый Rust query engine в Workers.
+- `.open-next`, `.wrangler` и `.dev.vars` исключены из Git.
+- Проверки: Prisma generate PASS, TypeScript PASS, тесты PASS 44/44. Обычный Next production bundle компилируется; локальный Windows sandbox блокирует только дочерний worker с `spawn EPERM`. OpenNext на Windows доходит до запуска adapter build и также блокируется sandbox-запретом `esbuild spawn EPERM`; финальная полная сборка должна выполняться в Linux CI Cloudflare.
+- Настройки Cloudflare после push: Build command `npm run build:cloudflare`, Deploy command `npm run deploy:cloudflare`, Version command `npx wrangler versions upload`, Root `/`.
+- До production запуска создать Cloudflare secrets/variables как минимум: `DATABASE_URL`, `PUBLIC_APP_URL`, `AI_PROVIDER=openai`, `OPENAI_API_KEY`, `CREDENTIALS_ENCRYPTION_KEY`, `CRON_SECRET`; далее подключить Resend/Stripe/WhatsApp по необходимости.
+- Миграции Prisma не выполняются Worker-деплоем. Их нужно один раз применить к production PostgreSQL отдельно командой `DATABASE_URL=... npm run db:deploy` из защищённой CI/локальной среды.
