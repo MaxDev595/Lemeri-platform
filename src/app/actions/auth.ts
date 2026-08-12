@@ -16,24 +16,41 @@ import { safeReturnTo } from "@/lib/locale-utils";
 export type AuthState = { error?: string; message?: string };
 const formLocale=(formData:FormData):Locale=>formData.get("locale")==="en"?"en":"ru";
 
+function registrationFailure(locale: Locale, error: unknown, phase: "rate-limit" | "create" | "session") {
+  if (!process.env.DATABASE_URL) {
+    return locale === "ru"
+      ? "База данных не подключена к Worker (код REG-CONFIG)."
+      : "The database is not connected to the Worker (code REG-CONFIG).";
+  }
+  const prismaCode =
+    error instanceof Prisma.PrismaClientKnownRequestError ? error.code : undefined;
+  const code = `REG-${phase === "rate-limit" ? "RATE" : phase === "create" ? "DB" : "SESSION"}${prismaCode ? `-${prismaCode}` : ""}`;
+  return locale === "ru"
+    ? `Не удалось завершить регистрацию (код ${code}).`
+    : `Registration could not be completed (code ${code}).`;
+}
+
 export async function register(_: AuthState, formData: FormData): Promise<AuthState> {
   const locale=formLocale(formData);const t=createTranslator(locale);
   const parsed = registerSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: t("auth.checkData") };
   const { name, email, password, company } = parsed.data;
+  let phase: "rate-limit" | "create" | "session" = "rate-limit";
   try {
     if(!(await guardServerAction("auth:register",5,15*60)).allowed)return{error:t("auth.rateLimited")};
+    phase = "create";
     const user = await db.$transaction(async tx => tx.user.create({
       data: {
         name, email, passwordHash: await hashPassword(password),
         memberships: { create: { role: "OWNER", workspace: { create: { name: company, slug: `${company.toLowerCase().replace(/[^a-zа-я0-9]+/gi, "-")}-${crypto.randomUUID().slice(0, 6)}`,settings:{create:{locale}} } } } },
       },
     }));
+    phase = "session";
     await createSession(user.id);
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") return { error: t("auth.accountExists") };
     console.error("Registration failed",error);
-    return { error: t("auth.createFailed") };
+    return { error: registrationFailure(locale, error, phase) };
   }
   redirect("/onboarding");
 }
