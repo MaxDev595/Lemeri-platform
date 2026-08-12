@@ -1,0 +1,9 @@
+import { Prisma } from "@prisma/client";
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { db } from "@/lib/db";
+import { getApiWorkspace } from "@/lib/auth/api";
+import { getAction } from "@/lib/actions/registry";
+const schema=z.object({name:z.string().trim().min(2).max(120),trigger:z.enum(["AI_RESPONSE","HANDOFF_CREATED","MESSAGE_RECEIVED"]),conditions:z.record(z.unknown()).default({}),steps:z.array(z.object({actionKey:z.string(),input:z.record(z.unknown())})).min(1).max(10),enabled:z.boolean().default(false)});
+export async function GET(){const auth=await getApiWorkspace();if(!auth)return NextResponse.json({error:"UNAUTHORIZED"},{status:401});return NextResponse.json(await db.automation.findMany({where:{workspaceId:auth.workspaceId},orderBy:{createdAt:"desc"}}))}
+export async function POST(request:Request){const auth=await getApiWorkspace();if(!auth)return NextResponse.json({error:"UNAUTHORIZED"},{status:401});if(!["OWNER","ADMIN"].includes(auth.membership.role))return NextResponse.json({error:"FORBIDDEN"},{status:403});const parsed=schema.safeParse(await request.json().catch(()=>null));if(!parsed.success)return NextResponse.json({error:"INVALID_REQUEST",issues:parsed.error.flatten()},{status:400});try{parsed.data.steps.forEach(step=>getAction(step.actionKey))}catch{return NextResponse.json({error:"UNKNOWN_ACTION"},{status:400})}const automation=await db.automation.create({data:{workspaceId:auth.workspaceId,name:parsed.data.name,trigger:parsed.data.trigger,enabled:parsed.data.enabled,conditions:parsed.data.conditions as Prisma.InputJsonValue,steps:parsed.data.steps as Prisma.InputJsonValue}});await db.auditLog.create({data:{workspaceId:auth.workspaceId,userId:auth.user.id,actorType:"USER",action:"AUTOMATION_CREATED",entityType:"Automation",entityId:automation.id}});return NextResponse.json(automation,{status:201})}

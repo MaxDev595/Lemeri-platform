@@ -1,0 +1,1 @@
+export function isSameOrigin(origin:string|null,expectedUrl:string,allowMissing=false){if(!origin)return allowMissing;try{return new URL(origin).origin===new URL(expectedUrl).origin}catch{return false}}

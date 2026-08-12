@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: lemiri
+      POSTGRES_PASSWORD: lemiri_dev_password
+      POSTGRES_DB: lemiri
+    ports:
+      - "55432:5432"
+    volumes:
+      - lemiri_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lemiri -d lemiri"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  app:
+    profiles: ["smoke"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://lemiri:lemiri_dev_password@postgres:5432/lemiri?schema=public
+      PUBLIC_APP_URL: http://localhost:3100
+      AI_PROVIDER: mock
+      LEMIRI_LOCAL_SMOKE: "true"
+      CREDENTIALS_ENCRYPTION_KEY: local-smoke-encryption-key-at-least-32-characters
+      CRON_SECRET: local-smoke-cron-secret-at-least-32-characters
+    ports:
+      - "3100:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+volumes:
+  lemiri_postgres:

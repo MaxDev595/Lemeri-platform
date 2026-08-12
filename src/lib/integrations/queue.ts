@@ -1,0 +1,2 @@
+import { db } from "@/lib/db";import { enqueueJob } from "@/lib/jobs/queue";
+export async function enqueueCrmEvent(workspaceId:string,event:string,data:object){const integration=await db.integration.findFirst({where:{workspaceId,provider:"WEBHOOK_CRM",status:"CONNECTED"},select:{id:true}});if(integration)await enqueueJob(workspaceId,"CRM_EVENT",{integrationId:integration.id,event,data,idempotencyKey:crypto.randomUUID()})}

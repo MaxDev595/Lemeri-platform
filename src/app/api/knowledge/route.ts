@@ -1,0 +1,11 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { db } from "@/lib/db";
+import { getApiWorkspace } from "@/lib/auth/api";
+import { canWorkspace } from "@/lib/auth/permissions";
+import { enqueueJob } from "@/lib/jobs/queue";
+import { chunkText } from "@/lib/knowledge/chunk";
+import { createTranslator } from "@/lib/i18n";
+const source=z.discriminatedUnion("type",[z.object({title:z.string().min(2).max(160),type:z.enum(["TEXT","FAQ"]),content:z.string().min(10).max(100000),uri:z.string().optional()}),z.object({title:z.string().min(2).max(160),type:z.literal("WEBSITE"),uri:z.string().url(),content:z.string().optional()})]);
+export async function GET(){const auth=await getApiWorkspace();if(!auth)return NextResponse.json({error:"UNAUTHORIZED"},{status:401});return NextResponse.json(await db.knowledgeSource.findMany({where:{workspaceId:auth.workspaceId},include:{_count:{select:{documents:true}}},orderBy:{createdAt:"desc"}}))}
+export async function POST(request:Request){const auth=await getApiWorkspace();if(!auth)return NextResponse.json({error:"UNAUTHORIZED"},{status:401});if(!canWorkspace(auth.membership.role,"MANAGE_KNOWLEDGE"))return NextResponse.json({error:"FORBIDDEN"},{status:403});const parsed=source.safeParse(await request.json().catch(()=>null));if(!parsed.success)return NextResponse.json({error:"INVALID_REQUEST",issues:parsed.error.flatten()},{status:400});if(parsed.data.type==="WEBSITE"){const item=await db.knowledgeSource.create({data:{workspaceId:auth.workspaceId,title:parsed.data.title,type:"WEBSITE",status:"PROCESSING",uri:parsed.data.uri}});await enqueueJob(auth.workspaceId,"WEBSITE_INGEST",{sourceId:item.id});return NextResponse.json(item,{status:202})}const t=createTranslator(auth.locale);const item=await db.knowledgeSource.create({data:{workspaceId:auth.workspaceId,title:parsed.data.title,type:parsed.data.type,status:"PROCESSING",documents:{create:{title:parsed.data.title,content:parsed.data.content,chunks:{create:chunkText(parsed.data.content).map((content,index)=>({content,sourceLabel:`${parsed.data.title} · ${t("server.fragment",{index:index+1})}`}))}}}},include:{documents:{include:{chunks:true}}}});await enqueueJob(auth.workspaceId,"KNOWLEDGE_INDEX",{sourceId:item.id});return NextResponse.json(item,{status:202})}

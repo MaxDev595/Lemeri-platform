@@ -1,0 +1,74 @@
+"use server";
+
+import { Prisma } from "@prisma/client";
+import { redirect } from "next/navigation";
+import { db } from "@/lib/db";
+import { createSession, destroySession } from "@/lib/auth/session";
+import { hashPassword, verifyPassword } from "@/lib/auth/password";
+import { loginSchema, registerSchema } from "@/lib/validation/auth";
+import { guardServerAction } from "@/lib/security/request";
+import { createPasswordResetToken, passwordResetTokenHash } from "@/lib/auth/password-reset";
+import { ResendEmailProvider } from "@/lib/email/provider";
+import { z } from "zod";
+import { createTranslator, type Locale } from "@/lib/i18n";
+import { safeReturnTo } from "@/lib/locale-utils";
+
+export type AuthState = { error?: string; message?: string };
+const formLocale=(formData:FormData):Locale=>formData.get("locale")==="en"?"en":"ru";
+
+export async function register(_: AuthState, formData: FormData): Promise<AuthState> {
+  const locale=formLocale(formData);const t=createTranslator(locale);
+  if(!(await guardServerAction("auth:register",5,15*60)).allowed)return{error:t("auth.rateLimited")};
+  const parsed = registerSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: t("auth.checkData") };
+  const { name, email, password, company } = parsed.data;
+  try {
+    const user = await db.$transaction(async tx => tx.user.create({
+      data: {
+        name, email, passwordHash: await hashPassword(password),
+        memberships: { create: { role: "OWNER", workspace: { create: { name: company, slug: `${company.toLowerCase().replace(/[^a-zа-я0-9]+/gi, "-")}-${crypto.randomUUID().slice(0, 6)}`,settings:{create:{locale}} } } } },
+      },
+    }));
+    await createSession(user.id);
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") return { error: t("auth.accountExists") };
+    return { error: t("auth.createFailed") };
+  }
+  redirect("/onboarding");
+}
+
+export async function login(_: AuthState, formData: FormData): Promise<AuthState> {
+  const t=createTranslator(formLocale(formData));
+  if(!(await guardServerAction("auth:login",10,15*60)).allowed)return{error:t("auth.rateLimited")};
+  const parsed = loginSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: t("auth.checkCredentials") };
+  const user = await db.user.findUnique({ where: { email: parsed.data.email } });
+  if (!user || !(await verifyPassword(parsed.data.password, user.passwordHash))) return { error: t("auth.invalidCredentials") };
+  await createSession(user.id);
+  redirect(safeReturnTo(formData.get("returnTo"))??"/app");
+}
+
+export async function logout() {
+  await destroySession();
+  redirect("/login");
+}
+
+const emailSchema=z.string().trim().toLowerCase().email();
+const resetSchema=z.object({token:z.string().min(32).max(256),password:z.string().min(10).max(128),confirmPassword:z.string()}).refine(value=>value.password===value.confirmPassword,{message:"Пароли не совпадают",path:["confirmPassword"]});
+
+export async function requestPasswordReset(_:AuthState,formData:FormData):Promise<AuthState>{
+  const locale=formLocale(formData);const t=createTranslator(locale);
+  if(!(await guardServerAction("auth:forgot-password",5,15*60)).allowed)return{error:t("auth.rateLimited")};
+  const email=emailSchema.safeParse(formData.get("email"));if(!email.success)return{error:t("auth.invalidEmail")};
+  const user=await db.user.findUnique({where:{email:email.data}});
+  if(user){const token=createPasswordResetToken();const tokenHash=passwordResetTokenHash(token);const expiresAt=new Date(Date.now()+60*60_000);await db.$transaction(async tx=>{await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`lemiri:password-reset:${user.id}`}, 0))`;await tx.passwordResetToken.deleteMany({where:{userId:user.id}});await tx.passwordResetToken.create({data:{userId:user.id,tokenHash,expiresAt}})});const url=`${process.env.PUBLIC_APP_URL??"http://localhost:3000"}/reset-password/${token}?lang=${locale}`;try{await new ResendEmailProvider().send({to:user.email,subject:t("auth.resetSubject"),html:`<p>${t("auth.resetRequested")}</p><p><a href="${url}">${t("auth.resetCta")}</a></p><p>${t("auth.resetExpiry")}</p>`,idempotencyKey:`password-reset-${tokenHash.slice(0,24)}`})}catch{await db.passwordResetToken.deleteMany({where:{tokenHash}})}}
+  return{message:t("auth.resetSent")};
+}
+
+export async function resetPassword(_:AuthState,formData:FormData):Promise<AuthState>{
+  const t=createTranslator(formLocale(formData));
+  if(!(await guardServerAction("auth:reset-password",8,15*60)).allowed)return{error:t("auth.rateLimited")};
+  const parsed=resetSchema.safeParse(Object.fromEntries(formData));if(!parsed.success)return{error:formData.get("password")!==formData.get("confirmPassword")?t("auth.passwordMismatch"):t("auth.checkData")};
+  const tokenHash=passwordResetTokenHash(parsed.data.token);const passwordHash=await hashPassword(parsed.data.password);const userId=await db.$transaction(async tx=>{const consumed=await tx.$queryRaw<Array<{userId:string}>>`DELETE FROM "PasswordResetToken" WHERE "tokenHash"=${tokenHash} AND "expiresAt">CURRENT_TIMESTAMP RETURNING "userId"`;const id=consumed[0]?.userId;if(!id)return null;await tx.user.update({where:{id},data:{passwordHash}});await tx.session.deleteMany({where:{userId:id}});await tx.passwordResetToken.deleteMany({where:{userId:id}});return id});if(!userId)return{error:t("auth.invalidResetLink")};
+  await createSession(userId);redirect("/app");
+}

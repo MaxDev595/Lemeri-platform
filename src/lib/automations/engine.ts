@@ -1,0 +1,7 @@
+import { db } from "@/lib/db";
+import { executeAllowedAction } from "@/lib/actions/execute";
+import { captureOperationalError } from "@/lib/observability/logger";
+import { matchesConditions } from "./conditions";
+type AutomationStep={actionKey:string;input:Record<string,unknown>};
+type TriggerContext={workspaceId:string;employeeId:string;conversationId?:string;data?:Record<string,unknown>};
+export async function triggerAutomations(trigger:string,context:TriggerContext){const automations=await db.automation.findMany({where:{workspaceId:context.workspaceId,trigger,enabled:true}});const results=[];for(const automation of automations){if(!matchesConditions(automation.conditions,context.data??{}))continue;const steps=automation.steps as unknown as AutomationStep[];try{for(const step of steps)await executeAllowedAction({workspaceId:context.workspaceId,employeeId:context.employeeId,conversationId:context.conversationId},step.actionKey,step.input);await db.analyticsEvent.create({data:{workspaceId:context.workspaceId,type:"AUTOMATION_SUCCEEDED",payload:{automationId:automation.id,trigger}}});results.push({id:automation.id,status:"SUCCEEDED"})}catch(error){await captureOperationalError({workspaceId:context.workspaceId,category:"AUTOMATION",code:"AUTOMATION_FAILED",message:error instanceof Error?error.message:"Unknown automation error",context:{automationId:automation.id,trigger}});results.push({id:automation.id,status:"FAILED"})}}return results}

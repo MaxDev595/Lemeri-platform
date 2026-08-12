@@ -1,0 +1,4 @@
+import { lookup } from "node:dns/promises";
+import { isIP } from "node:net";
+function privateIp(address:string){if(address==="::1"||address.startsWith("fc")||address.startsWith("fd")||address.startsWith("fe80:"))return true;if(!isIP(address))return true;const parts=address.split(".").map(Number);return isIP(address)===4&&(parts[0]===10||parts[0]===127||parts[0]===0||parts[0]===169&&parts[1]===254||parts[0]===172&&parts[1]>=16&&parts[1]<=31||parts[0]===192&&parts[1]===168)}
+export async function assertPublicHttpsUrl(value:string){const url=new URL(value);if(url.protocol!=="https:"||url.username||url.password||url.port)throw new Error("CRM endpoint must be a public HTTPS URL without credentials or custom port");const records=await lookup(url.hostname,{all:true});if(!records.length||records.some(record=>privateIp(record.address)))throw new Error("CRM endpoint resolves to a private or invalid address");return url}

@@ -1,0 +1,1 @@
+export function matchesConditions(conditions:unknown,data:Record<string,unknown>){if(!conditions||typeof conditions!=="object")return true;return Object.entries(conditions as Record<string,unknown>).every(([key,value])=>data[key]===value)}

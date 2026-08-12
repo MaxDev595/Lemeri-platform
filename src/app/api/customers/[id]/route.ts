@@ -1,0 +1,4 @@
+import { NextResponse } from "next/server";
+import { getApiWorkspace } from "@/lib/auth/api";
+import { db } from "@/lib/db";
+export async function DELETE(_:Request,{params}:{params:Promise<{id:string}>}){const auth=await getApiWorkspace();if(!auth)return NextResponse.json({error:"UNAUTHORIZED"},{status:401});if(!["OWNER","ADMIN"].includes(auth.membership.role))return NextResponse.json({error:"FORBIDDEN"},{status:403});const {id}=await params;const result=await db.customer.deleteMany({where:{id,workspaceId:auth.workspaceId}});if(!result.count)return NextResponse.json({error:"NOT_FOUND"},{status:404});await db.auditLog.create({data:{workspaceId:auth.workspaceId,userId:auth.user.id,actorType:"USER",action:"CUSTOMER_DATA_DELETED",entityType:"Customer",entityId:id}});return new NextResponse(null,{status:204})}
