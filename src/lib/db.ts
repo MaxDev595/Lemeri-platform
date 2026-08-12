@@ -2,10 +2,14 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { neonConfig } from "@neondatabase/serverless";
 
-// PrismaNeon uses Pool.query(). In Workers it must travel over Neon's HTTP
-// transport; otherwise the driver attempts to open a socket and workerd throws
-// ENOENT before the first query.
-neonConfig.poolQueryViaFetch = true;
+// Prisma transactions require Neon's Pool/WebSocket transport. OpenNext's
+// Node compatibility layer can otherwise make the driver pick a filesystem
+// socket fallback, which fails in workerd with ENOENT. Bind the native Worker
+// WebSocket implementation explicitly.
+neonConfig.poolQueryViaFetch = false;
+if (typeof WebSocket !== "undefined") {
+  neonConfig.webSocketConstructor = WebSocket;
+}
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 // Next/OpenNext import route modules while collecting build metadata. Do not
