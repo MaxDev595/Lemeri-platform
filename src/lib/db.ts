@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaNeon } from "@prisma/adapter-neon";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 // Next/OpenNext import route modules while collecting build metadata. Do not
@@ -10,5 +10,5 @@ const connectionString =
   process.env.DATABASE_URL ?? "postgresql://build:build@127.0.0.1:5432/build";
 export const db =
   globalForPrisma.prisma ??
-  new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
+  new PrismaClient({ adapter: new PrismaNeon({ connectionString }) });
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db;

@@ -20,7 +20,7 @@
     "db:studio": "prisma studio"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^6.19.3",
+    "@prisma/adapter-neon": "^6.19.3",
     "@prisma/client": "^6.13.0",
     "lucide-react": "^0.468.0",
     "mammoth": "^1.12.1",
