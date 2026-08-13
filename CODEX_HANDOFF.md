@@ -458,6 +458,8 @@ Cloudflare build 2026-08-13 16:40 полностью собрал Next/OpenNext,
 
 Production диагностика подтвердила `database: ok`, `stage: prisma`: прямой Neon HTTP работает, а `EPERM` возникает внутри Prisma compiler. Обнаружена неверная настройка генератора `runtime = "cloudflare"`; для Prisma 6 фактический Cloudflare runtime называется `workerd`. Схема исправлена на `runtime = "workerd"`, клиент перегенерирован. Readiness содержит маркер `prismaRuntime: "workerd"`. Prisma generate PASS, TypeScript PASS, тесты PASS 44/44. Следующий шаг — deploy и повтор readiness; успешный ответ должен содержать `prisma: "ok"`.
 
+Повтор с `prismaRuntime: workerd` подтвердил тот же `EPERM`: текущий Prisma query compiler нельзя использовать в этом Worker. Для достижения главной цели регистрации production auth-путь выведен из Prisma: rate limiting, атомарное создание User/Workspace/WorkspaceSettings/WorkspaceMember одним SQL CTE, создание сессии, чтение пользователя/участий и загрузка onboarding выполняются через Neon HTTP (`src/lib/neon-direct.ts`). Локальная Node/Docker среда продолжает использовать Prisma. TypeScript PASS, тесты PASS 44/44. Известное ограничение: остальные production операции платформы всё ещё требуют последовательного переноса с Prisma на Neon HTTP либо смены runtime-хостинга; текущий блок гарантирует именно регистрацию, сессию и открытие onboarding.
+
 ### Что реализовано
 
 - Установлены совместимые версии `@neondatabase/serverless@1.0.2` и `@prisma/adapter-neon@6.19.3`.
