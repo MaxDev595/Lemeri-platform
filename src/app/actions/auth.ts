@@ -17,7 +17,7 @@ import { createRegisteredUser } from "@/lib/neon-direct";
 export type AuthState = { error?: string; message?: string };
 const formLocale=(formData:FormData):Locale=>formData.get("locale")==="en"?"en":"ru";
 
-function registrationFailure(locale: Locale, error: unknown, phase: "rate-limit" | "create" | "session") {
+function registrationFailure(locale: Locale, error: unknown, phase: "rate-limit" | "password" | "create" | "session") {
   if (!process.env.DATABASE_URL) {
     return locale === "ru"
       ? "База данных не подключена к Worker (код REG-CONFIG)."
@@ -31,7 +31,7 @@ function registrationFailure(locale: Locale, error: unknown, phase: "rate-limit"
   const message=error instanceof Error?error.message:"";
   const driverCategory=adapterKind?.replace(/[^A-Z]/gi,"").slice(0,28).toUpperCase()??(/auth|password|credential/i.test(message)?"AUTH":/tls|ssl|certificate/i.test(message)?"TLS":/socket|connect|network|enoent|timeout/i.test(message)?"SOCKET":/table|relation.*does not exist/i.test(message)?"TABLE":/transaction|begin/i.test(message)?"TRANSACTION":error instanceof Error?error.name.replace(/[^A-Z]/gi,"").slice(0,20).toUpperCase():"UNKNOWN");
   const detail=prismaCode??driverCategory;
-  const code = `REG-${phase === "rate-limit" ? "RATE" : phase === "create" ? "DB" : "SESSION"}-${detail}`;
+  const code = `REG-${phase === "rate-limit" ? "RATE" : phase === "password" ? "PASSWORD" : phase === "create" ? "DB" : "SESSION"}-${detail}`;
   return locale === "ru"
     ? `Не удалось завершить регистрацию (код ${code}).`
     : `Registration could not be completed (code ${code}).`;
@@ -42,15 +42,17 @@ export async function register(_: AuthState, formData: FormData): Promise<AuthSt
   const parsed = registerSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: t("auth.checkData") };
   const { name, email, password, company } = parsed.data;
-  let phase: "rate-limit" | "create" | "session" = "rate-limit";
+  let phase: "rate-limit" | "password" | "create" | "session" = "rate-limit";
   try {
     if(!(await guardServerAction("auth:register",5,15*60)).allowed)return{error:t("auth.rateLimited")};
+    phase = "password";
+    const passwordHash = await hashPassword(password);
     phase = "create";
     // Nested writes are atomic. Avoid interactive transactions because edge
     // PostgreSQL connections may reject transaction pinning.
-    const user = process.env.NODE_ENV==="production"?await createRegisteredUser({name,email,passwordHash:await hashPassword(password),company,slug:`${company.toLowerCase().replace(/[^a-zР°-СЏ0-9]+/gi, "-")}-${crypto.randomUUID().slice(0, 6)}`,locale}):await db.user.create({
+    const user = process.env.NODE_ENV==="production"?await createRegisteredUser({name,email,passwordHash,company,slug:`${company.toLowerCase().replace(/[^a-zР°-СЏ0-9]+/gi, "-")}-${crypto.randomUUID().slice(0, 6)}`,locale}):await db.user.create({
       data: {
-        name, email, passwordHash: await hashPassword(password),
+        name, email, passwordHash,
         memberships: { create: { role: "OWNER", workspace: { create: { name: company, slug: `${company.toLowerCase().replace(/[^a-zа-я0-9]+/gi, "-")}-${crypto.randomUUID().slice(0, 6)}`,settings:{create:{locale}} } } } },
       },
     });
