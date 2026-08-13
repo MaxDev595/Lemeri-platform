@@ -45,12 +45,14 @@ export async function register(_: AuthState, formData: FormData): Promise<AuthSt
   try {
     if(!(await guardServerAction("auth:register",5,15*60)).allowed)return{error:t("auth.rateLimited")};
     phase = "create";
-    const user = await db.$transaction(async tx => tx.user.create({
+    // Nested writes are atomic. Avoid interactive transactions because edge
+    // PostgreSQL connections may reject transaction pinning.
+    const user = await db.user.create({
       data: {
         name, email, passwordHash: await hashPassword(password),
         memberships: { create: { role: "OWNER", workspace: { create: { name: company, slug: `${company.toLowerCase().replace(/[^a-zа-я0-9]+/gi, "-")}-${crypto.randomUUID().slice(0, 6)}`,settings:{create:{locale}} } } } },
       },
-    }));
+    });
     phase = "session";
     await createSession(user.id);
   } catch (error) {

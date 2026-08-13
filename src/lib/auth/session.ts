@@ -15,7 +15,8 @@ export async function createSession(userId: string) {
   const token = randomBytes(32).toString("base64url");
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 86400_000);
   const ip=source.get("x-forwarded-for")?.split(",")[0]??source.get("x-real-ip")??"";
-  await db.$transaction([db.session.deleteMany({where:{userId,expiresAt:{lt:new Date()}}}),db.session.create({ data: { userId, tokenHash: tokenHash(token), expiresAt,ipHash:ip?createHash("sha256").update(ip).digest("hex"):null,userAgent:source.get("user-agent")?.slice(0,500) } })]);
+  await db.session.deleteMany({where:{userId,expiresAt:{lt:new Date()}}});
+  await db.session.create({ data: { userId, tokenHash: tokenHash(token), expiresAt,ipHash:ip?createHash("sha256").update(ip).digest("hex"):null,userAgent:source.get("user-agent")?.slice(0,500) } });
   (await cookies()).set(COOKIE, token, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", expires: expiresAt, path: "/" });
 }
 
