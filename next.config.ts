@@ -9,5 +9,14 @@ const widgetHeaders=[
   {key:"Content-Security-Policy",value:"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors *; base-uri 'none'; form-action 'self'"},
 ];
 
-const config:NextConfig={output:"standalone",serverExternalPackages:["pg-cloudflare"],reactStrictMode:true,poweredByHeader:false,async headers(){return[{source:"/widget/:path*",headers:widgetHeaders},{source:"/:path((?!widget(?:/|$)).*)",headers:securityHeaders}]}};
+const config:NextConfig={
+  output:"standalone",
+  serverExternalPackages:["pg-cloudflare"],
+  // The application does not use ImageResponse/next-og. Excluding it prevents
+  // Next's broad server trace from adding resvg.wasm (~1.35 MiB) to the Worker.
+  outputFileTracingExcludes:{"*":["node_modules/next/dist/compiled/@vercel/og/**/*"]},
+  reactStrictMode:true,
+  poweredByHeader:false,
+  async headers(){return[{source:"/widget/:path*",headers:widgetHeaders},{source:"/:path((?!widget(?:/|$)).*)",headers:securityHeaders}]}
+};
 export default config;
