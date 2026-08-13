@@ -454,6 +454,8 @@ npm run db:deploy
 
 Повторный production smoke всё ещё вернул `EPERM`, хотя commit с `poolQueryViaFetch` находился в `origin/main`. Путь обычных запросов окончательно отделён от Pool: production model operations и `$queryRaw` используют `PrismaNeonHTTP`, а только явный `$transaction` направляется в `PrismaNeon`. Readiness теперь возвращает маркер `databaseTransport: "neon-http"`, позволяющий однозначно проверить, что Cloudflare запустил новую сборку. TypeScript PASS, тесты PASS 44/44.
 
+Cloudflare build 2026-08-13 16:40 полностью собрал Next/OpenNext, но deploy был отклонён кодом 10027: gzip bundle 3069.54 KiB превысил лимит бесплатного Worker 3 MiB. Отдельный Next Middleware bundle (~370 KiB raw) удалён; проверка same-origin для авторизованных API перенесена в общий `getApiWorkspace`, поэтому защита сохранена без отдельного runtime bundle. Ожидаемый результат следующего CI — Worker меньше лимита. TypeScript PASS, тесты PASS 44/44. После деплоя проверить `/api/health/ready`; диагностический ответ различает `direct-neon` и `prisma`.
+
 ### Что реализовано
 
 - Установлены совместимые версии `@neondatabase/serverless@1.0.2` и `@prisma/adapter-neon@6.19.3`.
