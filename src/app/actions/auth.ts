@@ -24,7 +24,13 @@ function registrationFailure(locale: Locale, error: unknown, phase: "rate-limit"
   }
   const prismaCode =
     error instanceof Prisma.PrismaClientKnownRequestError ? error.code : undefined;
-  const code = `REG-${phase === "rate-limit" ? "RATE" : phase === "create" ? "DB" : "SESSION"}${prismaCode ? `-${prismaCode}` : ""}`;
+  const record=error&&typeof error==="object"?error as Record<string,unknown>:undefined;
+  const cause=record?.cause&&typeof record.cause==="object"?record.cause as Record<string,unknown>:undefined;
+  const adapterKind=typeof cause?.kind==="string"?cause.kind:typeof record?.kind==="string"?record.kind:undefined;
+  const message=error instanceof Error?error.message:"";
+  const driverCategory=adapterKind?.replace(/[^A-Z]/gi,"").slice(0,28).toUpperCase()??(/auth|password|credential/i.test(message)?"AUTH":/tls|ssl|certificate/i.test(message)?"TLS":/socket|connect|network|enoent|timeout/i.test(message)?"SOCKET":/table|relation.*does not exist/i.test(message)?"TABLE":/transaction|begin/i.test(message)?"TRANSACTION":error instanceof Error?error.name.replace(/[^A-Z]/gi,"").slice(0,20).toUpperCase():"UNKNOWN");
+  const detail=prismaCode??driverCategory;
+  const code = `REG-${phase === "rate-limit" ? "RATE" : phase === "create" ? "DB" : "SESSION"}-${detail}`;
   return locale === "ru"
     ? `Не удалось завершить регистрацию (код ${code}).`
     : `Registration could not be completed (code ${code}).`;
