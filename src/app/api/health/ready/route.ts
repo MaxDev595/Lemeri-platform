@@ -20,7 +20,7 @@ export async function GET() {
   }
   try {
     await db.$queryRaw`SELECT 1`;
-    return NextResponse.json({ status: "ready", database: "ok", databaseTransport: "neon-http", configuration: configurationErrors.length ? "partial" : "ok", issueCount: configurationErrors.length, timestamp: new Date().toISOString() }, { headers: { "cache-control": "no-store" } });
+    return NextResponse.json({ status: "ready", database: "ok", prisma:"ok", prismaRuntime:"workerd", databaseTransport: "neon-http", configuration: configurationErrors.length ? "partial" : "ok", issueCount: configurationErrors.length, timestamp: new Date().toISOString() }, { headers: { "cache-control": "no-store" } });
   } catch (error) {
     const record=error&&typeof error==="object"?error as Record<string,unknown>:undefined;
     const cause=record?.cause&&typeof record.cause==="object"?record.cause as Record<string,unknown>:undefined;
@@ -36,6 +36,6 @@ export async function GET() {
       stack:error instanceof Error&&error.stack?sanitize(error.stack.split("\n").slice(0,5).join("\n")):undefined,
     };
     console.error("Database readiness failed",error);
-    return NextResponse.json({ status: "unavailable", database: "ok", prisma:"error", databaseTransport: "neon-direct-http", stage:"prisma", diagnostic }, { status: 503, headers: { "cache-control": "no-store" } });
+    return NextResponse.json({ status: "unavailable", database: "ok", prisma:"error", prismaRuntime:"workerd", databaseTransport: "neon-direct-http", stage:"prisma", diagnostic }, { status: 503, headers: { "cache-control": "no-store" } });
   }
 }

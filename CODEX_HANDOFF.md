@@ -456,6 +456,8 @@ npm run db:deploy
 
 Cloudflare build 2026-08-13 16:40 полностью собрал Next/OpenNext, но deploy был отклонён кодом 10027: gzip bundle 3069.54 KiB превысил лимит бесплатного Worker 3 MiB. Отдельный Next Middleware bundle (~370 KiB raw) удалён; проверка same-origin для авторизованных API перенесена в общий `getApiWorkspace`, поэтому защита сохранена без отдельного runtime bundle. Ожидаемый результат следующего CI — Worker меньше лимита. TypeScript PASS, тесты PASS 44/44. После деплоя проверить `/api/health/ready`; диагностический ответ различает `direct-neon` и `prisma`.
 
+Production диагностика подтвердила `database: ok`, `stage: prisma`: прямой Neon HTTP работает, а `EPERM` возникает внутри Prisma compiler. Обнаружена неверная настройка генератора `runtime = "cloudflare"`; для Prisma 6 фактический Cloudflare runtime называется `workerd`. Схема исправлена на `runtime = "workerd"`, клиент перегенерирован. Readiness содержит маркер `prismaRuntime: "workerd"`. Prisma generate PASS, TypeScript PASS, тесты PASS 44/44. Следующий шаг — deploy и повтор readiness; успешный ответ должен содержать `prisma: "ok"`.
+
 ### Что реализовано
 
 - Установлены совместимые версии `@neondatabase/serverless@1.0.2` и `@prisma/adapter-neon@6.19.3`.
