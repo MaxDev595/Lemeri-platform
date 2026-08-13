@@ -13,10 +13,16 @@ export async function GET() {
   } catch (error) {
     const record=error&&typeof error==="object"?error as Record<string,unknown>:undefined;
     const cause=record?.cause&&typeof record.cause==="object"?record.cause as Record<string,unknown>:undefined;
+    const sanitize=(value:string)=>value
+      .replace(/postgres(?:ql)?:\/\/[^\s"']+/gi,"postgresql://[redacted]")
+      .replace(/[A-Za-z0-9_-]{32,}/g,"[redacted]")
+      .slice(0,800);
     const diagnostic={
       name:error instanceof Error?error.name:"UnknownError",
       code:typeof record?.code==="string"?record.code:undefined,
       kind:typeof cause?.kind==="string"?cause.kind:typeof record?.kind==="string"?record.kind:undefined,
+      message:error instanceof Error?sanitize(error.message):undefined,
+      stack:error instanceof Error&&error.stack?sanitize(error.stack.split("\n").slice(0,5).join("\n")):undefined,
     };
     console.error("Database readiness failed",error);
     return NextResponse.json({ status: "unavailable", database: "error", diagnostic }, { status: 503, headers: { "cache-control": "no-store" } });
