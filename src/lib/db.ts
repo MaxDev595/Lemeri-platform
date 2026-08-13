@@ -1,6 +1,19 @@
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
+// Turbopack's WASM loader uses compileStreaming, while workerd currently only
+// exposes compile. Install the equivalent fallback before Prisma compiles its
+// query compiler. Keeping this local avoids patching OpenNext's worker runtime.
+if (typeof WebAssembly.compileStreaming !== "function") {
+  Object.defineProperty(WebAssembly, "compileStreaming", {
+    configurable: true,
+    value: async (source: Response | PromiseLike<Response>) => {
+      const response = await source;
+      return WebAssembly.compile(await response.arrayBuffer());
+    },
+  });
+}
+
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 // Next/OpenNext import route modules while collecting build metadata. Do not
 // require a live production secret during that import-only phase; the adapter
