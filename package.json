@@ -27,6 +27,7 @@
     "next": "^16.3.0",
     "pdf-parse": "^2.4.5",
     "pg": "^8.16.3",
+    "pg-cloudflare": "^1.4.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "read-excel-file": "^9.3.10",
