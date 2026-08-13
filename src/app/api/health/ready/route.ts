@@ -6,10 +6,10 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   const configurationErrors = runtimeConfigurationErrors();
-  if (configurationErrors.length) return NextResponse.json({ status: "unavailable", database: "unknown", configuration: "error", issueCount: configurationErrors.length }, { status: 503, headers: { "cache-control": "no-store" } });
+  if (!process.env.DATABASE_URL?.trim()) return NextResponse.json({ status: "unavailable", database: "unknown", configuration: "error", diagnostic: { code: "DATABASE_URL_MISSING" } }, { status: 503, headers: { "cache-control": "no-store" } });
   try {
     await db.$queryRaw`SELECT 1`;
-    return NextResponse.json({ status: "ready", database: "ok", timestamp: new Date().toISOString() }, { headers: { "cache-control": "no-store" } });
+    return NextResponse.json({ status: "ready", database: "ok", configuration: configurationErrors.length ? "partial" : "ok", issueCount: configurationErrors.length, timestamp: new Date().toISOString() }, { headers: { "cache-control": "no-store" } });
   } catch (error) {
     const record=error&&typeof error==="object"?error as Record<string,unknown>:undefined;
     const cause=record?.cause&&typeof record.cause==="object"?record.cause as Record<string,unknown>:undefined;
