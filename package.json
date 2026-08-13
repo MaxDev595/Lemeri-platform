@@ -21,14 +21,13 @@
     "db:studio": "prisma studio"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^6.19.3",
+    "@neondatabase/serverless": "^1.0.2",
+    "@prisma/adapter-neon": "^6.19.3",
     "@prisma/client": "^6.13.0",
     "lucide-react": "^0.468.0",
     "mammoth": "^1.12.1",
     "next": "^16.3.0",
     "pdf-parse": "^2.4.5",
-    "pg": "^8.16.3",
-    "pg-cloudflare": "^1.4.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "read-excel-file": "^9.3.10",
@@ -37,7 +36,6 @@
   "devDependencies": {
     "@opennextjs/cloudflare": "^1.20.2",
     "@types/node": "^22.10.5",
-    "@types/pg": "^8.15.5",
     "@types/react": "^19.0.3",
     "@types/react-dom": "^19.0.2",
     "prisma": "^6.13.0",

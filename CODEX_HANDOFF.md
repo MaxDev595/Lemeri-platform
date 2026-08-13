@@ -447,3 +447,41 @@ npm run db:deploy
 - Настройки Cloudflare после push: Build command `npm run build:cloudflare`, Deploy command `npm run deploy:cloudflare`, Version command `npx wrangler versions upload`, Root `/`.
 - До production запуска создать Cloudflare secrets/variables как минимум: `DATABASE_URL`, `PUBLIC_APP_URL`, `AI_PROVIDER=openai`, `OPENAI_API_KEY`, `CREDENTIALS_ENCRYPTION_KEY`, `CRON_SECRET`; далее подключить Resend/Stripe/WhatsApp по необходимости.
 - Миграции Prisma не выполняются Worker-деплоем. Их нужно один раз применить к production PostgreSQL отдельно командой `DATABASE_URL=... npm run db:deploy` из защищённой CI/локальной среды.
+
+## Исправление подключения Neon в Cloudflare Worker — 2026-08-13
+
+### Что реализовано
+
+- Установлены совместимые версии `@neondatabase/serverless@1.0.2` и `@prisma/adapter-neon@6.19.3`.
+- Prisma переключён с TCP-драйвера `@prisma/adapter-pg` на официальный serverless-драйвер `PrismaNeon`.
+- Удалены прямые зависимости `@prisma/adapter-pg`, `pg`, `pg-cloudflare`, `@types/pg` и настройка `serverExternalPackages` для `pg-cloudflare`.
+- Сохранён fallback для `WebAssembly.compileStreaming`, необходимый query compiler Prisma в workerd.
+- В production Worker Prisma создаёт отдельный клиент для каждой верхнеуровневой операции и не переиспользует соединение между запросами.
+
+### Что проверено
+
+- `npm run db:generate` — PASS, Prisma Client 6.19.3 сгенерирован.
+- `npx tsc --noEmit --incremental false` — PASS.
+- `npm test` — PASS, 44/44 теста.
+- `npm run build` — Next/Turbopack production-компиляция PASS; последующий дочерний процесс остановлен ограничением локальной Codex-песочницы `spawn EPERM`.
+- `npm ls` подтверждает наличие только Neon adapter/serverless driver; старые TCP-пакеты отсутствуют на верхнем уровне.
+
+### Причина исправления
+
+Предыдущий драйвер пытался открыть TCP-сокет из Cloudflare Worker и readiness возвращал Prisma `EPERM: operation not permitted`. Neon adapter использует поддерживаемый serverless-транспорт и устраняет именно этот несовместимый путь.
+
+### Что осталось проверить после деплоя
+
+1. Закоммитить и отправить текущие изменения в GitHub.
+2. Дождаться успешного Cloudflare build/deploy без использования старого build cache.
+3. Открыть `/api/health/ready`: ожидается HTTP 200 и `database: "ok"`.
+4. Выполнить регистрацию с новым уникальным email. Старый открытый таб перед проверкой обновить через Ctrl+F5, чтобы исключить устаревший Server Action ID.
+
+### Известные ограничения
+
+- Живой запрос к production Neon из локальной Codex-песочницы не выполнялся: production secret `DATABASE_URL` здесь недоступен.
+- Если readiness после нового деплоя покажет уже не `EPERM`, а ошибку авторизации/соединения Neon, проверить секрет `DATABASE_URL`, наличие `sslmode=require` и состояние Neon branch/database.
+
+### Следующий шаг
+
+После push и redeploy сначала проверить `/api/health/ready`. Только при `database: "ok"` проверять регистрацию; новый большой аудит до этой smoke-проверки не начинать.

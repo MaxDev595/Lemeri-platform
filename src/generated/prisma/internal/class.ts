@@ -27,9 +27,9 @@ const config: runtime.GetPrismaClientConfig = {
       "fromEnvVar": null
     },
     "config": {
+      "runtime": "cloudflare",
       "engineType": "client",
-      "compilerBuild": "small",
-      "runtime": "cloudflare"
+      "compilerBuild": "small"
     },
     "binaryTargets": [
       {

@@ -11,7 +11,6 @@ const widgetHeaders=[
 
 const config:NextConfig={
   output:"standalone",
-  serverExternalPackages:["pg-cloudflare"],
   // The application does not use ImageResponse/next-og. Excluding it prevents
   // Next's broad server trace from adding resvg.wasm (~1.35 MiB) to the Worker.
   outputFileTracingExcludes:{"*":["node_modules/next/dist/compiled/@vercel/og/**/*"]},

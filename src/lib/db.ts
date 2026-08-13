@@ -1,5 +1,5 @@
 import { PrismaClient } from "@/generated/prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaNeon } from "@prisma/adapter-neon";
 
 // Turbopack's WASM loader uses compileStreaming, while workerd currently only
 // exposes compile. Install the equivalent fallback before Prisma compiles its
@@ -23,7 +23,7 @@ const connectionString =
   process.env.DATABASE_URL ?? "postgresql://build:build@127.0.0.1:5432/build";
 
 const createClient = () =>
-  new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
+  new PrismaClient({ adapter: new PrismaNeon({ connectionString }) });
 
 // A Cloudflare Worker must not reuse sockets/pools that were created for a
 // different request. Keep the convenient singleton in local development, but
