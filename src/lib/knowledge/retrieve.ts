@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import type { KnowledgeMatch } from "@/lib/ai/types";
 import { configuredEmbeddingProvider } from "@/lib/ai/embeddings";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 
 const words = (value: string) => new Set(value.toLowerCase().match(/[a-zа-яё0-9]{3,}/gi) ?? []);
 export async function retrieveKnowledge(workspaceId: string, query: string, limit = 5): Promise<KnowledgeMatch[]> {

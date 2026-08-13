@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { isStaleStripeEvent, stripePlanForSubscription, verifyStripeSignature } from "@/lib/billing/stripe";
 

@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 
 export async function aggregateUsage(workspaceId:string,date=new Date()){
   const periodStart=new Date(Date.UTC(date.getUTCFullYear(),date.getUTCMonth(),1));const periodEnd=new Date(Date.UTC(date.getUTCFullYear(),date.getUTCMonth()+1,1));

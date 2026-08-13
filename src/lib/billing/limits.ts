@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from "@/generated/prisma/client";
 import { canActivateEmployee, canCreateConversation, effectivePlan } from "@/lib/billing/plans";
 
 export class BillingLimitError extends Error {
