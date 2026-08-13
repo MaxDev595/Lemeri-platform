@@ -9,5 +9,5 @@ const widgetHeaders=[
   {key:"Content-Security-Policy",value:"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors *; base-uri 'none'; form-action 'self'"},
 ];
 
-const config:NextConfig={output:"standalone",reactStrictMode:true,poweredByHeader:false,async headers(){return[{source:"/widget/:path*",headers:widgetHeaders},{source:"/:path((?!widget(?:/|$)).*)",headers:securityHeaders}]}};
+const config:NextConfig={output:"standalone",serverExternalPackages:["pg-cloudflare"],reactStrictMode:true,poweredByHeader:false,async headers(){return[{source:"/widget/:path*",headers:widgetHeaders},{source:"/:path((?!widget(?:/|$)).*)",headers:securityHeaders}]}};
 export default config;
