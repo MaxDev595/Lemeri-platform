@@ -1,5 +1,11 @@
 import { PrismaClient } from "@/generated/prisma/client";
+import { neonConfig } from "@neondatabase/serverless";
 import { PrismaNeon } from "@prisma/adapter-neon";
+
+// Cloudflare Workers cannot open regular Node TCP sockets. Route ordinary
+// Pool.query calls through Neon's HTTP fetch transport. Explicit transactions
+// still use the driver's WebSocket transport when Prisma requests a client.
+neonConfig.poolQueryViaFetch = true;
 
 // Turbopack's WASM loader uses compileStreaming, while workerd currently only
 // exposes compile. Install the equivalent fallback before Prisma compiles its

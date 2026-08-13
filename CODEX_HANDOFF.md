@@ -450,6 +450,8 @@ npm run db:deploy
 
 ## Исправление подключения Neon в Cloudflare Worker — 2026-08-13
 
+Дополнение после production smoke: один только `PrismaNeon` оставлял обычные `Pool.query` на WebSocket-транспорте, поэтому Worker продолжал возвращать `EPERM`. В `src/lib/db.ts` принудительно включён `neonConfig.poolQueryViaFetch = true`: обычные запросы, включая readiness и регистрацию, теперь идут через Neon HTTP fetch; явные Prisma-транзакции сохраняют WebSocket-транспорт. После изменения TypeScript PASS и тесты PASS 44/44. Требуется новый commit/push/deploy и повторная проверка readiness.
+
 ### Что реализовано
 
 - Установлены совместимые версии `@neondatabase/serverless@1.0.2` и `@prisma/adapter-neon@6.19.3`.
