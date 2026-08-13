@@ -10,7 +10,7 @@
     "build:cloudflare": "opennextjs-cloudflare build",
     "deploy:cloudflare": "opennextjs-cloudflare deploy",
     "preview:cloudflare": "opennextjs-cloudflare preview",
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate && node scripts/patch-opennext-turbopack.mjs",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types tests/run.ts",
     "test:db-smoke": "node scripts/runtime-db-smoke.mjs",
