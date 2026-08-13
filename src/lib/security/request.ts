@@ -5,6 +5,14 @@ import { isSameOrigin } from "./origin";
 
 export function requestIp(source: Headers) { return (source.get("x-forwarded-for")?.split(",")[0]??source.get("x-real-ip")??"unknown").trim(); }
 const digest=(value:string)=>createHash("sha256").update(value).digest("hex");
+type MemoryBucket={windowStart:number;count:number};
+const rateLimitMemory=(globalThis as typeof globalThis&{__lemiriRateLimits?:Map<string,MemoryBucket>}).__lemiriRateLimits??=new Map<string,MemoryBucket>();
+
+function checkMemoryRateLimit(scope:string,identifier:string,limit:number,windowSeconds:number){
+  const now=Date.now();const windowMs=windowSeconds*1000;const windowStart=Math.floor(now/windowMs)*windowMs;const key=digest(`${scope}:${identifier}`);const existing=rateLimitMemory.get(key);const count=existing?.windowStart===windowStart?existing.count+1:1;rateLimitMemory.set(key,{windowStart,count});
+  if(rateLimitMemory.size>5_000)for(const [bucketKey,bucket] of rateLimitMemory)if(bucket.windowStart+windowMs*2<now)rateLimitMemory.delete(bucketKey);
+  return{allowed:count<=limit,remaining:Math.max(0,limit-count),retryAfter:Math.ceil((windowStart+windowMs-now)/1000)};
+}
 
 export function validateRequestOrigin(request: Request) {
   return isSameOrigin(request.headers.get("origin"),process.env.PUBLIC_APP_URL??request.url,process.env.NODE_ENV!=="production");
@@ -22,4 +30,13 @@ export async function guardMutation(request:Request,scope:string,limit=120,windo
   return result.allowed?{ok:true as const}:{ok:false as const,status:429,error:"RATE_LIMITED",retryAfter:result.retryAfter};
 }
 
-export async function guardServerAction(scope:string,limit:number,windowSeconds:number){const source=await headers();return checkRateLimit(scope,requestIp(source),limit,windowSeconds)}
+export async function guardServerAction(scope:string,limit:number,windowSeconds:number){
+  const source=await headers();const identifier=requestIp(source);
+  try{return await checkRateLimit(scope,identifier,limit,windowSeconds)}catch(error){
+    // A Worker isolate can still protect the auth endpoint when its persistent
+    // database limiter is temporarily unreachable. Registration itself keeps
+    // its separate database error boundary and never silently falls back.
+    if(error instanceof Error&&"code" in error&&error.code==="ENOENT")return checkMemoryRateLimit(scope,identifier,limit,windowSeconds);
+    throw error;
+  }
+}
