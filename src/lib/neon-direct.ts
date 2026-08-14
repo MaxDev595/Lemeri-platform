@@ -6,11 +6,14 @@ function client() {
   return neon(connectionString);
 }
 
-export async function createRegisteredUser(input:{name:string;email:string;passwordHash:string;company:string;slug:string;locale:"ru"|"en"}){
+async function ensurePgcrypto(){await client().query(`CREATE EXTENSION IF NOT EXISTS pgcrypto`)}
+
+export async function createRegisteredUser(input:{name:string;email:string;password:string;company:string;slug:string;locale:"ru"|"en"}){
+  await ensurePgcrypto();
   const userId=crypto.randomUUID(),workspaceId=crypto.randomUUID(),memberId=crypto.randomUUID(),settingsId=crypto.randomUUID();
   const rows=await client().query(`
     WITH created_user AS (
-      INSERT INTO "User" ("id","email","name","passwordHash") VALUES ($1,$2,$3,$4) RETURNING "id"
+      INSERT INTO "User" ("id","email","name","passwordHash") VALUES ($1,$2,$3,crypt(encode(digest($4,'sha256'),'hex'),gen_salt('bf',10))) RETURNING "id"
     ), created_workspace AS (
       INSERT INTO "Workspace" ("id","name","slug") SELECT $5,$6,$7 FROM created_user RETURNING "id"
     ), created_settings AS (
@@ -18,7 +21,7 @@ export async function createRegisteredUser(input:{name:string;email:string;passw
     ), created_member AS (
       INSERT INTO "WorkspaceMember" ("id","workspaceId","userId","role") SELECT $10,created_workspace."id",created_user."id",'OWNER'::"MemberRole" FROM created_workspace CROSS JOIN created_user
     ) SELECT "id" FROM created_user
-  `,[userId,input.email,input.name,input.passwordHash,workspaceId,input.company,input.slug,settingsId,input.locale,memberId]);
+  `,[userId,input.email,input.name,input.password,workspaceId,input.company,input.slug,settingsId,input.locale,memberId]);
   return{id:String((rows[0] as {id:string}).id)};
 }
 
@@ -48,6 +51,25 @@ export async function getDirectUserByEmail(email:string){
   if(!rows.length)return null;
   const value=rows[0] as Record<string,unknown>;
   return{id:String(value.id),email:String(value.email),name:value.name as string|null,passwordHash:String(value.passwordHash),createdAt:new Date(String(value.createdAt))};
+}
+
+export async function verifyDirectUserPassword(email:string,password:string){
+  await ensurePgcrypto();
+  const rows=await client().query(`SELECT "id","email","name","passwordHash","createdAt",CASE WHEN "passwordHash" LIKE '$2%' THEN "passwordHash"=crypt(encode(digest($2,'sha256'),'hex'),"passwordHash") ELSE false END AS "passwordValid",("passwordHash" LIKE 'pbkdf2-sha256:%' OR "passwordHash" LIKE 'scrypt:%') AS "legacyPassword" FROM "User" WHERE "email"=$1 LIMIT 1`,[email,password]);
+  if(!rows.length)return null;
+  const value=rows[0] as Record<string,unknown>;
+  return{id:String(value.id),email:String(value.email),name:value.name as string|null,passwordHash:String(value.passwordHash),createdAt:new Date(String(value.createdAt)),passwordValid:Boolean(value.passwordValid),legacyPassword:Boolean(value.legacyPassword)};
+}
+
+export async function createDirectPasswordReset(email:string,tokenHash:string,expiresAt:Date){
+  const rows=await client().query(`WITH target AS (SELECT "id","email" FROM "User" WHERE "email"=$1),removed AS (DELETE FROM "PasswordResetToken" p USING target t WHERE p."userId"=t."id"),created AS (INSERT INTO "PasswordResetToken" ("id","tokenHash","userId","expiresAt") SELECT $2,$3,t."id",$4 FROM target t RETURNING "userId") SELECT t."id",t."email" FROM target t JOIN created c ON c."userId"=t."id"`,[email,crypto.randomUUID(),tokenHash,expiresAt]);
+  if(!rows.length)return null;const value=rows[0] as Record<string,unknown>;return{id:String(value.id),email:String(value.email)};
+}
+
+export async function resetDirectPassword(tokenHash:string,password:string){
+  await ensurePgcrypto();
+  const rows=await client().query(`WITH consumed AS (DELETE FROM "PasswordResetToken" WHERE "tokenHash"=$1 AND "expiresAt">CURRENT_TIMESTAMP RETURNING "userId"),updated AS (UPDATE "User" u SET "passwordHash"=crypt(encode(digest($2,'sha256'),'hex'),gen_salt('bf',10)) FROM consumed c WHERE u."id"=c."userId" RETURNING u."id"),removed_sessions AS (DELETE FROM "Session" s USING updated u WHERE s."userId"=u."id"),removed_tokens AS (DELETE FROM "PasswordResetToken" p USING updated u WHERE p."userId"=u."id") SELECT "id" FROM updated`,[tokenHash,password]);
+  return rows.length?String((rows[0] as {id:string}).id):null;
 }
 
 export async function getDirectOnboardingState(workspaceId:string){

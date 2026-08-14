@@ -12,7 +12,7 @@ import { ResendEmailProvider } from "@/lib/email/provider";
 import { z } from "zod";
 import { createTranslator, type Locale } from "@/lib/i18n";
 import { safeReturnTo } from "@/lib/locale-utils";
-import { createRegisteredUser, getDirectUserByEmail } from "@/lib/neon-direct";
+import { createDirectPasswordReset, createRegisteredUser, resetDirectPassword, verifyDirectUserPassword } from "@/lib/neon-direct";
 import { isUniqueConstraintError } from "@/lib/db-errors";
 
 export type AuthState = { error?: string; message?: string };
@@ -47,13 +47,13 @@ export async function register(_: AuthState, formData: FormData): Promise<AuthSt
   try {
     if(!(await guardServerAction("auth:register",5,15*60)).allowed)return{error:t("auth.rateLimited")};
     phase = "password";
-    const passwordHash = await hashPassword(password);
+    const passwordHash = process.env.NODE_ENV==="production"?null:await hashPassword(password);
     phase = "create";
     // Nested writes are atomic. Avoid interactive transactions because edge
     // PostgreSQL connections may reject transaction pinning.
-    const user = process.env.NODE_ENV==="production"?await createRegisteredUser({name,email,passwordHash,company,slug:`${company.toLowerCase().replace(/[^a-zР°-СЏ0-9]+/gi, "-")}-${crypto.randomUUID().slice(0, 6)}`,locale}):await db.user.create({
+    const user = process.env.NODE_ENV==="production"?await createRegisteredUser({name,email,password,company,slug:`${company.toLowerCase().replace(/[^a-zР°-СЏ0-9]+/gi, "-")}-${crypto.randomUUID().slice(0, 6)}`,locale}):await db.user.create({
       data: {
-        name, email, passwordHash,
+        name, email, passwordHash:passwordHash!,
         memberships: { create: { role: "OWNER", workspace: { create: { name: company, slug: `${company.toLowerCase().replace(/[^a-zа-я0-9]+/gi, "-")}-${crypto.randomUUID().slice(0, 6)}`,settings:{create:{locale}} } } } },
       },
     });
@@ -73,11 +73,12 @@ export async function login(_: AuthState, formData: FormData): Promise<AuthState
   const parsed = loginSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: t("auth.checkCredentials") };
   const user = process.env.NODE_ENV==="production"
-    ? await getDirectUserByEmail(parsed.data.email)
+    ? await verifyDirectUserPassword(parsed.data.email,parsed.data.password)
     : await db.user.findUnique({ where: { email: parsed.data.email } });
   if (!user) return { error: t("auth.accountNotFound") };
+  if ("legacyPassword" in user&&Boolean(user.legacyPassword))return{error:t("auth.loginTemporarilyUnavailable")};
   let passwordValid=false;
-  try{passwordValid=await verifyPassword(parsed.data.password,user.passwordHash)}catch(error){console.error("Login password verification failed",error);return{error:t("auth.loginTemporarilyUnavailable")}}
+  try{passwordValid="passwordValid" in user?Boolean(user.passwordValid):await verifyPassword(parsed.data.password,user.passwordHash)}catch(error){console.error("Login password verification failed",error);return{error:t("auth.loginTemporarilyUnavailable")}}
   if (!passwordValid) return { error: t("auth.invalidCredentials") };
   await createSession(user.id);
   redirect(safeReturnTo(formData.get("returnTo"))??"/app");
@@ -95,8 +96,8 @@ export async function requestPasswordReset(_:AuthState,formData:FormData):Promis
   const locale=formLocale(formData);const t=createTranslator(locale);
   if(!(await guardServerAction("auth:forgot-password",5,15*60)).allowed)return{error:t("auth.rateLimited")};
   const email=emailSchema.safeParse(formData.get("email"));if(!email.success)return{error:t("auth.invalidEmail")};
-  const user=await db.user.findUnique({where:{email:email.data}});
-  if(user){const token=createPasswordResetToken();const tokenHash=passwordResetTokenHash(token);const expiresAt=new Date(Date.now()+60*60_000);await db.$transaction(async tx=>{await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`lemiri:password-reset:${user.id}`}, 0))`;await tx.passwordResetToken.deleteMany({where:{userId:user.id}});await tx.passwordResetToken.create({data:{userId:user.id,tokenHash,expiresAt}})});const url=`${process.env.PUBLIC_APP_URL??"http://localhost:3000"}/reset-password/${token}?lang=${locale}`;try{await new ResendEmailProvider().send({to:user.email,subject:t("auth.resetSubject"),html:`<p>${t("auth.resetRequested")}</p><p><a href="${url}">${t("auth.resetCta")}</a></p><p>${t("auth.resetExpiry")}</p>`,idempotencyKey:`password-reset-${tokenHash.slice(0,24)}`})}catch{await db.passwordResetToken.deleteMany({where:{tokenHash}})}}
+  const token=createPasswordResetToken();const tokenHash=passwordResetTokenHash(token);const expiresAt=new Date(Date.now()+60*60_000);const user=process.env.NODE_ENV==="production"?await createDirectPasswordReset(email.data,tokenHash,expiresAt):await db.user.findUnique({where:{email:email.data}});
+  if(user){if(process.env.NODE_ENV!=="production")await db.$transaction(async tx=>{await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`lemiri:password-reset:${user.id}`}, 0))`;await tx.passwordResetToken.deleteMany({where:{userId:user.id}});await tx.passwordResetToken.create({data:{userId:user.id,tokenHash,expiresAt}})});const url=`${process.env.PUBLIC_APP_URL??"http://localhost:3000"}/reset-password/${token}?lang=${locale}`;try{await new ResendEmailProvider().send({to:user.email,subject:t("auth.resetSubject"),html:`<p>${t("auth.resetRequested")}</p><p><a href="${url}">${t("auth.resetCta")}</a></p><p>${t("auth.resetExpiry")}</p>`,idempotencyKey:`password-reset-${tokenHash.slice(0,24)}`})}catch{if(process.env.NODE_ENV!=="production")await db.passwordResetToken.deleteMany({where:{tokenHash}})}}
   return{message:t("auth.resetSent")};
 }
 
@@ -104,6 +105,6 @@ export async function resetPassword(_:AuthState,formData:FormData):Promise<AuthS
   const t=createTranslator(formLocale(formData));
   if(!(await guardServerAction("auth:reset-password",8,15*60)).allowed)return{error:t("auth.rateLimited")};
   const parsed=resetSchema.safeParse(Object.fromEntries(formData));if(!parsed.success)return{error:formData.get("password")!==formData.get("confirmPassword")?t("auth.passwordMismatch"):t("auth.checkData")};
-  const tokenHash=passwordResetTokenHash(parsed.data.token);const passwordHash=await hashPassword(parsed.data.password);const userId=await db.$transaction(async tx=>{const consumed=await tx.$queryRaw<Array<{userId:string}>>`DELETE FROM "PasswordResetToken" WHERE "tokenHash"=${tokenHash} AND "expiresAt">CURRENT_TIMESTAMP RETURNING "userId"`;const id=consumed[0]?.userId;if(!id)return null;await tx.user.update({where:{id},data:{passwordHash}});await tx.session.deleteMany({where:{userId:id}});await tx.passwordResetToken.deleteMany({where:{userId:id}});return id});if(!userId)return{error:t("auth.invalidResetLink")};
+  const tokenHash=passwordResetTokenHash(parsed.data.token);const userId=process.env.NODE_ENV==="production"?await resetDirectPassword(tokenHash,parsed.data.password):await (async()=>{const passwordHash=await hashPassword(parsed.data.password);return db.$transaction(async tx=>{const consumed=await tx.$queryRaw<Array<{userId:string}>>`DELETE FROM "PasswordResetToken" WHERE "tokenHash"=${tokenHash} AND "expiresAt">CURRENT_TIMESTAMP RETURNING "userId"`;const id=consumed[0]?.userId;if(!id)return null;await tx.user.update({where:{id},data:{passwordHash}});await tx.session.deleteMany({where:{userId:id}});await tx.passwordResetToken.deleteMany({where:{userId:id}});return id})})();if(!userId)return{error:t("auth.invalidResetLink")};
   await createSession(userId);redirect("/app");
 }
