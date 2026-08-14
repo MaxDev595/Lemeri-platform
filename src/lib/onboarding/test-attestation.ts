@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
-function secret(){const value=process.env.CREDENTIALS_ENCRYPTION_KEY??process.env.CRON_SECRET;if(!value&&process.env.NODE_ENV==="production")throw new Error("Onboarding attestation secret is required");return value??"lemiri-development-onboarding-secret"}
+function secret(){const value=process.env.CREDENTIALS_ENCRYPTION_KEY??process.env.CRON_SECRET??process.env.GROQ_API_KEY;if(!value&&process.env.NODE_ENV==="production")throw new Error("Onboarding attestation secret is required");return value??"lemiri-development-onboarding-secret"}
 function sign(payload:string){return createHmac("sha256",secret()).update(`lemiri-onboarding-test:v1:${payload}`).digest("base64url")}
 export function createOnboardingTestToken(digest:string,now=Date.now()){const payload=Buffer.from(JSON.stringify({digest,exp:now+30*60_000}),"utf8").toString("base64url");return`${payload}.${sign(payload)}`}
 export function verifyOnboardingTestToken(token:string|undefined,digest:string,now=Date.now()){if(!token)return false;const [payload,signature]=token.split(".");if(!payload||!signature)return false;const expected=sign(payload);const left=Buffer.from(signature);const right=Buffer.from(expected);if(left.length!==right.length||!timingSafeEqual(left,right))return false;try{const data=JSON.parse(Buffer.from(payload,"base64url").toString("utf8")) as {digest?:string;exp?:number};return data.digest===digest&&typeof data.exp==="number"&&data.exp>=now}catch{return false}}
