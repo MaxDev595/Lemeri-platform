@@ -47,7 +47,7 @@ export async function getDirectOnboardingState(workspaceId:string){
 
 export async function getDirectAppSnapshot(workspaceId:string){
   try {
-  const rows=await client().query(`
+  const sql=`
     SELECT jsonb_build_object(
       'employees',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',e."id",'name',e."name",'role',e."role",'status',e."status",'goal',COALESCE(s."goal",''),'tone',COALESCE(s."tone",''),'assignee',CASE WHEN m."id" IS NULL THEN NULL ELSE jsonb_build_object('id',m."id",'name',COALESCE(u."name",u."email")) END,'permissions',COALESCE((SELECT jsonb_agg(jsonb_build_object('key',p."actionKey",'enabled',p."enabled")) FROM "ActionPermission" p WHERE p."employeeId"=e."id"),'[]'::jsonb)) ORDER BY e."createdAt") FROM "AIEmployee" e LEFT JOIN "AIEmployeeSettings" s ON s."employeeId"=e."id" LEFT JOIN "WorkspaceMember" m ON m."id"=e."assignedMemberId" LEFT JOIN "User" u ON u."id"=m."userId" WHERE e."workspaceId"=$1),'[]'::jsonb),
       'sources',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',s."id",'title',s."title",'type',s."type",'status',s."status",'documents',(SELECT count(*) FROM "KnowledgeDocument" d WHERE d."sourceId"=s."id"),'createdAt',s."createdAt") ORDER BY s."createdAt" DESC) FROM "KnowledgeSource" s WHERE s."workspaceId"=$1),'[]'::jsonb),
@@ -67,7 +67,8 @@ export async function getDirectAppSnapshot(workspaceId:string){
       'stats',jsonb_build_object('dialogs',(SELECT count(*) FROM "Conversation" WHERE "workspaceId"=$1),'leads',(SELECT count(*) FROM "Lead" WHERE "workspaceId"=$1),'appointments',(SELECT count(*) FROM "Appointment" WHERE "workspaceId"=$1),'handoffs',(SELECT count(*) FROM "HumanHandoff" h JOIN "Conversation" c ON c."id"=h."conversationId" WHERE c."workspaceId"=$1 AND h."status"='OPEN')),
       'usage',jsonb_build_object('messages',(SELECT count(*) FROM "Message" m JOIN "Conversation" c ON c."id"=m."conversationId" WHERE c."workspaceId"=$1),'conversations',(SELECT count(*) FROM "Conversation" WHERE "workspaceId"=$1),'actions',(SELECT count(*) FROM "ActionExecution" x JOIN "AIEmployee" e ON e."id"=x."employeeId" WHERE e."workspaceId"=$1),'aiUsage',(SELECT count(*) FROM "AnalyticsEvent" WHERE "workspaceId"=$1 AND "type"='AI_RESPONSE'),'knowledgeBytes',(SELECT COALESCE(sum(octet_length(d."content")),0) FROM "KnowledgeDocument" d JOIN "KnowledgeSource" s ON s."id"=d."sourceId" WHERE s."workspaceId"=$1),'activeEmployees',(SELECT count(*) FROM "AIEmployee" WHERE "workspaceId"=$1 AND "status"='ACTIVE'))
     ) AS snapshot
-  `,[workspaceId]);
+  `;
+  const rows=await client().query(sql.replace(`e."name',`,`e."name",`),[workspaceId]);
   return (rows[0] as {snapshot:Record<string,unknown>}).snapshot;
   } catch(error) {
     const value=error as Error&{code?:unknown;detail?:unknown;hint?:unknown;position?:unknown;severity?:unknown;cause?:unknown};
