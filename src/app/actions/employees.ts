@@ -12,6 +12,7 @@ import { encryptCredentials } from "@/lib/security/encryption";
 import { employeeSchema } from "@/lib/validation/employee";
 import { createTranslator } from "@/lib/i18n";
 import { assertEmployeeActivationAllowed, BillingLimitError } from "@/lib/billing/limits";
+import { createDirectOnboardingEmployee } from "@/lib/neon-direct";
 
 export type EmployeeState = { error?: string };
 export async function createEmployee(_: EmployeeState, formData: FormData): Promise<EmployeeState> {
@@ -23,6 +24,20 @@ export async function createEmployee(_: EmployeeState, formData: FormData): Prom
   const definitions=await db.actionDefinition.findMany({where:{key:{in:actionCatalog.map(item=>item.key)}}});
   const details=extended?onboardingSchema.parse(raw):null;
   if(details?.publish==="on"&&!verifyOnboardingTestToken(details.testToken,onboardingConfigurationDigest(details)))return{error:t("onboarding.testRequired")};
+  if(process.env.NODE_ENV==="production"&&details){
+    try{
+      const chunks=chunkText(details.knowledgeContent??"").map((content,index)=>({content,sourceLabel:`${details.knowledgeTitle} · ${t("knowledge.fragment",{index:index+1})}`}));
+      const websiteConfigEncrypted=details.websiteOrigin?encryptCredentials({allowedOrigins:[new URL(details.websiteOrigin).origin]}):undefined;
+      const crmCredentialsEncrypted=details.crmWebhook?encryptCredentials({webhookUrl:details.crmWebhook}):undefined;
+      const direct=await createDirectOnboardingEmployee({workspaceId:workspace.id,userId:user.id,name:parsed.data.name,role:parsed.data.role,status:details.publish==="on"?"ACTIVE":"DRAFT",goal:parsed.data.goal,tone:parsed.data.tone,instructions:details.instructions||null,handoffRules:{uncertainty:details.handoffUncertainty==="on",complaint:details.handoffComplaint==="on",humanRequested:details.handoffHumanRequested==="on",businessTemplate:details.businessTemplate??"custom"},knowledgeTitle:details.knowledgeTitle,knowledgeContent:details.knowledgeContent,chunks,websiteConfigEncrypted,crmCredentialsEncrypted,auditMetadata:{role:parsed.data.role,businessTemplate:details.businessTemplate??"custom",websiteConnected:Boolean(details.websiteOrigin),crmConnected:Boolean(details.crmWebhook),knowledgeAdded:Boolean(details.knowledgeContent)}});
+      if(direct.sourceId)await enqueueJob(workspace.id,"KNOWLEDGE_INDEX",{sourceId:direct.sourceId});
+      revalidatePath("/app");redirect("/app");
+    }catch(error){
+      if((error as {digest?:string})?.digest?.startsWith("NEXT_REDIRECT"))throw error;
+      console.error("ONBOARDING_DIRECT_CREATE_FAILED",{name:error instanceof Error?error.name:"UnknownError",message:error instanceof Error?error.message:"Unknown failure"});
+      return{error:t("auth.createFailed")};
+    }
+  }
   let result:{sourceId?:string};
   const persistEmployee=async(tx:Parameters<Parameters<typeof db.$transaction>[0]>[0])=>{
     if(details?.publish==="on"&&process.env.NODE_ENV!=="production")await assertEmployeeActivationAllowed(tx,workspace.id);

@@ -78,6 +78,45 @@ export async function getDirectOnboardingState(workspaceId:string){
   return{employeeCount:Number(row.employeeCount),locale:row.locale==="en"?"en" as const:"ru" as const};
 }
 
+export async function createDirectOnboardingEmployee(input:{
+  workspaceId:string;userId:string;name:string;role:string;status:"ACTIVE"|"DRAFT";goal:string;tone:string;instructions:string|null;
+  handoffRules:Record<string,unknown>;knowledgeTitle?:string;knowledgeContent?:string;chunks:Array<{content:string;sourceLabel:string}>;
+  websiteConfigEncrypted?:string;crmCredentialsEncrypted?:string;auditMetadata:Record<string,unknown>;
+}){
+  const employeeId=crypto.randomUUID(),settingsId=crypto.randomUUID();
+  const sourceId=input.knowledgeContent?crypto.randomUUID():null,documentId=sourceId?crypto.randomUUID():null;
+  const channelId=input.websiteConfigEncrypted?crypto.randomUUID():null,integrationId=input.crmCredentialsEncrypted?crypto.randomUUID():null;
+  const rows=await client().query(`
+    WITH employee AS (
+      INSERT INTO "AIEmployee" ("id","workspaceId","name","role","status","updatedAt")
+      VALUES ($1,$2,$3,$4,$5::"EmployeeStatus",CURRENT_TIMESTAMP) RETURNING "id"
+    ), employee_settings AS (
+      INSERT INTO "AIEmployeeSettings" ("id","employeeId","goal","tone","instructions","handoffRules")
+      SELECT $6,"id",$7,$8,$9,$10::jsonb FROM employee
+    ), source AS (
+      INSERT INTO "KnowledgeSource" ("id","workspaceId","type","title","status")
+      SELECT $11,$2,'TEXT',$12,'PROCESSING' WHERE $11::text IS NOT NULL RETURNING "id"
+    ), document AS (
+      INSERT INTO "KnowledgeDocument" ("id","sourceId","title","content")
+      SELECT $13,"id",$12,$14 FROM source RETURNING "id"
+    ), chunks AS (
+      INSERT INTO "KnowledgeChunk" ("id","documentId","content","sourceLabel")
+      SELECT gen_random_uuid()::text,document."id",item.content,item.label
+      FROM document CROSS JOIN LATERAL jsonb_to_recordset($15::jsonb) AS item(content text,label text)
+    ), website_channel AS (
+      INSERT INTO "Channel" ("id","workspaceId","employeeId","type","status","externalId","configEncrypted","updatedAt")
+      SELECT $16,$2,employee."id",'WEBSITE','CONNECTED','embedded-widget',$17,CURRENT_TIMESTAMP FROM employee WHERE $16::text IS NOT NULL
+    ), crm_integration AS (
+      INSERT INTO "Integration" ("id","workspaceId","provider","status","credentialsEncrypted","updatedAt")
+      SELECT $18,$2,'CRM_WEBHOOK','CONNECTED',$19,CURRENT_TIMESTAMP WHERE $18::text IS NOT NULL
+    ), audit AS (
+      INSERT INTO "AuditLog" ("id","workspaceId","userId","actorType","action","entityType","entityId","metadata")
+      SELECT gen_random_uuid()::text,$2,$20,'USER',$21,'AIEmployee',employee."id",$22::jsonb FROM employee
+    ) SELECT employee."id",(SELECT "id" FROM source) AS "sourceId" FROM employee
+  `,[employeeId,input.workspaceId,input.name,input.role,input.status,settingsId,input.goal,input.tone,input.instructions,JSON.stringify(input.handoffRules),sourceId,input.knowledgeTitle??null,documentId,input.knowledgeContent??null,JSON.stringify(input.chunks.map(value=>({content:value.content,label:value.sourceLabel}))),channelId,input.websiteConfigEncrypted??null,integrationId,input.crmCredentialsEncrypted??null,input.userId,input.status==="ACTIVE"?"AI_EMPLOYEE_PUBLISHED":"AI_EMPLOYEE_CREATED",JSON.stringify(input.auditMetadata)]);
+  const row=rows[0] as {id:string;sourceId:string|null};return{employeeId:String(row.id),sourceId:row.sourceId?String(row.sourceId):undefined};
+}
+
 export async function getDirectAppSnapshot(workspaceId:string){
   try {
   const sql=`
