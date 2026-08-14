@@ -46,6 +46,7 @@ export async function getDirectOnboardingState(workspaceId:string){
 }
 
 export async function getDirectAppSnapshot(workspaceId:string){
+  try {
   const rows=await client().query(`
     SELECT jsonb_build_object(
       'employees',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',e."id",'name',e."name",'role',e."role",'status',e."status",'goal',COALESCE(s."goal",''),'tone',COALESCE(s."tone",''),'assignee',CASE WHEN m."id" IS NULL THEN NULL ELSE jsonb_build_object('id',m."id",'name',COALESCE(u."name",u."email")) END,'permissions',COALESCE((SELECT jsonb_agg(jsonb_build_object('key',p."actionKey",'enabled',p."enabled")) FROM "ActionPermission" p WHERE p."employeeId"=e."id"),'[]'::jsonb)) ORDER BY e."createdAt") FROM "AIEmployee" e LEFT JOIN "AIEmployeeSettings" s ON s."employeeId"=e."id" LEFT JOIN "WorkspaceMember" m ON m."id"=e."assignedMemberId" LEFT JOIN "User" u ON u."id"=m."userId" WHERE e."workspaceId"=$1),'[]'::jsonb),
@@ -68,4 +69,18 @@ export async function getDirectAppSnapshot(workspaceId:string){
     ) AS snapshot
   `,[workspaceId]);
   return (rows[0] as {snapshot:Record<string,unknown>}).snapshot;
+  } catch(error) {
+    const value=error as Error&{code?:unknown;detail?:unknown;hint?:unknown;position?:unknown;severity?:unknown;cause?:unknown};
+    console.error("DIRECT_APP_SNAPSHOT_QUERY_FAILED",{
+      name:value?.name,
+      message:value?.message,
+      code:value?.code,
+      detail:value?.detail,
+      hint:value?.hint,
+      position:value?.position,
+      severity:value?.severity,
+      cause:value?.cause instanceof Error?{name:value.cause.name,message:value.cause.message}:value?.cause,
+    });
+    throw new Error("DIRECT_APP_SNAPSHOT_QUERY_FAILED");
+  }
 }
