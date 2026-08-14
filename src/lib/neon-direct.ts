@@ -71,7 +71,7 @@ export async function getDirectAppSnapshot(workspaceId:string){
   return (rows[0] as {snapshot:Record<string,unknown>}).snapshot;
   } catch(error) {
     const value=error as Error&{code?:unknown;detail?:unknown;hint?:unknown;position?:unknown;severity?:unknown;cause?:unknown};
-    console.error("DIRECT_APP_SNAPSHOT_QUERY_FAILED",{
+    console.error(`DIRECT_APP_SNAPSHOT_QUERY_FAILED ${JSON.stringify({
       name:value?.name,
       message:value?.message,
       code:value?.code,
@@ -80,7 +80,7 @@ export async function getDirectAppSnapshot(workspaceId:string){
       position:value?.position,
       severity:value?.severity,
       cause:value?.cause instanceof Error?{name:value.cause.name,message:value.cause.message}:value?.cause,
-    });
+    })}`);
     throw new Error("DIRECT_APP_SNAPSHOT_QUERY_FAILED");
   }
 }
