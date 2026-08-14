@@ -1,8 +1,6 @@
-import { pbkdf2Async } from "@noble/hashes/pbkdf2.js";
-import { sha256 } from "@noble/hashes/sha2.js";
-
 const PBKDF2_ITERATIONS = 210_000;
 const KEY_BYTES = 32;
+const encoder = new TextEncoder();
 
 const toHex = (bytes: Uint8Array) =>
   Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
@@ -22,11 +20,19 @@ const constantTimeEqual = (actual: Uint8Array, expected: Uint8Array) => {
 };
 
 async function derivePbkdf2(password: string, salt: Uint8Array, iterations: number) {
-  return pbkdf2Async(sha256, password, salt, {
-    c: iterations,
-    dkLen: KEY_BYTES,
-    asyncTick: 4,
-  });
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(password),
+    "PBKDF2",
+    false,
+    ["deriveBits"],
+  );
+  const bits = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", hash: "SHA-256", salt: Uint8Array.from(salt).buffer, iterations },
+    key,
+    KEY_BYTES * 8,
+  );
+  return new Uint8Array(bits);
 }
 
 export async function hashPassword(password: string) {

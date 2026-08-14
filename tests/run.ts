@@ -4,6 +4,7 @@ import "./connectors.test.ts";
 import "./billing.test.ts";
 import "./security-automation.test.ts";
 import "./openai-provider.test.ts";
+import "./groq-provider.test.ts";
 import "./whatsapp.test.ts";
 import "./knowledge.test.ts";
 import "./permissions.test.ts";

@@ -21,6 +21,6 @@ export class OpenAIEmbeddingProvider implements EmbeddingProvider {
 }
 
 export function configuredEmbeddingProvider(): EmbeddingProvider | null {
-  if (process.env.AI_PROVIDER !== "openai") return null;
+  if ((process.env.AI_PROVIDER ?? "mock") === "mock") return null;
   return new OpenAIEmbeddingProvider(process.env.OPENAI_API_KEY ?? "", process.env.OPENAI_EMBEDDING_MODEL ?? "text-embedding-3-small");
 }
