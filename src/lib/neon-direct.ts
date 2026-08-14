@@ -43,6 +43,13 @@ export async function getDirectSessionUser(tokenHash:string){
   return{id:String(first.id),email:String(first.email),name:first.name as string|null,passwordHash:String(first.passwordHash),createdAt:new Date(String(first.createdAt)),memberships:rows.filter(row=>(row as Record<string,unknown>).memberId).map(row=>{const value=row as Record<string,unknown>;return{id:String(value.memberId),workspaceId:String(value.workspaceId),userId:String(first.id),role:String(value.role),workspace:{id:String(value.workspaceId),name:String(value.workspaceName),slug:String(value.slug),createdAt:new Date(String(value.workspaceCreatedAt)),settings:{locale:String(value.locale??"ru"),timezone:String(value.timezone??"Europe/Moscow"),theme:String(value.theme??"system")}}}})};
 }
 
+export async function getDirectUserByEmail(email:string){
+  const rows=await client().query(`SELECT "id","email","name","passwordHash","createdAt" FROM "User" WHERE "email"=$1 LIMIT 1`,[email]);
+  if(!rows.length)return null;
+  const value=rows[0] as Record<string,unknown>;
+  return{id:String(value.id),email:String(value.email),name:value.name as string|null,passwordHash:String(value.passwordHash),createdAt:new Date(String(value.createdAt))};
+}
+
 export async function getDirectOnboardingState(workspaceId:string){
   const rows=await client().query(`SELECT (SELECT COUNT(*)::int FROM "AIEmployee" WHERE "workspaceId"=$1) AS "employeeCount",COALESCE((SELECT "locale" FROM "WorkspaceSettings" WHERE "workspaceId"=$1),'ru') AS "locale"`,[workspaceId]);
   const row=rows[0] as {employeeCount:number;locale:string};

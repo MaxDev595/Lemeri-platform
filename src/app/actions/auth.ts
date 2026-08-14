@@ -12,7 +12,7 @@ import { ResendEmailProvider } from "@/lib/email/provider";
 import { z } from "zod";
 import { createTranslator, type Locale } from "@/lib/i18n";
 import { safeReturnTo } from "@/lib/locale-utils";
-import { createRegisteredUser } from "@/lib/neon-direct";
+import { createRegisteredUser, getDirectUserByEmail } from "@/lib/neon-direct";
 import { isUniqueConstraintError } from "@/lib/db-errors";
 
 export type AuthState = { error?: string; message?: string };
@@ -72,8 +72,11 @@ export async function login(_: AuthState, formData: FormData): Promise<AuthState
   if(!(await guardServerAction("auth:login",10,15*60)).allowed)return{error:t("auth.rateLimited")};
   const parsed = loginSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: t("auth.checkCredentials") };
-  const user = await db.user.findUnique({ where: { email: parsed.data.email } });
-  if (!user || !(await verifyPassword(parsed.data.password, user.passwordHash))) return { error: t("auth.invalidCredentials") };
+  const user = process.env.NODE_ENV==="production"
+    ? await getDirectUserByEmail(parsed.data.email)
+    : await db.user.findUnique({ where: { email: parsed.data.email } });
+  if (!user) return { error: t("auth.accountNotFound") };
+  if (!(await verifyPassword(parsed.data.password, user.passwordHash))) return { error: t("auth.invalidCredentials") };
   await createSession(user.id);
   redirect(safeReturnTo(formData.get("returnTo"))??"/app");
 }
