@@ -7,9 +7,19 @@ import { billingPlans } from "@/lib/billing/plans";
 import { redirect } from "next/navigation";
 import { createTranslator } from "@/lib/i18n";
 import { employeeRoleLabel } from "@/lib/employee-domain";
+import { getDirectAppSnapshot } from "@/lib/neon-direct";
 
 export default async function AppPage() {
   const context=await requireWorkspace();const workspaceId=context.workspace.id;
+  if(process.env.NODE_ENV==="production"){
+    type DirectEmployee={id:string;name:string;role:string;status:string};
+    type DirectSnapshot={employees:DirectEmployee[];settings:{locale:string};subscription:{plan:string;status:string;currentPeriodEnd:string}|null;usage:Record<string,number>;stats:{dialogs:number;leads:number;appointments:number;handoffs:number};[key:string]:unknown};
+    const snapshot=await getDirectAppSnapshot(workspaceId) as DirectSnapshot;
+    const employee=snapshot.employees[0];if(!employee)redirect("/onboarding");
+    const t=createTranslator(snapshot.settings.locale);
+    const data={...snapshot,actions:actionCatalog.map(a=>({key:a.key,name:a.key==="createLead"?t("action.createLead.name"):a.key==="createAppointment"?t("action.createAppointment.name"):a.key==="notifyManager"?t("action.notifyManager.name"):a.key==="handoffToHuman"?t("action.handoffToHuman.name"):a.name,description:a.key==="createLead"?t("action.createLead.copy"):a.key==="createAppointment"?t("action.createAppointment.copy"):a.key==="notifyManager"?t("action.notifyManager.copy"):a.key==="handoffToHuman"?t("action.handoffToHuman.copy"):a.description})),billing:{subscription:snapshot.subscription??{plan:"TRIAL",status:"TRIALING",currentPeriodEnd:""},usage:snapshot.usage,plans:billingPlans}};
+    return <Platform workspaceId={workspaceId} workspaces={context.user.memberships.map(item=>({id:item.workspaceId,name:item.workspace.name,role:item.role}))} workspaceName={context.workspace.name} userName={context.user.name??t("role.owner")} employee={{id:employee.id,name:employee.name,role:employeeRoleLabel(employee.role,snapshot.settings.locale==="en"?"en":"ru"),status:employee.status}} stats={snapshot.stats} data={data as unknown as Parameters<typeof Platform>[0]["data"]}/>;
+  }
   await Promise.all([ensureActionDefinitions(),db.workspaceSettings.upsert({where:{workspaceId},create:{workspaceId},update:{}})]);const usage=await aggregateUsage(workspaceId);
   const [employees,dialogs,leads,appointments,handoffs,sources,conversations,leadRows,appointmentRows,customers,channels,members,invitations,workspaceSettings,subscription,auditLogs,analyticsEvents,notifications,automations]=await Promise.all([
     db.aIEmployee.findMany({where:{workspaceId},include:{settings:true,permissions:true,assignee:{include:{user:{select:{name:true,email:true}}}}},orderBy:{createdAt:"asc"}}),
