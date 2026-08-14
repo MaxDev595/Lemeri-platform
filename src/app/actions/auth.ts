@@ -13,6 +13,7 @@ import { z } from "zod";
 import { createTranslator, type Locale } from "@/lib/i18n";
 import { safeReturnTo } from "@/lib/locale-utils";
 import { createRegisteredUser } from "@/lib/neon-direct";
+import { isUniqueConstraintError } from "@/lib/db-errors";
 
 export type AuthState = { error?: string; message?: string };
 const formLocale=(formData:FormData):Locale=>formData.get("locale")==="en"?"en":"ru";
@@ -59,7 +60,7 @@ export async function register(_: AuthState, formData: FormData): Promise<AuthSt
     phase = "session";
     await createSession(user.id);
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") return { error: t("auth.accountExists") };
+    if (isUniqueConstraintError(error)) return { error: t("auth.accountExists") };
     console.error("Registration failed",error);
     return { error: registrationFailure(locale, error, phase) };
   }
