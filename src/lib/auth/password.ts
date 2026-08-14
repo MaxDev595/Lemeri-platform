@@ -20,14 +20,15 @@ const constantTimeEqual = (actual: Uint8Array, expected: Uint8Array) => {
 };
 
 async function derivePbkdf2(password: string, salt: Uint8Array, iterations: number) {
-  const key = await crypto.subtle.importKey(
+  const subtle = globalThis.crypto.subtle;
+  const key = await subtle.importKey(
     "raw",
     encoder.encode(password),
-    "PBKDF2",
+    { name: "PBKDF2" },
     false,
     ["deriveBits"],
   );
-  const bits = await crypto.subtle.deriveBits(
+  const bits = await subtle.deriveBits(
     { name: "PBKDF2", hash: "SHA-256", salt: Uint8Array.from(salt).buffer, iterations },
     key,
     KEY_BYTES * 8,

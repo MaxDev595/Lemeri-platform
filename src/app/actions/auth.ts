@@ -76,7 +76,9 @@ export async function login(_: AuthState, formData: FormData): Promise<AuthState
     ? await getDirectUserByEmail(parsed.data.email)
     : await db.user.findUnique({ where: { email: parsed.data.email } });
   if (!user) return { error: t("auth.accountNotFound") };
-  if (!(await verifyPassword(parsed.data.password, user.passwordHash))) return { error: t("auth.invalidCredentials") };
+  let passwordValid=false;
+  try{passwordValid=await verifyPassword(parsed.data.password,user.passwordHash)}catch(error){console.error("Login password verification failed",error);return{error:t("auth.loginTemporarilyUnavailable")}}
+  if (!passwordValid) return { error: t("auth.invalidCredentials") };
   await createSession(user.id);
   redirect(safeReturnTo(formData.get("returnTo"))??"/app");
 }
