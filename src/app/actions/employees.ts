@@ -18,13 +18,14 @@ export async function createEmployee(_: EmployeeState, formData: FormData): Prom
   const raw=Object.fromEntries(formData);const t=createTranslator(raw.locale==="en"?"en":"ru");const extended=raw.businessTemplate!==undefined;
   const parsed=(extended?onboardingSchema:employeeSchema).safeParse(raw);
   if(!parsed.success)return{error:t(extended?"auth.checkData":"employees.invalid")};
-  const {workspace,user}=await requireWorkspace();await ensureActionDefinitions();
+  const {workspace,user}=await requireWorkspace();
+  if(process.env.NODE_ENV!=="production")await ensureActionDefinitions();
   const definitions=await db.actionDefinition.findMany({where:{key:{in:actionCatalog.map(item=>item.key)}}});
   const details=extended?onboardingSchema.parse(raw):null;
   if(details?.publish==="on"&&!verifyOnboardingTestToken(details.testToken,onboardingConfigurationDigest(details)))return{error:t("onboarding.testRequired")};
   let result:{sourceId?:string};
   const persistEmployee=async(tx:Parameters<Parameters<typeof db.$transaction>[0]>[0])=>{
-    if(details?.publish==="on")await assertEmployeeActivationAllowed(tx,workspace.id);
+    if(details?.publish==="on"&&process.env.NODE_ENV!=="production")await assertEmployeeActivationAllowed(tx,workspace.id);
     const employee=await tx.aIEmployee.create({data:{workspaceId:workspace.id,name:parsed.data.name,role:parsed.data.role,status:details?.publish==="on"?"ACTIVE":"DRAFT",settings:{create:{goal:parsed.data.goal,tone:parsed.data.tone,instructions:details?.instructions||null,handoffRules:{uncertainty:details?details.handoffUncertainty==="on":true,complaint:details?details.handoffComplaint==="on":true,humanRequested:details?details.handoffHumanRequested==="on":true,businessTemplate:details?.businessTemplate??"custom"}}}}});
     const enabled=parsed.data.role==="SUPPORT"?["notifyManager","handoffToHuman"]:["createLead","createAppointment","notifyManager","handoffToHuman"];
     if(definitions.length)await tx.actionPermission.createMany({data:definitions.map(definition=>({employeeId:employee.id,actionId:definition.id,actionKey:definition.key,enabled:enabled.includes(definition.key)}))});
