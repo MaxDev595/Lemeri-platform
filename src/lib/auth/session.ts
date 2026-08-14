@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { selectActiveMembership } from "./workspace";
-import { createDirectSession, getDirectSessionUser } from "@/lib/neon-direct";
+import { createDirectSession, deleteDirectSession, getDirectSessionUser } from "@/lib/neon-direct";
 
 const COOKIE = process.env.NODE_ENV === "production" ? "__Host-lemiri_session" : "lemiri_session";
 export const WORKSPACE_COOKIE = process.env.NODE_ENV === "production" ? "__Host-lemiri_workspace" : "lemiri_workspace";
@@ -26,7 +26,11 @@ export async function createSession(userId: string) {
 export async function destroySession() {
   const store = await cookies();
   const token = store.get(COOKIE)?.value;
-  if (token) await db.session.deleteMany({ where: { tokenHash: tokenHash(token) } });
+  if (token) {
+    const hash=tokenHash(token);
+    if(process.env.NODE_ENV==="production")await deleteDirectSession(hash);
+    else await db.session.deleteMany({ where: { tokenHash: hash } });
+  }
   store.delete(COOKIE);
   store.delete(WORKSPACE_COOKIE);
 }

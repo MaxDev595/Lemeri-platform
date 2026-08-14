@@ -27,6 +27,10 @@ export async function createDirectSession(input:{userId:string;tokenHash:string;
   await client().query(`INSERT INTO "Session" ("id","tokenHash","userId","expiresAt","ipHash","userAgent") VALUES ($1,$2,$3,$4,$5,$6)`,[crypto.randomUUID(),input.tokenHash,input.userId,input.expiresAt,input.ipHash,input.userAgent]);
 }
 
+export async function deleteDirectSession(tokenHash:string){
+  await client().query(`DELETE FROM "Session" WHERE "tokenHash"=$1`,[tokenHash]);
+}
+
 export async function directRateLimit(input:{key:string;windowStart:Date;expiresAt:Date}){
   const rows=await client().query(`INSERT INTO "RateLimitBucket" ("id","key","windowStart","count","expiresAt") VALUES ($1,$2,$3,1,$4) ON CONFLICT ("key","windowStart") DO UPDATE SET "count"="RateLimitBucket"."count"+1,"expiresAt"=EXCLUDED."expiresAt" RETURNING "count"`,[crypto.randomUUID(),input.key,input.windowStart,input.expiresAt]);
   return Number((rows[0] as {count:number}).count);
