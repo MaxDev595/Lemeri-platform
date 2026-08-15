@@ -2,7 +2,7 @@
 
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Activity, BarChart3, Bell, BookOpen, Bot, CalendarDays, Check, ChevronDown, CircleHelp, CreditCard, FileText, Image as ImageIcon, LayoutDashboard, Menu, MessageCircle, MoreHorizontal, PanelLeftClose, PanelLeftOpen, Pause, Play, Plug, Plus, Search, Send, Settings, Sparkles, TestTube2, Upload, UserRoundPlus, WandSparkles, X, Zap } from "lucide-react";
+import { Activity, BarChart3, Bell, BookOpen, Bot, CalendarDays, Check, ChevronDown, CircleHelp, CreditCard, FileText, Image as ImageIcon, Languages, LayoutDashboard, Menu, MessageCircle, MoreHorizontal, PanelLeftClose, PanelLeftOpen, Pause, Play, Plug, Plus, Search, Send, Settings, Sparkles, TestTube2, Upload, UserRoundPlus, WandSparkles, X, Zap } from "lucide-react";
 import { Logo } from "./logo";
 import { createTranslator, dateLocale, type MessageKey } from "@/lib/i18n";
 import { employeeRoleLabel, employeeToneLabel } from "@/lib/employee-domain";
@@ -43,7 +43,7 @@ type PlatformProps={workspaceName:string;userName:string;employee:{id:string;nam
 type MultiWorkspaceProps={workspaceId:string;workspaces:Array<{id:string;name:string;role:string}>};
 export function Platform({ workspaceId, workspaces, workspaceName, userName, employee, stats, data }: PlatformProps&MultiWorkspaceProps) {
   const router=useRouter();
-  const locale=data.settings.locale==="en"?"en":"ru";const t=createTranslator(locale);
+  const [locale,setLocale]=useState<"ru"|"en">(data.settings.locale==="en"?"en":"ru");const t=createTranslator(locale);
   const [page,setPage]=useState<PageId>("overview");
   const [running, setRunning] = useState(employee.status === "ACTIVE");
   const [drawer, setDrawer] = useState(false);
@@ -54,6 +54,7 @@ export function Platform({ workspaceId, workspaces, workspaceName, userName, emp
   const select=(value:string)=>{const next=(value in pageLabels?value:pageByLabel.get(value)) as PageId|undefined;if(next)setPage(next);setDrawer(false)};
   const notify = (message: string) => { setToast(message); window.setTimeout(() => setToast(""), 2400); };
   const switchWorkspace=async(nextWorkspaceId:string)=>{if(nextWorkspaceId===workspaceId)return;const response=await sendJson("/api/workspaces/switch","POST",{workspaceId:nextWorkspaceId});if(response.ok){setPage("overview");router.refresh()}else notify(t("toast.workspaceSwitchFailed"))};
+  const switchLocale=async()=>{const next=locale==="ru"?"en":"ru";setLocale(next);document.documentElement.lang=next;const response=await sendJson("/api/settings","PATCH",{locale:next});if(!response.ok){setLocale(locale);document.documentElement.lang=locale;notify(t("settings.saveFailed"))}};
   useEffect(()=>{fetch("/api/settings").then(response=>response.json()).then(body=>{const theme=body.settings?.theme??"system";document.documentElement.dataset.theme=theme==="system"?"":theme;document.documentElement.lang=body.settings?.locale??"ru"}).catch(()=>undefined)},[]);
   useEffect(()=>{const handler=(event:KeyboardEvent)=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="k"){event.preventDefault();setSearchOpen(value=>!value)}if(event.key==="Escape")setSearchOpen(false)};window.addEventListener("keydown",handler);return()=>window.removeEventListener("keydown",handler)},[]);
   const searchable:Array<{id:PageId;Icon:typeof Settings;label:string}>=[...sections.flatMap(group=>group.items.map(([id,Icon,key])=>({id:id as PageId,Icon,label:t(key as MessageKey)}))),{id:"settings",Icon:Settings,label:t("nav.settings")},{id:"notifications",Icon:Bell,label:t("nav.notifications")}];
@@ -68,7 +69,7 @@ export function Platform({ workspaceId, workspaces, workspaceName, userName, emp
     </aside>
     {drawer && <button className="scrim" onClick={() => setDrawer(false)} aria-label={t("common.closeMenu")}/>} 
     <main>
-      <header className="topbar"><button className="iconButton mobileOnly" onClick={() => setDrawer(true)}><Menu size={20}/></button><button className="topSearch" onClick={()=>setSearchOpen(true)}><Search size={16}/><span>{t("common.search")}</span><kbd>Ctrl K</kbd></button><div className="topActions"><button className="iconButton" onClick={()=>select("notifications")} aria-label={t("nav.notifications")}><Bell size={18}/>{data.notifications.some(n=>!n.readAt)&&<i/>}</button><button className="testButton" onClick={()=>select("testing")}><TestTube2 size={16}/> {t("common.test")}</button></div></header>
+      <header className="topbar"><button className="iconButton mobileOnly" onClick={() => setDrawer(true)}><Menu size={20}/></button><button className="topSearch" onClick={()=>setSearchOpen(true)}><Search size={16}/><span>{t("common.search")}</span><kbd>Ctrl K</kbd></button><div className="topActions"><button className="languageButton" onClick={switchLocale} aria-label={locale==="ru"?"Switch to English":"Переключить на русский"}><Languages size={16}/><span>{locale==="ru"?"EN":"RU"}</span></button><button className="iconButton" onClick={()=>select("notifications")} aria-label={t("nav.notifications")}><Bell size={18}/>{data.notifications.some(n=>!n.readAt)&&<i/>}</button><button className="testButton" onClick={()=>select("testing")}><TestTube2 size={16}/> {t("common.test")}</button></div></header>
       {page==="overview"?<Dashboard locale={locale} running={running} setRunning={setRunning} select={select} notify={notify} employee={employee} stats={stats} data={data} userName={userName}/>:<FeaturePage locale={locale} page={pageLabels[page]} select={select} notify={notify} data={data} employeeId={employee.id} workspaceName={workspaceName} refresh={()=>router.refresh()}/>} 
     </main>
     {toast && <div className="toast"><Check size={17}/>{toast}</div>}

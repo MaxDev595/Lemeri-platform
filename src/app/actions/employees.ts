@@ -21,7 +21,6 @@ export async function createEmployee(_: EmployeeState, formData: FormData): Prom
   if(!parsed.success)return{error:t(extended?"auth.checkData":"employees.invalid")};
   const {workspace,user}=await requireWorkspace();
   if(process.env.NODE_ENV!=="production")await ensureActionDefinitions();
-  const definitions=await db.actionDefinition.findMany({where:{key:{in:actionCatalog.map(item=>item.key)}}});
   const details=extended?onboardingSchema.parse(raw):null;
   if(details?.publish==="on"&&!verifyOnboardingTestToken(details.testToken,onboardingConfigurationDigest(details)))return{error:t("onboarding.testRequired")};
   if(process.env.NODE_ENV==="production"&&details){
@@ -29,8 +28,7 @@ export async function createEmployee(_: EmployeeState, formData: FormData): Prom
       const chunks=chunkText(details.knowledgeContent??"").map((content,index)=>({content,sourceLabel:`${details.knowledgeTitle} · ${t("knowledge.fragment",{index:index+1})}`}));
       const websiteConfigEncrypted=details.websiteOrigin?encryptCredentials({allowedOrigins:[new URL(details.websiteOrigin).origin]}):undefined;
       const crmCredentialsEncrypted=details.crmWebhook?encryptCredentials({webhookUrl:details.crmWebhook}):undefined;
-      const direct=await createDirectOnboardingEmployee({workspaceId:workspace.id,userId:user.id,name:parsed.data.name,role:parsed.data.role,status:details.publish==="on"?"ACTIVE":"DRAFT",goal:parsed.data.goal,tone:parsed.data.tone,instructions:details.instructions||null,handoffRules:{uncertainty:details.handoffUncertainty==="on",complaint:details.handoffComplaint==="on",humanRequested:details.handoffHumanRequested==="on",businessTemplate:details.businessTemplate??"custom"},knowledgeTitle:details.knowledgeTitle,knowledgeContent:details.knowledgeContent,chunks,websiteConfigEncrypted,crmCredentialsEncrypted,auditMetadata:{role:parsed.data.role,businessTemplate:details.businessTemplate??"custom",websiteConnected:Boolean(details.websiteOrigin),crmConnected:Boolean(details.crmWebhook),knowledgeAdded:Boolean(details.knowledgeContent)}});
-      if(direct.sourceId)await enqueueJob(workspace.id,"KNOWLEDGE_INDEX",{sourceId:direct.sourceId});
+      await createDirectOnboardingEmployee({workspaceId:workspace.id,userId:user.id,name:parsed.data.name,role:parsed.data.role,status:details.publish==="on"?"ACTIVE":"DRAFT",goal:parsed.data.goal,tone:parsed.data.tone,instructions:details.instructions||null,handoffRules:{uncertainty:details.handoffUncertainty==="on",complaint:details.handoffComplaint==="on",humanRequested:details.handoffHumanRequested==="on",businessTemplate:details.businessTemplate??"custom"},knowledgeTitle:details.knowledgeTitle,knowledgeContent:details.knowledgeContent,chunks,websiteConfigEncrypted,crmCredentialsEncrypted,auditMetadata:{role:parsed.data.role,businessTemplate:details.businessTemplate??"custom",websiteConnected:Boolean(details.websiteOrigin),crmConnected:Boolean(details.crmWebhook),knowledgeAdded:Boolean(details.knowledgeContent)}});
       revalidatePath("/app");redirect("/app");
     }catch(error){
       if((error as {digest?:string})?.digest?.startsWith("NEXT_REDIRECT"))throw error;
@@ -38,6 +36,7 @@ export async function createEmployee(_: EmployeeState, formData: FormData): Prom
       return{error:t("auth.createFailed")};
     }
   }
+  const definitions=await db.actionDefinition.findMany({where:{key:{in:actionCatalog.map(item=>item.key)}}});
   let result:{sourceId?:string};
   const persistEmployee=async(tx:Parameters<Parameters<typeof db.$transaction>[0]>[0])=>{
     if(details?.publish==="on"&&process.env.NODE_ENV!=="production")await assertEmployeeActivationAllowed(tx,workspace.id);

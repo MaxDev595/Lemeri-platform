@@ -78,6 +78,12 @@ export async function getDirectOnboardingState(workspaceId:string){
   return{employeeCount:Number(row.employeeCount),locale:row.locale==="en"?"en" as const:"ru" as const};
 }
 
+export async function getDirectWorkspaceSettings(workspaceId:string){
+  const rows=await client().query(`SELECT "locale","timezone","theme","dataRetentionDays","analyticsEnabled","aiTrainingOptIn","logoUrl","workingHours" FROM "WorkspaceSettings" WHERE "workspaceId"=$1 LIMIT 1`,[workspaceId]);
+  if(!rows.length)throw new Error("WORKSPACE_SETTINGS_NOT_FOUND");
+  return rows[0];
+}
+
 export async function createDirectOnboardingEmployee(input:{
   workspaceId:string;userId:string;name:string;role:string;status:"ACTIVE"|"DRAFT";goal:string;tone:string;instructions:string|null;
   handoffRules:Record<string,unknown>;knowledgeTitle?:string;knowledgeContent?:string;chunks:Array<{content:string;sourceLabel:string}>;
@@ -103,6 +109,9 @@ export async function createDirectOnboardingEmployee(input:{
       INSERT INTO "KnowledgeChunk" ("id","documentId","content","sourceLabel")
       SELECT gen_random_uuid()::text,document."id",item.content,item.label
       FROM document CROSS JOIN LATERAL jsonb_to_recordset($15::jsonb) AS item(content text,label text)
+    ), knowledge_job AS (
+      INSERT INTO "BackgroundJob" ("id","workspaceId","type","payload")
+      SELECT gen_random_uuid()::text,$2,'KNOWLEDGE_INDEX',jsonb_build_object('sourceId',source."id") FROM source
     ), website_channel AS (
       INSERT INTO "Channel" ("id","workspaceId","employeeId","type","status","externalId","configEncrypted","updatedAt")
       SELECT $16,$2,employee."id",'WEBSITE','CONNECTED','embedded-widget',$17,CURRENT_TIMESTAMP FROM employee WHERE $16::text IS NOT NULL

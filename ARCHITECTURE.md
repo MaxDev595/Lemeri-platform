@@ -19,3 +19,7 @@ All business entities are owned directly or transitively by a workspace. Server 
 ## MVP order
 
 Foundation → employee onboarding → knowledge → website conversations/handoff → leads and appointments → channels → testing → analytics → billing/team/settings. The current implementation provides the complete navigable product shell, responsive design system, realistic development data, interactions, and the production PostgreSQL relational schema.
+
+
+# test sms
+ETO APP MENY ZAEBAL
