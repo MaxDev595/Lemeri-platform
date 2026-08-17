@@ -176,6 +176,11 @@ button,.planButton,.fileButton{min-height:40px;border-radius:12px;font-size:12px
   .toast{left:12px;right:12px;bottom:12px}
 }
 
+/* AppSelect owns its visual surface; remove the obsolete native-select shell. */
+.employeeSelect{width:min(260px,100%);height:auto;border:0;background:transparent;border-radius:0;padding:0;font-size:inherit}
+.switch[aria-busy="true"] i{animation:togglePending .7s ease-in-out infinite alternate}
+@keyframes togglePending{to{opacity:.45}}
+
 /* Lemiri visual system: hierarchy-first surfaces and explicit UI states. */
 :root{
   --radius-xs:8px;--radius-sm:11px;--radius-md:15px;--radius-lg:22px;
