@@ -175,3 +175,79 @@ button,.planButton,.fileButton{min-height:40px;border-radius:12px;font-size:12px
   .dataSection,.conversationWorkspace,.playground,.settingsCard{border-radius:14px}.dataToolbar,.cardsGrid,.connectorGrid{padding-inline:13px}
   .toast{left:12px;right:12px;bottom:12px}
 }
+
+/* Lemiri visual system: hierarchy-first surfaces and explicit UI states. */
+:root{
+  --radius-xs:8px;--radius-sm:11px;--radius-md:15px;--radius-lg:22px;
+  --control-h:42px;--focus-ring:0 0 0 4px rgba(98,84,232,.13);
+  --danger:#c43f55;--warning:#9a6815;--success:#287a5b;
+}
+:root:not([data-theme="dark"]) .eyebrow,
+:root:not([data-theme="dark"]) .welcome p,
+:root:not([data-theme="dark"]) .sectionHead p,
+:root:not([data-theme="dark"]) .metric span,
+:root:not([data-theme="dark"]) .metric small,
+:root:not([data-theme="dark"]) .employeeIdentity p,
+:root:not([data-theme="dark"]) .employeeStats span,
+:root:not([data-theme="dark"]) .tasks small,
+:root:not([data-theme="dark"]) .activityItem p,
+:root:not([data-theme="dark"]) .activityItem time,
+:root:not([data-theme="dark"]) .conversationList small,
+:root:not([data-theme="dark"]) .conversationMeta time,
+:root:not([data-theme="dark"]) .dataToolbar small,
+:root:not([data-theme="dark"]) .appSelectLabel,
+:root:not([data-theme="dark"]) .appSelectPlaceholder,
+:root:not([data-theme="dark"]) .emptyState p{color:var(--muted)!important}
+:root:not([data-theme="dark"]) .linkButton,
+:root:not([data-theme="dark"]) .appSelectOption.selected{color:var(--accent-deep)!important}
+
+body{overflow-x:clip}.appShell main,.page,.dataSection,.conversationWorkspace{min-width:0}
+input,textarea,select,.appSelectTrigger{font-size:13px;line-height:1.35}
+input,textarea,select{accent-color:var(--accent)}
+input:disabled,textarea:disabled,select:disabled,button:disabled{cursor:not-allowed;opacity:.48;transform:none!important;box-shadow:none!important}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:0;box-shadow:var(--focus-ring)!important}
+
+/* Dashboard uses one continuous information field instead of four floating cards. */
+.metrics{gap:0;border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;background:var(--surface)}
+.metric{border:0;border-right:1px solid var(--line);border-radius:0;box-shadow:none;background:transparent;position:relative}
+.metric:last-child{border-right:0}.metric:first-child:before{content:"";position:absolute;inset:18px auto 18px 0;width:3px;border-radius:3px;background:linear-gradient(var(--accent-bright),var(--accent-deep))}
+@media(hover:hover){.metric:hover{transform:none;background:var(--fog);box-shadow:none}}
+.employeeCard{border-color:rgba(98,84,232,.22);box-shadow:0 18px 48px rgba(63,50,153,.09);overflow:hidden}
+.employeeCard>.sectionHead{background:linear-gradient(115deg,var(--accent-soft),transparent 72%)}
+.employeeMain{position:relative}.employeeMain:after{content:"AI";position:absolute;right:18px;top:8px;font-size:64px;font-weight:700;letter-spacing:-.08em;color:var(--accent);opacity:.035;pointer-events:none}
+.setupCard,.chartCard,.activityCard,.settingsCard{box-shadow:none}
+.bottomGrid{align-items:start}.activityList,.conversationList{border-top:1px solid var(--line)}
+
+/* Data-heavy views favor rhythm and separators over boxed tiles. */
+.connectorGrid,.cardsGrid{align-items:stretch}.connectorCard,.resourceCard{box-shadow:none;border-color:transparent;border-bottom-color:var(--line);border-radius:var(--radius-sm);background:var(--surface)}
+.connectorCard:hover,.resourceCard:hover{transform:none!important;background:var(--fog);box-shadow:none!important;border-color:rgba(98,84,232,.18)}
+.connectorLogo{border:1px solid rgba(98,84,232,.18);background:var(--accent-soft);color:var(--accent-deep)}
+.tableWrap{width:100%;overflow:auto;border-radius:0 0 var(--radius-md) var(--radius-md)}
+table{border-collapse:separate;border-spacing:0}thead th{position:sticky;top:0;z-index:2;background:var(--fog);color:var(--muted);letter-spacing:.04em}tbody tr{transition:background-color .16s ease}tbody tr:hover{background:var(--fog)}
+
+.status{font-weight:650;border:1px solid transparent}.status.success{color:var(--success);background:rgba(40,122,91,.1);border-color:rgba(40,122,91,.16)}.status.paused{color:var(--muted);background:var(--mist);border-color:var(--line)}
+.toast{z-index:120;border:1px solid rgba(255,255,255,.12);border-radius:var(--radius-sm)}
+.commandOverlay{z-index:100}.commandPalette{max-height:min(620px,calc(100dvh - 32px))}
+.emptyState{background:radial-gradient(circle at 50% 35%,var(--accent-soft),transparent 46%)}
+.emptyState>span{box-shadow:inset 0 0 0 1px rgba(98,84,232,.14)}
+
+@keyframes lemiriSkeleton{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skeleton,[aria-busy="true"] .skeleton{color:transparent!important;background:linear-gradient(90deg,var(--mist) 25%,var(--surface-secondary) 45%,var(--mist) 65%);background-size:220% 100%;animation:lemiriSkeleton 1.35s ease-in-out infinite;border-radius:var(--radius-xs)}
+
+:root[data-theme="dark"]{--danger:#ff7185;--warning:#e7b65c;--success:#67c79f;--focus-ring:0 0 0 4px rgba(113,99,243,.24)}
+:root[data-theme="dark"] .metrics{background:#09090b;border-color:#26262d}
+:root[data-theme="dark"] .metric{background:transparent;border-color:#26262d}
+:root[data-theme="dark"] .employeeCard>.sectionHead{background:linear-gradient(115deg,rgba(98,84,232,.18),transparent 72%)}
+:root[data-theme="dark"] .connectorCard:hover,:root[data-theme="dark"] .resourceCard:hover,:root[data-theme="dark"] tbody tr:hover{background:#111116}
+:root[data-theme="dark"] thead th{background:#101014}
+
+@media(max-width:700px){
+  .metrics{display:grid;grid-template-columns:1fr 1fr;border-radius:var(--radius-md)}
+  .metric{border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .metric:nth-child(2n){border-right:0}.metric:nth-last-child(-n+2){border-bottom:0}
+  .dataSection{overflow:hidden}.commandOverlay{padding:12px;place-items:start center}.commandPalette{width:100%;border-radius:var(--radius-md)}
+}
+@media(max-width:420px){
+  .metrics{grid-template-columns:1fr}.metric{border-right:0;border-bottom:1px solid var(--line)!important}.metric:last-child{border-bottom:0!important}
+  .employeeMain:after{font-size:48px}.tableWrap{margin-inline:0;width:100%}
+}
