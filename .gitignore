@@ -9,3 +9,6 @@ outputs/
 .env
 .env.local
 .dev.vars
+
+Claude outputs/
+env-local-dev.txt
