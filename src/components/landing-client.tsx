@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Menu, X } from "lucide-react";
+import Lenis from "lenis";
 
 /** Sticky header that gains a surface once the page scrolls, plus a mobile sheet menu. */
 export function LandingNav({ children, menu }: { children: ReactNode; menu: ReactNode }) {
@@ -112,4 +113,94 @@ export function TiltStage({ children }: { children: ReactNode }) {
       {children}
     </div>
   );
+}
+
+/**
+ * Headline word that types itself, pauses, erases and moves on to the next one.
+ * The server renders the first word in full, so the heading reads correctly
+ * without JavaScript and for screen readers (the animated copy is aria-hidden).
+ */
+export function TypeCycle({ words }: { words: readonly string[] }) {
+  const [text, setText] = useState(words[0] ?? "");
+  useEffect(() => {
+    if (words.length < 2 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let index = 0;
+    let length = words[0]!.length;
+    let deleting = true;
+    let timer = 0;
+    const tick = () => {
+      const word = words[index]!;
+      if (deleting) {
+        length -= 1;
+        setText(word.slice(0, length));
+        if (length <= 0) {
+          deleting = false;
+          index = (index + 1) % words.length;
+          timer = window.setTimeout(tick, 320);
+          return;
+        }
+        timer = window.setTimeout(tick, 38);
+        return;
+      }
+      const next = words[index]!;
+      length += 1;
+      setText(next.slice(0, length));
+      if (length >= next.length) {
+        deleting = true;
+        timer = window.setTimeout(tick, 2400);
+        return;
+      }
+      timer = window.setTimeout(tick, 70 + Math.random() * 40);
+    };
+    timer = window.setTimeout(tick, 2600);
+    return () => window.clearTimeout(timer);
+  }, [words]);
+  return (
+    <span className="lnType">
+      <span className="srOnly">{words[0]}</span>
+      <em aria-hidden="true">{text || "\u200b"}</em>
+      <i className="lnCaret" aria-hidden="true" />
+    </span>
+  );
+}
+
+/**
+ * Inertial smooth scrolling for the landing only (the app keeps native scroll).
+ * Uses Lenis over native scroll, so sticky elements, IntersectionObserver
+ * reveals and keyboard scrolling keep working. Off for reduced motion.
+ */
+export function SmoothScroll() {
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const lenis = new Lenis({
+      duration: 1.15,
+      easing: (t) => 1 - Math.pow(1 - t, 4),
+      smoothWheel: true,
+      wheelMultiplier: 0.95,
+    });
+    // In-page links glide to their section; sections carry their own top padding,
+    // so aligning the section edge with the viewport keeps headings below the nav.
+    const onClick = (event: MouseEvent) => {
+      const link = (event.target as HTMLElement).closest<HTMLAnchorElement>('a[href^="#"]');
+      const id = link?.getAttribute("href")?.slice(1);
+      const target = id ? document.getElementById(id) : null;
+      if (!target) return;
+      event.preventDefault();
+      lenis.scrollTo(target, { offset: 0, duration: 1.3 });
+      history.replaceState(null, "", `#${id}`);
+    };
+    document.addEventListener("click", onClick);
+    let frame = 0;
+    const raf = (time: number) => {
+      lenis.raf(time);
+      frame = requestAnimationFrame(raf);
+    };
+    frame = requestAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(frame);
+      document.removeEventListener("click", onClick);
+      lenis.destroy();
+    };
+  }, []);
+  return null;
 }

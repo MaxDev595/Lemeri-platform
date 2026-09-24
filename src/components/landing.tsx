@@ -17,7 +17,7 @@ import { Logo, LemiriGlyph } from "./logo";
 import { AuthDemo } from "./auth-demo";
 import { CountUp } from "./motion";
 import { ChannelGlyph } from "./illustrations";
-import { LandingNav, StepsRail, TiltStage } from "./landing-client";
+import { LandingNav, SmoothScroll, StepsRail, TiltStage, TypeCycle } from "./landing-client";
 import { landingCopy } from "./landing-copy";
 import type { Locale } from "@/lib/i18n";
 import { localeHref } from "@/lib/locale-utils";
@@ -51,6 +51,7 @@ export function Landing({ locale, signedIn = false }: { locale: Locale; signedIn
   );
   return (
     <div className="landing" lang={locale}>
+      <SmoothScroll />
       <LandingNav
         menu={
           <nav className="lnSheetLinks">
@@ -96,7 +97,7 @@ export function Landing({ locale, signedIn = false }: { locale: Locale; signedIn
               {c.hero.pill}
             </span>
             <h1>
-              {c.hero.titleA} <em>{c.hero.titleAccent}</em> {c.hero.titleB}
+              {c.hero.titleA} <TypeCycle words={c.hero.titleWords} /> {c.hero.titleB}
             </h1>
             <p>{c.hero.copy}</p>
             <div className="lnHeroCta">

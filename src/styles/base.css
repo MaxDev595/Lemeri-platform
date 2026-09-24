@@ -298,12 +298,45 @@ legend {
   --btn-fg: var(--text-on-accent);
   --btn-bd: transparent;
   --btn-shadow: var(--e-accent), var(--highlight);
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+  isolation: isolate;
+  overflow: hidden;
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0));
+}
+/* Hover: the fill deepens, the button lifts a hair and a soft sheen sweeps
+   across. Text colour is pinned to white so links (a:hover) can't recolour it. */
+.primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.28) 50%, transparent 70%);
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+.primary,
+.primary:hover,
+.primary:focus-visible,
+a.primary:hover {
+  color: var(--text-on-accent);
 }
 .primary:hover:not(:disabled) {
   --btn-bg: var(--accent-hover);
   --btn-bd: transparent;
   --btn-fg: var(--text-on-accent);
+  --btn-shadow: 0 2px 4px rgba(67, 54, 180, 0.28), 0 12px 26px -8px rgba(98, 84, 232, 0.6), var(--highlight);
+  transform: translateY(-1px);
+}
+.primary:hover:not(:disabled)::after {
+  transform: translateX(120%);
+  transition: transform 750ms var(--ease-out);
+}
+.primary:active:not(:disabled) {
+  transform: translateY(0) scale(0.985);
+}
+a.btn:hover,
+a.exportButton:hover,
+a.planButton:hover {
+  color: var(--text);
 }
 .primary:disabled {
   --btn-bg: var(--indigo-300);

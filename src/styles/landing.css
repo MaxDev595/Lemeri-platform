@@ -20,6 +20,56 @@
 html:has(.landing) {
   scroll-padding-top: 88px;
 }
+/* Lenis drives the scroll on the landing; native smooth scrolling would fight it. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+html.lenis {
+  scroll-behavior: auto;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+.lenis [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+/* Typewriter headline word */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.lnType {
+  display: inline;
+  white-space: nowrap;
+}
+.lnType em {
+  /* Extra inline padding keeps the gradient from clipping the last glyph. */
+  padding: 0 0.08em 0.06em 0.02em;
+  margin: 0 -0.08em 0 -0.02em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.lnCaret {
+  display: inline-block;
+  width: 0.06em;
+  height: 0.82em;
+  margin-left: 0.04em;
+  border-radius: 2px;
+  background: var(--accent);
+  vertical-align: -0.04em;
+  animation: caret 1s steps(1) infinite;
+}
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
 
 /* -------- Navigation -------------------------------------------------- */
 .lnNav {
@@ -173,6 +223,8 @@ html:has(.landing) {
 }
 .lnHead h2 em,
 .lnHero h1 em {
+  padding-right: 0.08em;
+  margin-right: -0.08em;
   background: linear-gradient(100deg, var(--indigo-700), var(--indigo-500) 55%, #8b7dff);
   -webkit-background-clip: text;
   background-clip: text;
