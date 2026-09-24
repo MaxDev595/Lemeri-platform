@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   description: "Отвечает клиентам, собирает заявки, записывает на услуги и передаёт сложные диалоги команде. Запуск за 15 минут.",
 };
 
+// lemeriai.com: signed-in users go straight to the platform, everyone else sees the landing.
 export default async function Home({ searchParams }: { searchParams: Promise<{ lang?: string }> }) {
   if (await getSessionUser()) redirect("/app");
   const locale = await getPublicLocale((await searchParams).lang);

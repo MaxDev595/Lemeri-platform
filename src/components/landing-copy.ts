@@ -2,7 +2,7 @@ import type { Locale } from "@/lib/i18n";
 
 export const landingCopy = {
   ru: {
-    nav: { features: "Возможности", how: "Как работает", roles: "Роли", pricing: "Тарифы", faq: "Вопросы", login: "Войти", start: "Начать бесплатно" },
+    nav: { features: "Возможности", how: "Как работает", roles: "Роли", pricing: "Тарифы", faq: "Вопросы", login: "Войти", start: "Начать бесплатно", cabinet: "Открыть кабинет" },
     hero: {
       pill: "AI-сотрудник для бизнеса",
       titleA: "Наймите сотрудника, который",
@@ -91,7 +91,7 @@ export const landingCopy = {
     footer: { rights: "© 2026 Lemiri AI", made: "Сделано для бизнеса, который ценит каждого клиента" },
   },
   en: {
-    nav: { features: "Features", how: "How it works", roles: "Roles", pricing: "Pricing", faq: "FAQ", login: "Sign in", start: "Start free" },
+    nav: { features: "Features", how: "How it works", roles: "Roles", pricing: "Pricing", faq: "FAQ", login: "Sign in", start: "Start free", cabinet: "Open dashboard" },
     hero: {
       pill: "AI employee for business",
       titleA: "Hire an employee who",

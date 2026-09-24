@@ -35,10 +35,10 @@ const featureIcons = [MessagesSquare, BookOpenCheck, ShieldCheck, Zap];
 const roleIcons = [CalendarCheck2, UserRoundCheck, Headphones];
 const weekBars = [42, 58, 51, 74, 88, 63, 47];
 
-export function Landing({ locale }: { locale: Locale }) {
+export function Landing({ locale, signedIn = false }: { locale: Locale; signedIn?: boolean }) {
   const c = landingCopy[locale];
   const other = locale === "ru" ? "en" : "ru";
-  const register = localeHref("/register", locale);
+  const register = signedIn ? "/app" : localeHref("/register", locale);
   const login = localeHref("/login", locale);
   const links = (
     <>
@@ -55,9 +55,9 @@ export function Landing({ locale }: { locale: Locale }) {
         menu={
           <nav className="lnSheetLinks">
             {links}
-            <Link href={login}>{c.nav.login}</Link>
+            {!signedIn && <Link href={login}>{c.nav.login}</Link>}
             <Link className="primary" href={register}>
-              {c.nav.start}
+              {signedIn ? c.nav.cabinet : c.nav.start}
             </Link>
           </nav>
         }
@@ -71,11 +71,13 @@ export function Landing({ locale }: { locale: Locale }) {
             <span className={locale === "ru" ? "on" : ""}>RU</span>
             <span className={locale === "en" ? "on" : ""}>EN</span>
           </Link>
-          <Link className="lnLogin" href={login}>
-            {c.nav.login}
-          </Link>
+          {!signedIn && (
+            <Link className="lnLogin" href={login}>
+              {c.nav.login}
+            </Link>
+          )}
           <Link className="primary lnStart" href={register}>
-            {c.nav.start}
+            {signedIn ? c.nav.cabinet : c.nav.start}
           </Link>
         </div>
       </LandingNav>

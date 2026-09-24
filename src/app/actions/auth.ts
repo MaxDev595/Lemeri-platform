@@ -86,7 +86,7 @@ export async function login(_: AuthState, formData: FormData): Promise<AuthState
 
 export async function logout() {
   await destroySession();
-  redirect("/login");
+  redirect("/");
 }
 
 const emailSchema=z.string().trim().toLowerCase().email();
