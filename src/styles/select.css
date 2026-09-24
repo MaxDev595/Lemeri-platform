@@ -1,0 +1,224 @@
+/* ==========================================================================
+   AppSelect — trigger + portalled listbox
+   ========================================================================== */
+
+.appSelect {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.appSelectLabel {
+  color: var(--text-2);
+  font-size: var(--fs-13);
+  font-weight: 500;
+}
+.appSelectTrigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 10px 0 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--text);
+  font-size: var(--fs-14);
+  text-align: left;
+  box-shadow: var(--e-1);
+  transition:
+    border-color var(--t-fast) ease,
+    box-shadow var(--t-base) var(--ease-out),
+    background-color var(--t-fast) ease;
+}
+.appSelectTrigger:hover:not(:disabled) {
+  border-color: var(--line-strong);
+}
+.appSelectTrigger[aria-expanded="true"] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-ring);
+}
+.appSelectTrigger:disabled {
+  background: var(--surface-2);
+  color: var(--text-4);
+  cursor: not-allowed;
+}
+.appSelect--sm .appSelectTrigger {
+  min-height: 32px;
+  font-size: var(--fs-13);
+}
+.appSelect--lg .appSelectTrigger {
+  min-height: 46px;
+}
+.appSelect--error .appSelectTrigger {
+  border-color: var(--bad);
+}
+.appSelectValue,
+.appSelectPlaceholder {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.appSelectPlaceholder {
+  color: var(--text-4);
+}
+.appSelectIcon {
+  display: grid;
+  color: var(--text-3);
+}
+.appSelectChevron {
+  color: var(--text-4);
+  transition: transform 260ms var(--ease-out);
+}
+.appSelectTrigger[aria-expanded="true"] .appSelectChevron {
+  transform: rotate(180deg);
+  color: var(--accent);
+}
+.appSelectError {
+  color: var(--bad);
+  font-size: var(--fs-12);
+}
+
+/* Menu */
+.appSelectMenu {
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--e-3);
+  animation: drop 200ms var(--ease-out);
+  transform-origin: top center;
+}
+.appSelectMenu[style*="bottom"] {
+  transform-origin: bottom center;
+  animation-name: pop;
+}
+.appSelectSearch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--text-4);
+}
+.appSelectSearch input {
+  flex: 1;
+  height: 42px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.appSelectSearch input:focus {
+  box-shadow: none;
+}
+.appSelectOptions {
+  display: grid;
+  gap: 1px;
+  padding: 5px;
+  overflow-y: auto;
+}
+.appSelectOption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text-2);
+  font-size: var(--fs-14);
+  text-align: left;
+  transition: background-color 80ms ease;
+}
+.appSelectOption > span:not(.appSelectOptionIcon) {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.appSelectOption.active {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+.appSelectOption.selected {
+  color: var(--accent-text);
+  font-weight: 550;
+}
+.appSelectOption.selected svg {
+  color: var(--accent);
+  animation: check-pop 260ms var(--ease-spring);
+}
+.appSelectOption:disabled {
+  opacity: 0.45;
+}
+.appSelectOptionIcon {
+  display: grid;
+  color: var(--text-3);
+}
+.appSelectEmpty {
+  padding: 18px 10px;
+  color: var(--text-4);
+  font-size: var(--fs-13);
+  text-align: center;
+}
+
+/* Compact inline variants */
+.periodDropdown {
+  min-width: 170px;
+}
+.periodDropdown .appSelectLabel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+.periodDropdown .appSelectTrigger::before {
+  content: "";
+  width: 15px;
+  height: 15px;
+  flex: none;
+  background: var(--text-3);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4.5' width='18' height='16' rx='3'/%3E%3Cpath d='M3 9.5h18M8 2.5v4M16 2.5v4'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+}
+.assignmentSelect .appSelectTrigger {
+  min-height: 34px;
+  font-size: var(--fs-13);
+}
+.tableWrap .assignmentSelect .appSelectLabel,
+.chatPane .assignmentSelect .appSelectLabel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+.tableWrap .assignmentSelect {
+  min-width: 190px;
+}
+.tableWrap .assignmentSelect .appSelectTrigger {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+.tableWrap tr:hover .assignmentSelect .appSelectTrigger,
+.tableWrap .assignmentSelect .appSelectTrigger[aria-expanded="true"] {
+  border-color: var(--line);
+  background: var(--surface);
+}
+.employeeSelect {
+  min-width: 200px;
+}

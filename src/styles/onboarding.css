@@ -1,0 +1,457 @@
+/* ==========================================================================
+   Onboarding wizard
+   ========================================================================== */
+
+.onboardingPage {
+  min-height: 100vh;
+  padding: 0 20px 64px;
+  background:
+    radial-gradient(60% 40% at 50% 0%, var(--accent-softer), transparent 70%),
+    var(--bg);
+}
+.onboardingPage > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1080px;
+  height: 72px;
+  margin: 0 auto;
+}
+.onboardingPage > header > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-full);
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: var(--fs-13);
+  font-weight: 550;
+  box-shadow: var(--e-1);
+}
+.onboardingPage > header > span::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ok);
+}
+
+.onboardingCard {
+  position: relative;
+  display: grid;
+  gap: 0;
+  width: min(760px, 100%);
+  margin: 24px auto 0;
+  padding: 36px 40px 28px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-2xl);
+  background: var(--surface);
+  box-shadow: var(--e-3);
+  animation: rise 700ms var(--ease-out) both;
+}
+.onboardingLanguage {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  transition:
+    color var(--t-fast) ease,
+    border-color var(--t-fast) ease;
+}
+.onboardingLanguage:hover {
+  border-color: var(--line-strong);
+  color: var(--text);
+}
+
+/* Stepper — numbered nodes on a rail that fills as you progress */
+.wizardSteps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(360px, calc(100% - 80px));
+  margin-bottom: 28px;
+  container-type: inline-size;
+}
+.wizardSteps span {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text-4);
+  font-size: var(--fs-12);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  transition:
+    background-color 300ms var(--ease-out),
+    border-color 300ms var(--ease-out),
+    color 300ms ease,
+    box-shadow 300ms var(--ease-out);
+}
+.wizardSteps span + span::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 1.5px);
+  width: calc((100cqw - 6 * 26px) / 5 - 3px);
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent) 50%, var(--line) 50%) 100% 0 / 200% 100%;
+  transform: translateY(-50%);
+  transition: background-position 520ms var(--ease-out);
+}
+.wizardSteps span.done + span::before,
+.wizardSteps span.done + span.current::before {
+  background-position: 0 0;
+}
+.wizardSteps span.done {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+.wizardSteps span.current {
+  border-color: var(--accent);
+  color: var(--accent-text);
+  box-shadow: 0 0 0 4px var(--accent-ring);
+}
+.onboardingCard > .eyebrow {
+  margin-bottom: 8px;
+  color: var(--accent-text);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.onboardingWizard section:not([hidden]) {
+  animation: wizard-in 520ms var(--ease-out) both;
+}
+@keyframes wizard-in {
+  from {
+    opacity: 0;
+    transform: translate3d(16px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.onboardingWizard section > h1 {
+  font-size: var(--fs-28);
+  font-weight: 620;
+  letter-spacing: -0.035em;
+}
+.onboardingCopy {
+  margin: 8px 0 24px;
+  color: var(--text-3);
+  font-size: var(--fs-15);
+}
+
+/* Choice cards */
+.roleGrid,
+.templateGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.templateGrid {
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+}
+.roleCard,
+.templateCard {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  justify-content: stretch;
+  justify-items: start;
+  gap: 6px;
+  min-height: 132px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--e-1);
+  color: var(--text);
+  font-size: inherit;
+  text-align: left;
+  white-space: normal;
+  transition:
+    border-color var(--t-base) ease,
+    box-shadow var(--t-base) var(--ease-out),
+    transform var(--t-base) var(--ease-out),
+    background-color var(--t-base) ease;
+}
+.templateCard {
+  min-height: 108px;
+}
+.roleCard:hover,
+.templateCard:hover {
+  border-color: var(--line-strong);
+  box-shadow: var(--e-2);
+  transform: translateY(-2px);
+}
+.roleCard > svg,
+.templateCard > svg {
+  box-sizing: content-box;
+  margin-bottom: 8px;
+  padding: 8px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  color: var(--text-3);
+  transition:
+    background-color var(--t-base) ease,
+    color var(--t-base) ease;
+}
+.roleCard b,
+.templateCard b {
+  font-size: var(--fs-15);
+  font-weight: 600;
+}
+.roleCard small,
+.templateCard small {
+  color: var(--text-3);
+  font-size: var(--fs-13);
+  line-height: 1.45;
+}
+.roleCard.selected,
+.templateCard.selected {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, var(--accent-softer), var(--surface));
+  box-shadow:
+    0 0 0 3px var(--accent-ring),
+    var(--e-2);
+}
+.roleCard.selected > svg,
+.templateCard.selected > svg {
+  background: var(--accent);
+  color: #fff;
+}
+.roleCard > span {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  animation: check-pop 320ms var(--ease-spring);
+}
+
+/* Fields */
+.onboardingFields {
+  display: grid;
+  gap: 16px;
+}
+.onboardingFields fieldset {
+  display: grid;
+  gap: 8px;
+}
+.onboardingFields .checkRow {
+  padding: 12px 14px;
+  color: var(--text);
+  font-size: var(--fs-14);
+  font-weight: 450;
+  align-items: center;
+}
+.knowledgeTextarea {
+  min-height: 200px;
+}
+.wizardNotice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: var(--accent-softer);
+  color: var(--text-2);
+  font-size: var(--fs-13);
+}
+.wizardNotice svg {
+  color: var(--accent);
+}
+
+/* Review */
+.reviewGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.reviewGrid article {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface-2);
+}
+.reviewGrid svg {
+  flex: none;
+  color: var(--accent);
+}
+.reviewGrid span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.reviewGrid small {
+  color: var(--text-4);
+  font-size: var(--fs-12);
+}
+.reviewGrid b {
+  overflow: hidden;
+  font-size: var(--fs-14);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.reviewGrid em {
+  color: var(--text-3);
+  font-size: var(--fs-12);
+  font-style: normal;
+}
+.previewChat {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background:
+    radial-gradient(circle at 1px 1px, var(--line-soft) 1px, transparent 0) 0 0 / 16px 16px,
+    var(--surface);
+}
+.previewChat > button {
+  justify-self: start;
+}
+.previewAnswer {
+  display: grid;
+  gap: 4px;
+  max-width: 88%;
+  justify-self: end;
+  padding: 12px 14px;
+  border-radius: 16px 16px 6px 16px;
+  background: var(--accent);
+  color: #fff;
+  box-shadow: var(--e-accent);
+  animation: pop 420ms var(--ease-out);
+}
+.previewAnswer b {
+  font-size: var(--fs-12);
+  opacity: 0.8;
+}
+.previewAnswer p {
+  font-size: var(--fs-14);
+  line-height: 1.5;
+}
+.previewAnswer small {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  opacity: 0.7;
+}
+.publishCheck {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  cursor: pointer;
+}
+.publishCheck span {
+  display: grid;
+  gap: 2px;
+}
+.publishCheck b {
+  color: var(--text);
+  font-size: var(--fs-14);
+}
+.publishCheck small {
+  color: var(--text-3);
+  font-size: var(--fs-13);
+  font-weight: 400;
+}
+
+/* Footer actions */
+.wizardActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line-soft);
+}
+.wizardBack {
+  --btn-bd: transparent;
+  --btn-shadow: none;
+  --btn-fg: var(--text-3);
+}
+.wizardBack:hover:not(:disabled) {
+  --btn-bg: var(--surface-hover);
+}
+.onboardingNext {
+  min-height: 42px;
+  padding: 0 18px;
+}
+.onboardingNext svg:last-child {
+  transition: transform var(--t-base) var(--ease-out);
+}
+.onboardingNext:hover:not(:disabled) svg:last-child {
+  transform: translateX(3px);
+}
+.onboardingWizard > .formError {
+  margin-top: 14px;
+}
+
+@media (max-width: 800px) {
+  .onboardingCard {
+    padding: 28px 22px 22px;
+    border-radius: var(--r-xl);
+  }
+  .roleGrid,
+  .reviewGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .roleCard {
+    min-height: 0;
+  }
+  .templateGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 480px) {
+  .onboardingPage {
+    padding: 0 12px 40px;
+  }
+  .templateGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .wizardActions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+  .wizardActions > * {
+    width: 100%;
+  }
+}

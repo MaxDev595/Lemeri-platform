@@ -23,7 +23,7 @@ const config: runtime.GetPrismaClientConfig = {
       "value": "prisma-client"
     },
     "output": {
-      "value": "C:\\Users\\pc\\Documents\\Codex\\2026-08-11\\pnpm-dev\\src\\generated\\prisma",
+      "value": "C:\\Users\\pc\\Desktop\\Lemeri-platform\\src\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -39,7 +39,7 @@ const config: runtime.GetPrismaClientConfig = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\pc\\Documents\\Codex\\2026-08-11\\pnpm-dev\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\pc\\Desktop\\Lemeri-platform\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativePath": "../../../prisma",

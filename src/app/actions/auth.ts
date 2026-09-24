@@ -51,7 +51,7 @@ export async function register(_: AuthState, formData: FormData): Promise<AuthSt
     phase = "create";
     // Nested writes are atomic. Avoid interactive transactions because edge
     // PostgreSQL connections may reject transaction pinning.
-    const user = process.env.NODE_ENV==="production"?await createRegisteredUser({name,email,password,company,slug:`${company.toLowerCase().replace(/[^a-zР°-СЏ0-9]+/gi, "-")}-${crypto.randomUUID().slice(0, 6)}`,locale}):await db.user.create({
+    const user = process.env.NODE_ENV==="production"?await createRegisteredUser({name,email,password,company,slug:`${company.toLowerCase().replace(/[^a-zа-я0-9]+/gi, "-")}-${crypto.randomUUID().slice(0, 6)}`,locale}):await db.user.create({
       data: {
         name, email, passwordHash:passwordHash!,
         memberships: { create: { role: "OWNER", workspace: { create: { name: company, slug: `${company.toLowerCase().replace(/[^a-zа-я0-9]+/gi, "-")}-${crypto.randomUUID().slice(0, 6)}`,settings:{create:{locale}} } } } },

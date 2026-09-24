@@ -1,7 +1,9 @@
 "use client";
 
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { ArrowUp } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
+import { LemiriGlyph } from "./logo";
 
 type Message = { id?:string; role: "user" | "assistant"; text: string };
 
@@ -18,6 +20,7 @@ const widgetCopy = {
     sendFailed: "Не удалось отправить сообщение",
     connectionFailed: "Ошибка соединения",
     planLimit: "Лимит новых диалогов временно исчерпан. Пожалуйста, свяжитесь с компанией другим способом.",
+    suggestions: ["Сколько стоят услуги?", "Хочу записаться", "Связаться с менеджером"],
   },
   en: {
     status: "AI employee · usually replies immediately",
@@ -31,6 +34,7 @@ const widgetCopy = {
     sendFailed: "Could not send the message",
     connectionFailed: "Connection error",
     planLimit: "The new conversation limit has been reached. Please contact the company another way.",
+    suggestions: ["What are your prices?", "I want to book", "Talk to a manager"],
   },
 } as const;
 
@@ -70,12 +74,18 @@ export function WebsiteWidget({ locale, employeeId, employeeName }: { locale: Lo
     poll();const timer=setInterval(poll,2000);return()=>{active=false;clearInterval(timer)};
   },[conversationId,visitorId,embedAuth,employeeId]);
 
+  const streamRef=useRef<HTMLElement>(null);
+  useEffect(()=>{const node=streamRef.current;if(node)node.scrollTo({top:node.scrollHeight,behavior:"smooth"})},[messages.length,busy]);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
     const input = new FormData(form).get("message")?.toString().trim();
     if (!input || busy || !visitorId || !embedAuth) return;
     form.reset();
+    await send(input);
+  }
+  async function send(input: string) {
+    if (!input || busy || !visitorId || !embedAuth) return;
     setMessages((value) => [...value, { role: "user", text: input }]);
     setBusy(true);
     try {
@@ -90,5 +100,5 @@ export function WebsiteWidget({ locale, employeeId, employeeName }: { locale: Lo
     } finally { setBusy(false); }
   }
 
-  return <main className="publicWidget"><header><span className="widgetAvatar">L</span><div><b>{employeeName}</b><small>{copy.status}</small></div></header><section aria-live="polite">{messages.length === 0 && <div className="widgetWelcome"><span>✦</span><h1>{copy.hello}</h1><p>{copy.help}</p></div>}{messages.map((message, index) => <div className={`widgetBubble ${message.role}`} key={index}>{message.text}</div>)}{busy && <div className="widgetBubble assistant typing">•••</div>}</section><form onSubmit={submit}><input name="message" required maxLength={4000} autoComplete="off" placeholder={embedAuth ? copy.message : copy.connecting} aria-label={copy.messageLabel}/><button disabled={busy || !visitorId || !embedAuth} aria-label={copy.send}>↑</button></form><footer>{copy.powered}</footer></main>;
+  return <main className="publicWidget"><header><span className="widgetAvatar"><LemiriGlyph size={22}/></span><div><b>{employeeName}</b><small>{copy.status}</small></div></header><section aria-live="polite" ref={streamRef}>{messages.length === 0 && <div className="widgetWelcome"><span><LemiriGlyph size={26}/></span><h1>{copy.hello}</h1><p>{copy.help}</p><div className="widgetSuggestions">{copy.suggestions.map(item=><button type="button" key={item} disabled={busy||!visitorId||!embedAuth} onClick={()=>void send(item)}>{item}</button>)}</div></div>}{messages.map((message, index) => <div className={`widgetBubble ${message.role}`} key={index}>{message.text}</div>)}{busy && <div className="widgetBubble assistant typing" aria-label="…"><i/><i/><i/></div>}</section><form onSubmit={submit}><input name="message" required maxLength={4000} autoComplete="off" placeholder={embedAuth ? copy.message : copy.connecting} aria-label={copy.messageLabel}/><button disabled={busy || !visitorId || !embedAuth} aria-label={copy.send}><ArrowUp size={18}/></button></form><footer>{copy.powered}</footer></main>;
 }

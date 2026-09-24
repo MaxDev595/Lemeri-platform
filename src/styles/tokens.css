@@ -1,0 +1,279 @@
+/* ==========================================================================
+   Lemiri design tokens
+   Palette is the original Lemiri indigo + cool neutrals, expanded into ramps.
+   ========================================================================== */
+
+@font-face {
+  font-family: "Onest";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("/fonts/onest-cyrillic-ext-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: "Onest";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("/fonts/onest-cyrillic-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Onest";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("/fonts/onest-latin-ext-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Onest";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("/fonts/onest-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 800;
+  src: url("/fonts/jetbrains-mono-cyrillic-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 800;
+  src: url("/fonts/jetbrains-mono-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC,
+    U+2122, U+2212, U+FEFF, U+FFFD;
+}
+
+:root {
+  /* Brand */
+  --indigo-25: #fafaff;
+  --indigo-50: #f4f3ff;
+  --indigo-100: #eeecff;
+  --indigo-200: #dcd8ff;
+  --indigo-300: #bfb8fb;
+  --indigo-400: #9489f6;
+  --indigo-500: #7163f3;
+  --indigo-600: #6254e8;
+  --indigo-700: #5546dc;
+  --indigo-800: #4336b4;
+  --indigo-900: #2c2478;
+
+  /* Neutrals (cool, tuned to #17191f ink) */
+  --gray-0: #ffffff;
+  --gray-25: #fbfbfd;
+  --gray-50: #f6f7f9;
+  --gray-100: #f0f1f4;
+  --gray-150: #e9eaef;
+  --gray-200: #e4e6ec;
+  --gray-300: #d3d6de;
+  --gray-400: #a8adba;
+  --gray-500: #858a98;
+  --gray-600: #6f7482;
+  --gray-700: #4d515c;
+  --gray-800: #2c2f37;
+  --gray-900: #17191f;
+
+  /* Functional tints — kept quiet so indigo stays the only loud colour */
+  --green-500: #1f9d6b;
+  --green-50: #e9f7f1;
+  --amber-500: #b7791f;
+  --amber-50: #fbf4e6;
+  --red-500: #d0424f;
+  --red-50: #fcecee;
+
+  /* Semantic */
+  --bg: var(--gray-25);
+  --bg-sunken: var(--gray-50);
+  --surface: var(--gray-0);
+  --surface-2: var(--gray-50);
+  --surface-hover: var(--gray-50);
+  --surface-press: var(--gray-100);
+  --overlay: rgba(23, 25, 31, 0.36);
+
+  --text: var(--gray-900);
+  --text-2: var(--gray-700);
+  --text-3: var(--gray-600);
+  --text-4: var(--gray-500);
+  --text-on-accent: #ffffff;
+
+  --line: var(--gray-200);
+  --line-soft: var(--gray-150);
+  --line-strong: var(--gray-300);
+
+  --accent: var(--indigo-600);
+  --accent-hover: var(--indigo-700);
+  --accent-press: var(--indigo-800);
+  --accent-soft: var(--indigo-100);
+  --accent-softer: var(--indigo-50);
+  --accent-text: var(--indigo-700);
+  --accent-ring: rgba(98, 84, 232, 0.22);
+
+  --ok: var(--green-500);
+  --ok-soft: var(--green-50);
+  --warn: var(--amber-500);
+  --warn-soft: var(--amber-50);
+  --bad: var(--red-500);
+  --bad-soft: var(--red-50);
+
+  /* Legacy aliases still referenced by inline styles / older markup */
+  --ink: var(--text);
+  --muted: var(--text-3);
+  --background: var(--bg);
+  --border: var(--line);
+  --text-primary: var(--text);
+  --text-secondary: var(--text-3);
+
+  /* Type */
+  --font-sans: "Onest", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --fs-11: 0.6875rem;
+  --fs-12: 0.75rem;
+  --fs-13: 0.8125rem;
+  --fs-14: 0.875rem;
+  --fs-15: 0.9375rem;
+  --fs-16: 1rem;
+  --fs-18: 1.125rem;
+  --fs-20: 1.25rem;
+  --fs-24: 1.5rem;
+  --fs-28: 1.75rem;
+  --fs-32: 2rem;
+  --fs-40: 2.5rem;
+  --fs-56: 3.5rem;
+
+  /* Space (4pt) */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+
+  /* Shape */
+  --r-xs: 6px;
+  --r-sm: 8px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 18px;
+  --r-2xl: 24px;
+  --r-full: 999px;
+
+  /* Elevation — layered, low-contrast, tinted by ink not indigo */
+  --e-0: 0 0 0 1px var(--line);
+  --e-1: 0 1px 2px rgba(23, 25, 31, 0.05);
+  --e-2: 0 1px 2px rgba(23, 25, 31, 0.04), 0 4px 12px -2px rgba(23, 25, 31, 0.06);
+  --e-3: 0 2px 4px rgba(23, 25, 31, 0.04), 0 12px 32px -8px rgba(23, 25, 31, 0.14);
+  --e-4: 0 4px 8px rgba(23, 25, 31, 0.04), 0 24px 64px -12px rgba(23, 25, 31, 0.24);
+  --e-accent: 0 1px 2px rgba(67, 54, 180, 0.3), 0 6px 16px -6px rgba(98, 84, 232, 0.55);
+  --highlight: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --t-fast: 120ms;
+  --t-base: 200ms;
+  --t-slow: 420ms;
+  --t-reveal: 720ms;
+
+  /* Layout */
+  --sidebar-w: 256px;
+  --sidebar-w-collapsed: 72px;
+  --topbar-h: 60px;
+  --page-max: 1320px;
+
+  color-scheme: light;
+}
+
+/* -------- Dark theme -------------------------------------------------- */
+:root[data-theme="dark"] {
+  --bg: #0e0f13;
+  --bg-sunken: #0b0c0f;
+  --surface: #15171c;
+  --surface-2: #1a1c22;
+  --surface-hover: #1d2027;
+  --surface-press: #23262e;
+  --overlay: rgba(4, 5, 8, 0.6);
+
+  --text: #eceef3;
+  --text-2: #c3c7d1;
+  --text-3: #9398a6;
+  --text-4: #737887;
+
+  --line: #262932;
+  --line-soft: #1f2229;
+  --line-strong: #343844;
+
+  --accent: #7466f5;
+  --accent-hover: #8577ff;
+  --accent-press: #6254e8;
+  --accent-soft: rgba(116, 102, 245, 0.16);
+  --accent-softer: rgba(116, 102, 245, 0.09);
+  --accent-text: #a79ef9;
+  --accent-ring: rgba(133, 119, 255, 0.34);
+
+  --ok: #3cc28f;
+  --ok-soft: rgba(60, 194, 143, 0.13);
+  --warn: #e0a84a;
+  --warn-soft: rgba(224, 168, 74, 0.13);
+  --bad: #f06a75;
+  --bad-soft: rgba(240, 106, 117, 0.13);
+
+  --e-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --e-2: 0 1px 2px rgba(0, 0, 0, 0.35), 0 6px 16px -4px rgba(0, 0, 0, 0.4);
+  --e-3: 0 2px 4px rgba(0, 0, 0, 0.3), 0 16px 40px -8px rgba(0, 0, 0, 0.55);
+  --e-4: 0 4px 8px rgba(0, 0, 0, 0.3), 0 28px 72px -12px rgba(0, 0, 0, 0.7);
+  --highlight: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-theme=""] {
+    --bg: #0e0f13;
+    --bg-sunken: #0b0c0f;
+    --surface: #15171c;
+    --surface-2: #1a1c22;
+    --surface-hover: #1d2027;
+    --surface-press: #23262e;
+    --overlay: rgba(4, 5, 8, 0.6);
+    --text: #eceef3;
+    --text-2: #c3c7d1;
+    --text-3: #9398a6;
+    --text-4: #737887;
+    --line: #262932;
+    --line-soft: #1f2229;
+    --line-strong: #343844;
+    --accent: #7466f5;
+    --accent-hover: #8577ff;
+    --accent-press: #6254e8;
+    --accent-soft: rgba(116, 102, 245, 0.16);
+    --accent-softer: rgba(116, 102, 245, 0.09);
+    --accent-text: #a79ef9;
+    --accent-ring: rgba(133, 119, 255, 0.34);
+    --ok: #3cc28f;
+    --ok-soft: rgba(60, 194, 143, 0.13);
+    --warn: #e0a84a;
+    --warn-soft: rgba(224, 168, 74, 0.13);
+    --bad: #f06a75;
+    --bad-soft: rgba(240, 106, 117, 0.13);
+    --e-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --e-2: 0 1px 2px rgba(0, 0, 0, 0.35), 0 6px 16px -4px rgba(0, 0, 0, 0.4);
+    --e-3: 0 2px 4px rgba(0, 0, 0, 0.3), 0 16px 40px -8px rgba(0, 0, 0, 0.55);
+    --e-4: 0 4px 8px rgba(0, 0, 0, 0.3), 0 28px 72px -12px rgba(0, 0, 0, 0.7);
+    --highlight: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    color-scheme: dark;
+  }
+}

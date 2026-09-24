@@ -1,0 +1,183 @@
+/* ==========================================================================
+   Motion system
+   Reveal classes only hide content once <html> carries .motion (set by the
+   client-side RevealRoot), so nothing is invisible without JavaScript.
+   - .reveal           → element fades/rises in when it scrolls into view
+   - [data-stagger]    → children reveal one after another
+   - .page             → route-level enter choreography
+   Everything collapses to instant under prefers-reduced-motion.
+   ========================================================================== */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes drop {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -4px, 0) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  80%,
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+@keyframes draw {
+  from {
+    stroke-dashoffset: var(--len, 400);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes grow-y {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -6px, 0);
+  }
+}
+@keyframes typing {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+  30% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+
+/* -------- Scroll reveal ------------------------------------------------ */
+.motion .reveal {
+  opacity: 0;
+  transform: translate3d(0, 14px, 0);
+  transition:
+    opacity var(--t-reveal) var(--ease-out),
+    transform var(--t-reveal) var(--ease-out);
+  transition-delay: calc(var(--reveal-i, 0) * 60ms);
+  will-change: opacity, transform;
+}
+.motion .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
+}
+.motion [data-stagger] > * {
+  opacity: 0;
+  transform: translate3d(0, 10px, 0);
+  transition:
+    opacity 560ms var(--ease-out),
+    transform 560ms var(--ease-out);
+}
+.motion [data-stagger].is-visible > * {
+  opacity: 1;
+  transform: none;
+}
+[data-stagger].is-visible > :nth-child(1) { transition-delay: 0ms; }
+[data-stagger].is-visible > :nth-child(2) { transition-delay: 45ms; }
+[data-stagger].is-visible > :nth-child(3) { transition-delay: 90ms; }
+[data-stagger].is-visible > :nth-child(4) { transition-delay: 135ms; }
+[data-stagger].is-visible > :nth-child(5) { transition-delay: 180ms; }
+[data-stagger].is-visible > :nth-child(6) { transition-delay: 225ms; }
+[data-stagger].is-visible > :nth-child(7) { transition-delay: 270ms; }
+[data-stagger].is-visible > :nth-child(8) { transition-delay: 315ms; }
+[data-stagger].is-visible > :nth-child(n + 9) { transition-delay: 360ms; }
+
+/* -------- Page enter --------------------------------------------------- */
+.page > * {
+  animation: rise 560ms var(--ease-out) both;
+}
+.page > :nth-child(1) { animation-delay: 0ms; }
+.page > :nth-child(2) { animation-delay: 60ms; }
+.page > :nth-child(3) { animation-delay: 120ms; }
+.page > :nth-child(4) { animation-delay: 180ms; }
+.page > :nth-child(n + 5) { animation-delay: 240ms; }
+
+/* Skeleton placeholder */
+.skeleton {
+  border-radius: var(--r-sm);
+  background: linear-gradient(90deg, var(--surface-2) 0%, var(--surface-press) 50%, var(--surface-2) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal,
+  [data-stagger] > * {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

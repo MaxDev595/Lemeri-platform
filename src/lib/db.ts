@@ -37,9 +37,18 @@ const createHttpClient = () =>
 // resolve a fresh client for every top-level database operation in production.
 // The returned delegate/method retains its client, so transactions and model
 // queries execute on one adapter for the duration of that operation.
+// Neon's serverless driver speaks WebSocket/HTTP and cannot reach a plain
+// PostgreSQL server (docker compose, a local install). In development against
+// such a database, use the regular TCP driver instead. The branch is removed
+// from production bundles because NODE_ENV is inlined at build time.
+const isNeonDatabase = /\.neon\.(tech|build)\b/.test(connectionString);
+const createLocalClient = async () => {
+  const { PrismaPg } = await import("@prisma/adapter-pg");
+  return new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
+};
 const developmentClient =
   process.env.NODE_ENV !== "production"
-    ? (globalForPrisma.prisma ??= createTransactionClient())
+    ? (globalForPrisma.prisma ??= isNeonDatabase ? createTransactionClient() : await createLocalClient())
     : undefined;
 
 export const db: PrismaClient =

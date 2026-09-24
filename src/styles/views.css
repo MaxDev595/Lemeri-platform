@@ -1,0 +1,1731 @@
+/* ==========================================================================
+   Feature views: data sections, tables, conversations, channels, analytics,
+   team, billing, settings, notifications, automations, testing.
+   ========================================================================== */
+
+.stackedPage {
+  display: grid;
+  gap: 16px;
+}
+
+/* -------- Data section ------------------------------------------------- */
+.dataSection {
+  overflow: hidden;
+}
+.dataToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.dataToolbar > div:first-child {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.dataToolbar > b,
+.dataToolbar > div > b {
+  font-size: var(--fs-15);
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+.dataToolbar small {
+  color: var(--text-3);
+  font-size: var(--fs-13);
+}
+.toolbarButtons,
+.knowledgeKinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.knowledgeKinds {
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  gap: 2px;
+}
+.knowledgeKinds button,
+.knowledgeKinds button.primary {
+  --btn-bg: transparent;
+  --btn-bd: transparent;
+  --btn-shadow: none;
+  --btn-fg: var(--text-3);
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 7px;
+  background-image: none;
+}
+.knowledgeKinds button:hover:not(:disabled) {
+  --btn-bg: transparent;
+  --btn-bd: transparent;
+  --btn-fg: var(--text);
+}
+.knowledgeKinds button.primary,
+.knowledgeKinds button.primary:hover:not(:disabled) {
+  --btn-bg: var(--surface);
+  --btn-fg: var(--text);
+  --btn-shadow: var(--e-1), 0 0 0 1px var(--line-soft);
+}
+
+/* Inline form */
+.inlineForm {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end;
+  gap: 14px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--surface-2);
+  animation: rise 360ms var(--ease-out);
+}
+.inlineForm .wide,
+.inlineForm > button {
+  grid-column: 1 / -1;
+}
+.inlineForm > button {
+  justify-self: start;
+}
+.inlineForm.stacked {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+}
+.inlineForm.stacked > button {
+  justify-self: start;
+}
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.fileDrop {
+  position: relative;
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  min-height: 140px;
+  padding: 24px;
+  border: 1.5px dashed var(--line-strong);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  color: var(--text-3);
+  text-align: center;
+  transition:
+    border-color var(--t-fast) ease,
+    background-color var(--t-fast) ease;
+}
+.fileDrop::before {
+  content: "";
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-md);
+  background: var(--accent-softer)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236254e8' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 16V4m0 0-4.5 4.5M12 4l4.5 4.5M4 15v2.5A2.5 2.5 0 0 0 6.5 20h11a2.5 2.5 0 0 0 2.5-2.5V15'/%3E%3C/svg%3E")
+    center / 20px no-repeat;
+}
+.fileDrop:hover {
+  border-color: var(--accent);
+  background: var(--accent-softer);
+}
+.fileDrop input {
+  font-size: var(--fs-13);
+}
+.fieldHint {
+  margin-top: -6px;
+  color: var(--text-4);
+  font-size: var(--fs-12);
+}
+
+/* -------- Cards grid (employees) -------------------------------------- */
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+  padding: 16px;
+}
+.resourceCard {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  transition:
+    border-color var(--t-base) ease,
+    box-shadow var(--t-base) var(--ease-out),
+    transform var(--t-base) var(--ease-out);
+}
+.resourceCard:hover {
+  border-color: var(--line-strong);
+  box-shadow: var(--e-2);
+  transform: translateY(-2px);
+}
+.resourceIcon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: linear-gradient(160deg, var(--surface), var(--accent-softer));
+}
+.resourceIcon.live::after {
+  content: "";
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 11px;
+  height: 11px;
+  border: 2.5px solid var(--surface);
+  border-radius: 50%;
+  background: var(--ok);
+}
+.resourceTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: -10px;
+}
+.resourceTitle h3 {
+  font-size: var(--fs-16);
+}
+.resourceCard > p {
+  color: var(--text-3);
+  font-size: var(--fs-13);
+}
+.resourceCard dl {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-soft);
+}
+.resourceCard dt {
+  color: var(--text-4);
+  font-size: var(--fs-12);
+  font-weight: 500;
+}
+.resourceCard dd {
+  margin: 2px 0 0;
+  color: var(--text-2);
+  font-size: var(--fs-13);
+  line-height: 1.5;
+}
+
+/* -------- Tables ------------------------------------------------------- */
+.tableWrap {
+  overflow-x: auto;
+}
+.tableWrap table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--fs-14);
+}
+.tableWrap th {
+  position: sticky;
+  top: 0;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--surface-2);
+  color: var(--text-3);
+  font-size: var(--fs-12);
+  font-weight: 500;
+  text-align: left;
+  white-space: nowrap;
+}
+.tableWrap td {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--text-2);
+  vertical-align: middle;
+  font-variant-numeric: tabular-nums;
+}
+.tableWrap tbody tr {
+  transition: background-color var(--t-fast) ease;
+}
+.tableWrap tbody tr:hover {
+  background: var(--surface-hover);
+}
+.tableWrap tbody tr:last-child td {
+  border-bottom: 0;
+}
+.tableWrap td b {
+  color: var(--text);
+  font-weight: 550;
+}
+.tableTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  font-weight: 550;
+}
+.tableTitle svg {
+  padding: 5px;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r-sm);
+  background: var(--accent-softer);
+  color: var(--accent);
+}
+
+/* -------- Empty state ------------------------------------------------- */
+.emptyState {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 40px 24px 44px;
+  text-align: center;
+}
+.emptyState h3 {
+  margin-top: 10px;
+  font-size: var(--fs-16);
+}
+.emptyState p {
+  max-width: 42ch;
+  color: var(--text-3);
+  font-size: var(--fs-14);
+}
+.emptyArt {
+  position: relative;
+  width: 160px;
+  height: 112px;
+  color: var(--accent);
+}
+.emptyArtBg {
+  width: 100%;
+  height: 100%;
+}
+.ea-grid path {
+  stroke: var(--line);
+  stroke-dasharray: 2 3;
+}
+.ea-card {
+  fill: var(--surface);
+  stroke: var(--line);
+}
+.ea-card-3 {
+  opacity: 0.5;
+}
+.ea-card-1 rect:first-child {
+  fill: var(--surface);
+  stroke: var(--line-strong);
+  filter: drop-shadow(0 6px 14px rgba(23, 25, 31, 0.08));
+}
+.ea-line {
+  fill: var(--accent-soft);
+}
+.ea-line.soft {
+  fill: var(--surface-press);
+}
+.ea-card-1 {
+  animation: float 5s var(--ease-in-out) infinite;
+}
+.ea-spark {
+  fill: var(--accent);
+  opacity: 0.5;
+  animation: float 3.4s var(--ease-in-out) infinite;
+}
+.ea-spark.two {
+  opacity: 0.3;
+  animation-delay: -1.2s;
+}
+.emptyArtTile {
+  position: absolute;
+  right: 18px;
+  bottom: 8px;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: #fff;
+  box-shadow: var(--e-accent), var(--highlight);
+  animation: float 5s var(--ease-in-out) -2.5s infinite;
+}
+
+/* -------- Conversations ----------------------------------------------- */
+.conversationWorkspace {
+  display: grid;
+  grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+  min-height: 600px;
+  height: calc(100vh - var(--topbar-h) - 200px);
+  max-height: 820px;
+  overflow: hidden;
+}
+.conversationWorkspace > aside {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px;
+  overflow-y: auto;
+  border-right: 1px solid var(--line-soft);
+  background: var(--surface-2);
+}
+.conversationWorkspace > aside > button {
+  position: relative;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  background: transparent;
+  text-align: left;
+  transition:
+    background-color var(--t-fast) ease,
+    border-color var(--t-fast) ease,
+    box-shadow var(--t-base) ease;
+}
+.conversationWorkspace > aside > button:hover {
+  background: var(--surface-hover);
+}
+.conversationWorkspace > aside > button.selected {
+  border-color: var(--line);
+  background: var(--surface);
+  box-shadow: var(--e-1);
+}
+.conversationWorkspace > aside > button > span:nth-child(2) {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+.conversationWorkspace > aside b {
+  overflow: hidden;
+  font-size: var(--fs-14);
+  font-weight: 550;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.conversationWorkspace > aside small {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--text-3);
+  font-size: var(--fs-13);
+  line-height: 1.4;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+.conversationSide {
+  display: grid;
+  align-self: start;
+  justify-items: end;
+  gap: 4px;
+}
+.conversationSide time {
+  color: var(--text-4);
+  font-size: var(--fs-12);
+}
+.conversationSide em {
+  color: var(--text-4);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 500;
+}
+.handoffDot {
+  position: absolute;
+  top: 10px;
+  left: 36px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--surface-2);
+  border-radius: 50%;
+  background: var(--warn);
+}
+.chatPane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  animation: fade 260ms ease;
+}
+.chatPane > header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.chatPane > header > div:nth-child(2) {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.3;
+}
+.chatPane > header b {
+  font-size: var(--fs-15);
+}
+.chatPane > header small {
+  color: var(--text-3);
+  font-size: var(--fs-12);
+}
+.chatPane > header .assignmentSelect {
+  width: 200px;
+}
+.messageStream {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+  padding: 24px;
+  overflow-y: auto;
+  background:
+    radial-gradient(circle at 1px 1px, var(--line-soft) 1px, transparent 0) 0 0 / 18px 18px,
+    var(--surface);
+}
+.bubble {
+  display: grid;
+  gap: 4px;
+  max-width: min(72%, 560px);
+  padding: 10px 14px 8px;
+  border-radius: 16px;
+  font-size: var(--fs-14);
+  line-height: 1.5;
+  animation: pop 360ms var(--ease-out) both;
+}
+.bubble:nth-child(2) { animation-delay: 50ms; }
+.bubble:nth-child(3) { animation-delay: 100ms; }
+.bubble:nth-child(n + 4) { animation-delay: 150ms; }
+.bubble p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+.bubble time {
+  justify-self: end;
+  font-size: 11px;
+  opacity: 0.6;
+}
+.bubble.inbound {
+  align-self: flex-start;
+  border: 1px solid var(--line);
+  border-bottom-left-radius: 6px;
+  background: var(--surface);
+  box-shadow: var(--e-1);
+}
+.bubble.outbound {
+  align-self: flex-end;
+  border-bottom-right-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+  box-shadow: var(--e-accent);
+}
+.bubbleAuthor {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.82;
+}
+.bubble.outbound .lemiriGlyph path,
+.bubble.outbound .lemiriGlyph circle {
+  fill: #fff;
+}
+.bubble.outbound .lemiriGlyph .lg-foot {
+  opacity: 0.6;
+}
+.handoffBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0 16px 12px;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--warn) 30%, transparent);
+  border-radius: var(--r-lg);
+  background: var(--warn-soft);
+  animation: rise 400ms var(--ease-out);
+}
+.handoffBanner > span {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--warn);
+  color: #fff;
+}
+.handoffBanner b {
+  font-size: var(--fs-14);
+}
+.handoffBanner p {
+  margin-top: 2px;
+  color: var(--text-2);
+  font-size: var(--fs-13);
+}
+.humanReply,
+.playground > form {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px 16px;
+  border-top: 1px solid var(--line-soft);
+}
+.humanReply input,
+.playground > form input {
+  flex: 1;
+  min-height: 42px;
+}
+
+/* -------- Appointments ------------------------------------------------ */
+.cardsGrid.appointments {
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+}
+.appointmentCard {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  transition:
+    border-color var(--t-base) ease,
+    box-shadow var(--t-base) var(--ease-out),
+    transform var(--t-base) var(--ease-out);
+}
+.appointmentCard:hover {
+  border-color: var(--line-strong);
+  box-shadow: var(--e-2);
+  transform: translateY(-2px);
+}
+.dateBox {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 58px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  line-height: 1;
+}
+.dateBox small {
+  order: -1;
+  width: 100%;
+  padding: 4px 0;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.dateBox b {
+  padding: 4px 0 6px;
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+}
+.appointmentCard h3 {
+  font-size: var(--fs-15);
+}
+.appointmentCard p {
+  margin-top: 2px;
+  color: var(--text-2);
+  font-size: var(--fs-13);
+}
+.appointmentCard small {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-4);
+  font-size: var(--fs-12);
+}
+.appointmentCard small::first-letter {
+  text-transform: uppercase;
+}
+
+/* -------- Channels + integrations ------------------------------------ */
+.connectorGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 12px;
+  padding: 16px;
+}
+.connectorCard {
+  position: relative;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: 4px 14px;
+  align-items: start;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  transition:
+    border-color var(--t-base) ease,
+    box-shadow var(--t-base) var(--ease-out);
+}
+.connectorCard:hover {
+  border-color: var(--line-strong);
+  box-shadow: var(--e-2);
+}
+.connectorLogo {
+  --tone: var(--accent);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--tone) 11%, var(--surface));
+  color: var(--tone);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tone) 16%, transparent);
+  transition: transform var(--t-base) var(--ease-spring);
+}
+.connectorCard:hover .connectorLogo {
+  transform: rotate(-6deg) scale(1.05);
+}
+.glyph-telegram {
+  --tone: #2f86d6;
+}
+.glyph-whatsapp {
+  --tone: #1f9d6b;
+}
+.glyph-email {
+  --tone: #b7791f;
+}
+.connectorCard > div:nth-child(2) {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding-top: 2px;
+}
+.connectorCard h3 {
+  font-size: var(--fs-15);
+}
+.connectorCard p {
+  color: var(--text-3);
+  font-size: var(--fs-13);
+}
+.connectorHint {
+  overflow: hidden;
+  margin-top: 6px;
+  padding: 6px 8px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.connectorError {
+  margin: 0;
+  color: var(--bad);
+  font-size: var(--fs-12);
+}
+p.connectorError {
+  padding: 12px 20px;
+  background: var(--bad-soft);
+}
+.disconnect,
+.integrationActions {
+  grid-column: 2 / -1;
+  justify-self: start;
+  margin-top: 8px;
+}
+.disconnect {
+  --btn-fg: var(--text-3);
+  min-height: 30px;
+}
+.disconnect:hover:not(:disabled) {
+  --btn-fg: var(--bad);
+}
+.integrationActions {
+  display: flex;
+  gap: 6px;
+}
+.integrationActions button {
+  min-height: 30px;
+}
+
+/* -------- Actions (permissions) --------------------------------------- */
+.permissionList,
+.automationList {
+  display: grid;
+}
+.permissionList > div,
+.automationList > div {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--line-soft);
+  transition: background-color var(--t-fast) ease;
+}
+.automationList > div {
+  grid-template-columns: 36px minmax(0, 1fr) auto auto;
+}
+.permissionList > div:hover,
+.automationList > div:hover {
+  background: var(--surface-hover);
+}
+.permissionIcon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-md);
+  background: var(--accent-softer);
+  color: var(--accent);
+}
+.permissionList b,
+.automationList b {
+  font-size: var(--fs-14);
+  font-weight: 550;
+}
+.permissionList p,
+.automationList p {
+  margin-top: 2px;
+  color: var(--text-3);
+  font-size: var(--fs-13);
+}
+.automationList p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.automationList p svg {
+  color: var(--text-4);
+}
+.triggerChip {
+  padding: 1px 8px;
+  border-radius: var(--r-full);
+  background: var(--accent-softer);
+  color: var(--accent-text);
+  font-size: var(--fs-12);
+  font-weight: 550;
+}
+.removeAutomation {
+  --btn-fg: var(--text-3);
+  min-height: 30px;
+}
+.removeAutomation:hover:not(:disabled) {
+  --btn-fg: var(--bad);
+}
+.securityNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 16px 20px 20px;
+  padding: 14px 16px;
+  border-radius: var(--r-lg);
+  background: var(--surface-2);
+  color: var(--text-3);
+}
+.securityNote svg {
+  margin-top: 2px;
+  color: var(--accent);
+}
+.securityNote p {
+  font-size: var(--fs-13);
+  line-height: 1.55;
+}
+.securityNote b {
+  color: var(--text);
+}
+
+/* -------- Knowledge health ------------------------------------------- */
+.healthPanel {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1.3fr);
+  gap: 28px;
+  align-items: center;
+  padding: 20px 24px;
+}
+.healthScore {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding-right: 28px;
+  border-right: 1px solid var(--line-soft);
+}
+.healthScore .ringLabel {
+  font-size: var(--fs-20);
+}
+.healthScore > span {
+  color: var(--text-3);
+  font-size: var(--fs-12);
+  font-weight: 500;
+}
+.healthPanel > div:nth-child(2) b,
+.healthGaps b {
+  font-size: var(--fs-14);
+  font-weight: 600;
+}
+.healthPanel > div:nth-child(2) p {
+  margin-top: 4px;
+  color: var(--text-3);
+  font-size: var(--fs-13);
+}
+.healthGaps {
+  display: grid;
+  gap: 6px;
+}
+.healthGaps p {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: var(--fs-13);
+}
+.healthGaps span {
+  flex: none;
+  padding: 1px 7px;
+  border-radius: var(--r-full);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-size: var(--fs-12);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* -------- Analytics --------------------------------------------------- */
+.analyticsLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 12px;
+}
+.analyticsCards {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.analyticsCards article,
+.usageGrid article {
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  background: var(--surface);
+  box-shadow: var(--e-1);
+}
+.analyticsCards span,
+.usageGrid span {
+  color: var(--text-3);
+  font-size: var(--fs-13);
+  font-weight: 500;
+}
+.analyticsCards strong,
+.usageGrid strong {
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.chartCard,
+.activityCard,
+.insightsPanel {
+  padding: 20px;
+}
+.barChart {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+  height: 260px;
+  padding: 0 8px;
+  background: repeating-linear-gradient(
+      to top,
+      var(--line-soft) 0 1px,
+      transparent 1px 25%
+    )
+    0 0 / 100% calc(100% - 30px) no-repeat;
+}
+.barChart > div {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  justify-items: center;
+  align-items: end;
+  gap: 8px;
+  min-width: 0;
+}
+.barChart > div > b {
+  align-self: end;
+  font-size: var(--fs-14);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.barChart > div > span {
+  width: min(56px, 100%);
+  border-radius: 10px 10px 4px 4px;
+  background: linear-gradient(180deg, var(--indigo-500), var(--indigo-600));
+  box-shadow: var(--highlight);
+  transform-origin: bottom;
+  transform: scaleY(0);
+  transition: transform 900ms var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 90ms + 150ms);
+}
+.barChart.is-visible > div > span,
+:root:not(.motion) .barChart > div > span {
+  transform: none;
+}
+.barChart > div:last-child > span {
+  background: linear-gradient(180deg, var(--indigo-300), var(--indigo-400));
+}
+.barChart > div > small {
+  overflow: hidden;
+  width: 100%;
+  color: var(--text-3);
+  font-size: var(--fs-12);
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.auditList {
+  display: grid;
+  gap: 2px;
+  max-height: 290px;
+  margin: 0 -8px;
+  overflow-y: auto;
+}
+.auditList > div {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px;
+  border-radius: var(--r-md);
+}
+.auditList > div:hover {
+  background: var(--surface-hover);
+}
+.auditList > div > span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent-softer);
+  color: var(--accent);
+}
+.auditList > div > div {
+  display: grid;
+  min-width: 0;
+}
+.auditList b {
+  font-size: var(--fs-13);
+  font-weight: 550;
+}
+.auditList b::first-letter {
+  text-transform: uppercase;
+}
+.auditList small {
+  color: var(--text-4);
+  font-size: var(--fs-12);
+}
+.auditList time {
+  color: var(--text-4);
+  font-size: var(--fs-12);
+  white-space: nowrap;
+}
+.insightGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+.insightGrid article {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: linear-gradient(180deg, var(--surface), var(--surface-2));
+}
+.insightGrid b {
+  font-size: var(--fs-14);
+  font-weight: 600;
+}
+.insightGrid p {
+  color: var(--text-3);
+  font-size: var(--fs-13);
+  line-height: 1.55;
+}
+
+/* -------- Team -------------------------------------------------------- */
+.memberList {
+  display: grid;
+}
+.memberList > div {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) minmax(160px, 200px) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--line-soft);
+  transition: background-color var(--t-fast) ease;
+}
+.memberList > div:hover {
+  background: var(--surface-hover);
+}
+.memberList > div > div {
+  display: grid;
+  min-width: 0;
+}
+.memberList b {
+  font-size: var(--fs-14);
+  font-weight: 550;
+}
+.memberList small {
+  overflow: hidden;
+  color: var(--text-3);
+  font-size: var(--fs-13);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.memberList > div > .status {
+  grid-column: 3 / -1;
+  justify-self: start;
+}
+.memberList > div > button {
+  --btn-fg: var(--text-3);
+  min-height: 32px;
+}
+.memberList > div > button:hover:not(:disabled) {
+  --btn-fg: var(--bad);
+}
+.pendingInvites {
+  display: grid;
+  gap: 6px;
+  padding: 16px 20px 20px;
+}
+.pendingInvites h3 {
+  margin-bottom: 4px;
+  color: var(--text-3);
+  font-size: var(--fs-13);
+  font-weight: 550;
+}
+.pendingInvites p {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-md);
+  font-size: var(--fs-14);
+}
+.pendingInvites span {
+  color: var(--text-4);
+  font-size: var(--fs-12);
+}
+.devLink {
+  display: grid;
+  gap: 6px;
+  margin: 16px 20px 0;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: var(--accent-softer);
+  font-size: var(--fs-13);
+}
+.devLink code {
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+
+/* -------- Billing ----------------------------------------------------- */
+.billingLayout {
+  display: grid;
+  gap: 12px;
+}
+.currentPlan {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 28px;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 140% at 100% 0%, var(--accent-soft), transparent 55%),
+    var(--surface);
+}
+.currentPlan h2 {
+  margin-top: 6px;
+  font-size: var(--fs-32);
+  font-weight: 620;
+  letter-spacing: -0.04em;
+}
+.currentPlan p {
+  margin-top: 8px;
+}
+.currentPlan p::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--ok);
+  vertical-align: 1px;
+}
+.currentPlan p {
+  color: var(--text-3);
+  font-size: var(--fs-13);
+}
+.usageCircle {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  background:
+    radial-gradient(closest-side, var(--surface) 78%, transparent 79% 100%),
+    conic-gradient(var(--accent) 0 72%, var(--accent-soft) 72% 100%);
+  animation: pop 700ms var(--ease-out) 200ms both;
+}
+.usageCircle strong {
+  font-size: var(--fs-28);
+  font-weight: 650;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+.usageCircle small {
+  margin-top: 4px;
+  color: var(--text-3);
+  font-size: var(--fs-12);
+}
+.usageGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.plansGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+.plansGrid article {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 18px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  background: var(--surface);
+  transition:
+    border-color var(--t-base) ease,
+    box-shadow var(--t-base) var(--ease-out),
+    transform var(--t-base) var(--ease-out);
+}
+.plansGrid article:hover {
+  border-color: var(--line-strong);
+  box-shadow: var(--e-2);
+  transform: translateY(-3px);
+}
+.plansGrid h3 {
+  font-size: var(--fs-15);
+}
+.plansGrid strong {
+  font-size: var(--fs-20);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+}
+.plansGrid p {
+  flex: 1;
+  color: var(--text-3);
+  font-size: var(--fs-13);
+  line-height: 1.55;
+}
+.plansGrid article > button,
+.plansGrid .planButton {
+  width: 100%;
+  margin-top: 6px;
+}
+.plansGrid .recommended {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: linear-gradient(180deg, var(--accent-softer), var(--surface) 55%);
+  box-shadow: 0 0 0 4px var(--accent-softer), var(--e-2);
+}
+.recommended > span {
+  position: absolute;
+  top: -11px;
+  left: 16px;
+  padding: 3px 10px;
+  border-radius: var(--r-full);
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  box-shadow: var(--e-accent);
+}
+
+/* -------- Settings ---------------------------------------------------- */
+.settingsLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr);
+  align-items: start;
+  gap: 12px;
+}
+.settingsCard {
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+}
+.settingsCard h2 {
+  font-size: var(--fs-18);
+}
+.settingsCard > p {
+  color: var(--text-3);
+  font-size: var(--fs-14);
+}
+.settingsCard > button.primary {
+  justify-self: start;
+}
+.logoUploader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.logoUploader img,
+.logoUploader > span {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--r-lg);
+  object-fit: contain;
+}
+.logoUploader > span {
+  display: grid;
+  place-items: center;
+  border: 1.5px dashed var(--line-strong);
+  color: var(--text-4);
+}
+.logoUploader img {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+}
+.fileButton {
+  display: inline-flex;
+  cursor: pointer;
+}
+.fileButton input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.weekdayGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+.weekdayGrid label {
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+.weekdayGrid input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.weekdayGrid span {
+  display: grid;
+  place-items: center;
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--text-3);
+  font-size: var(--fs-13);
+  font-weight: 550;
+  transition:
+    background-color var(--t-fast) ease,
+    border-color var(--t-fast) ease,
+    color var(--t-fast) ease,
+    transform var(--t-fast) var(--ease-out);
+}
+.weekdayGrid label:hover span {
+  border-color: var(--line-strong);
+}
+.weekdayGrid label:active span {
+  transform: scale(0.95);
+}
+.weekdayGrid input:checked + span {
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  background: var(--accent-softer);
+  color: var(--accent-text);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+.weekdayGrid input:focus-visible + span {
+  box-shadow: 0 0 0 4px var(--accent-ring);
+}
+.checkRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  cursor: pointer;
+  transition:
+    border-color var(--t-fast) ease,
+    background-color var(--t-fast) ease;
+}
+.checkRow:hover {
+  border-color: var(--line-strong);
+  background: var(--surface-hover);
+}
+.checkRow:has(input:checked) {
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  background: var(--accent-softer);
+}
+.checkRow input {
+  margin-top: 1px;
+}
+.checkRow span {
+  display: grid;
+  gap: 2px;
+}
+.checkRow b {
+  color: var(--text);
+  font-size: var(--fs-14);
+  font-weight: 550;
+}
+.checkRow small {
+  color: var(--text-3);
+  font-size: var(--fs-13);
+  font-weight: 400;
+}
+.exportButton {
+  justify-self: start;
+}
+.dangerZone {
+  display: grid;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--bad) 28%, transparent);
+  border-radius: var(--r-lg);
+  background: var(--bad-soft);
+}
+.dangerZone b {
+  color: color-mix(in srgb, var(--bad) 85%, var(--text));
+  font-size: var(--fs-14);
+}
+.dangerZone p {
+  color: var(--text-2);
+  font-size: var(--fs-13);
+}
+.dangerZone small {
+  color: var(--text-3);
+  font-size: var(--fs-12);
+}
+
+/* -------- Notifications ---------------------------------------------- */
+.notificationList {
+  display: grid;
+}
+.notificationList > div {
+  position: relative;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: start;
+  padding: 14px 20px 14px 24px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.notificationList > div:not(.read)::before {
+  content: "";
+  position: absolute;
+  top: 26px;
+  left: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.notificationList > div > span {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent-softer);
+  color: var(--accent);
+}
+.notificationList > div.read > span {
+  background: var(--surface-2);
+  color: var(--text-4);
+}
+.notificationList > div > div {
+  display: grid;
+  gap: 2px;
+}
+.notificationList b {
+  font-size: var(--fs-14);
+  font-weight: 550;
+}
+.notificationList > div.read b {
+  color: var(--text-2);
+  font-weight: 500;
+}
+.notificationList p {
+  color: var(--text-3);
+  font-size: var(--fs-13);
+}
+.notificationList time {
+  color: var(--text-4);
+  font-size: var(--fs-12);
+  white-space: nowrap;
+}
+
+/* -------- Testing ----------------------------------------------------- */
+.testLab {
+  display: grid;
+  grid-template-columns: minmax(340px, 0.85fr) minmax(0, 1.15fr);
+  align-items: start;
+  gap: 12px;
+}
+.playground {
+  position: sticky;
+  top: calc(var(--topbar-h) + 16px);
+  display: flex;
+  flex-direction: column;
+  height: min(680px, calc(100vh - var(--topbar-h) - 48px));
+  overflow: hidden;
+}
+.playground .messageStream {
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+}
+.playground .messageStream > .emptyState {
+  margin: auto;
+}
+.playground > form button {
+  width: 42px;
+  min-height: 42px;
+  padding: 0;
+}
+.testCaseList {
+  display: grid;
+}
+.testCaseList article {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.testCaseList article > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.testCaseList b {
+  font-size: var(--fs-14);
+  font-weight: 550;
+}
+.testCaseList p {
+  color: var(--text-2);
+  font-size: var(--fs-13);
+}
+.testCaseList small {
+  overflow: hidden;
+  padding: 6px 8px;
+  border-left: 2px solid var(--accent-soft);
+  color: var(--text-3);
+  font-size: var(--fs-12);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.testCaseList button {
+  min-height: 32px;
+}
+
+.simpleMessage {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  min-height: 100vh;
+  padding: 24px;
+  text-align: center;
+}
+.simpleMessage h1 {
+  font-size: var(--fs-24);
+}
+.simpleMessage p {
+  color: var(--text-3);
+}
+
+/* -------- Responsive -------------------------------------------------- */
+@media (max-width: 1280px) {
+  .plansGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 1100px) {
+  .analyticsLayout,
+  .settingsLayout,
+  .testLab {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .playground {
+    position: relative;
+    top: 0;
+    height: 520px;
+  }
+  .healthPanel {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .healthGaps {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 860px) {
+  .analyticsCards,
+  .usageGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .plansGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .conversationWorkspace {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+    max-height: none;
+  }
+  .conversationWorkspace > aside {
+    flex-direction: row;
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .conversationWorkspace > aside > button {
+    min-width: 240px;
+  }
+  .chatPane {
+    min-height: 480px;
+  }
+  .chatPane > header {
+    flex-wrap: wrap;
+  }
+  .chatPane > header .assignmentSelect {
+    width: 100%;
+    order: 3;
+  }
+}
+@media (max-width: 720px) {
+  .dataToolbar {
+    padding: 14px 16px;
+  }
+  .inlineForm,
+  .formRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .inlineForm .wide {
+    grid-column: auto;
+  }
+  .inlineForm {
+    padding: 16px;
+  }
+  .cardsGrid,
+  .connectorGrid {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 12px;
+  }
+  .cardsGrid.appointments {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .permissionList > div,
+  .automationList > div,
+  .notificationList > div,
+  .testCaseList article {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .automationList > div {
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+  }
+  .removeAutomation {
+    grid-column: 2 / -1;
+    justify-self: start;
+  }
+  .memberList > div {
+    grid-template-columns: 36px minmax(0, 1fr);
+    padding: 12px 16px;
+  }
+  .memberList > div > .appSelect,
+  .memberList > div > button,
+  .memberList > div > .status {
+    grid-column: 2;
+    justify-self: stretch;
+  }
+  .memberList > div > .status {
+    justify-self: start;
+  }
+  .testCaseList article {
+    grid-template-columns: 1fr auto;
+  }
+  .testCaseList article > div {
+    grid-column: 1 / -1;
+  }
+  .healthPanel {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+    padding: 18px;
+  }
+  .healthScore {
+    grid-template-columns: auto 1fr;
+    justify-items: start;
+    align-items: center;
+    padding: 0 0 18px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .currentPlan {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+  }
+  .plansGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .barChart {
+    gap: 10px;
+    height: 220px;
+  }
+  .settingsCard {
+    padding: 18px;
+  }
+  .weekdayGrid {
+    gap: 4px;
+  }
+  .messageStream {
+    padding: 16px;
+  }
+  .bubble {
+    max-width: 88%;
+  }
+  .tableWrap th,
+  .tableWrap td {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
