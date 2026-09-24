@@ -10,6 +10,7 @@ import "@/styles/views.css";
 import "@/styles/auth.css";
 import "@/styles/onboarding.css";
 import "@/styles/widget.css";
+import "@/styles/landing.css";
 
 export const metadata: Metadata = { title: "Lemiri AI — цифровые сотрудники для бизнеса", description: "Единая платформа для AI-сотрудников, диалогов, лидов, записей и базы знаний." };
 export const viewport: Viewport = { themeColor: [{ media: "(prefers-color-scheme: light)", color: "#fbfbfd" }, { media: "(prefers-color-scheme: dark)", color: "#0e0f13" }] };
