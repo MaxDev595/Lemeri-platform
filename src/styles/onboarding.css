@@ -17,7 +17,24 @@
   height: 72px;
   margin: 0 auto;
 }
-.onboardingPage > header > span {
+.onboardingWorkspaces {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.onboardingWorkspaces a {
+  color: var(--accent);
+  font-size: var(--fs-13);
+  font-weight: 550;
+  text-decoration: none;
+}
+.onboardingWorkspaces a:hover {
+  text-decoration: underline;
+}
+.onboardingPage > header > span,
+.onboardingWorkspaces > span {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -30,7 +47,8 @@
   font-weight: 550;
   box-shadow: var(--e-1);
 }
-.onboardingPage > header > span::before {
+.onboardingPage > header > span::before,
+.onboardingWorkspaces > span::before {
   content: "";
   width: 7px;
   height: 7px;

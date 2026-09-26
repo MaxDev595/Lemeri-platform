@@ -25,6 +25,12 @@ export async function createRegisteredUser(input:{name:string;email:string;passw
   return{id:String((rows[0] as {id:string}).id)};
 }
 
+export async function createDirectWorkspace(input:{userId:string;name:string;slug:string;locale:"ru"|"en"}){
+  const workspaceId=crypto.randomUUID();
+  await client().query(`WITH created_workspace AS (INSERT INTO "Workspace" ("id","name","slug") VALUES ($1,$2,$3) RETURNING "id"), created_settings AS (INSERT INTO "WorkspaceSettings" ("id","workspaceId","locale","updatedAt") SELECT $4,"id",$5,CURRENT_TIMESTAMP FROM created_workspace) INSERT INTO "WorkspaceMember" ("id","workspaceId","userId","role") SELECT $6,"id",$7,'OWNER'::"MemberRole" FROM created_workspace`,[workspaceId,input.name,input.slug,crypto.randomUUID(),input.locale,crypto.randomUUID(),input.userId]);
+  return workspaceId;
+}
+
 export async function createDirectSession(input:{userId:string;tokenHash:string;expiresAt:Date;ipHash:string|null;userAgent:string|null}){
   await client().query(`DELETE FROM "Session" WHERE "userId"=$1 AND "expiresAt"<CURRENT_TIMESTAMP`,[input.userId]);
   await client().query(`INSERT INTO "Session" ("id","tokenHash","userId","expiresAt","ipHash","userAgent") VALUES ($1,$2,$3,$4,$5,$6)`,[crypto.randomUUID(),input.tokenHash,input.userId,input.expiresAt,input.ipHash,input.userAgent]);
@@ -117,7 +123,7 @@ export async function createDirectOnboardingEmployee(input:{
       SELECT $16,$2,employee."id",'WEBSITE','CONNECTED','embedded-widget',$17,CURRENT_TIMESTAMP FROM employee WHERE $16::text IS NOT NULL
     ), crm_integration AS (
       INSERT INTO "Integration" ("id","workspaceId","provider","status","credentialsEncrypted","updatedAt")
-      SELECT $18,$2,'CRM_WEBHOOK','CONNECTED',$19,CURRENT_TIMESTAMP WHERE $18::text IS NOT NULL
+      SELECT $18,$2,'WEBHOOK_CRM','PENDING',$19,CURRENT_TIMESTAMP WHERE $18::text IS NOT NULL
     ), audit AS (
       INSERT INTO "AuditLog" ("id","workspaceId","userId","actorType","action","entityType","entityId","metadata")
       SELECT gen_random_uuid()::text,$2,$20,'USER',$21,'AIEmployee',employee."id",$22::jsonb FROM employee
@@ -126,17 +132,24 @@ export async function createDirectOnboardingEmployee(input:{
   const row=rows[0] as {id:string;sourceId:string|null};return{employeeId:String(row.id),sourceId:row.sourceId?String(row.sourceId):undefined};
 }
 
+// Mirrors ensureActionDefinitions + the permission rows the Prisma onboarding path
+// creates, so employees published from the Worker can actually run their actions.
+export async function createDirectActionPermissions(input:{employeeId:string;definitions:Array<{key:string;name:string;description:string}>;enabledKeys:string[]}){
+  await client().query(`INSERT INTO "ActionDefinition" ("id","key","name","description","inputSchema") SELECT gen_random_uuid()::text,d.key,d.name,d.description,'{"type":"object"}'::jsonb FROM jsonb_to_recordset($1::jsonb) AS d(key text,name text,description text) ON CONFLICT ("key") DO NOTHING`,[JSON.stringify(input.definitions)]);
+  await client().query(`INSERT INTO "ActionPermission" ("id","employeeId","actionKey","actionId","enabled") SELECT gen_random_uuid()::text,$1,ad."key",ad."id",ad."key"=ANY($2::text[]) FROM "ActionDefinition" ad WHERE ad."key"=ANY($3::text[]) ON CONFLICT ("employeeId","actionKey") DO NOTHING`,[input.employeeId,input.enabledKeys,input.definitions.map(item=>item.key)]);
+}
+
 export async function getDirectAppSnapshot(workspaceId:string){
   try {
   const sql=`
     SELECT jsonb_build_object(
       'employees',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',e."id",'name',e."name",'role',e."role",'status',e."status",'goal',COALESCE(s."goal",''),'tone',COALESCE(s."tone",''),'assignee',CASE WHEN m."id" IS NULL THEN NULL ELSE jsonb_build_object('id',m."id",'name',COALESCE(u."name",u."email")) END,'permissions',COALESCE((SELECT jsonb_agg(jsonb_build_object('key',p."actionKey",'enabled',p."enabled")) FROM "ActionPermission" p WHERE p."employeeId"=e."id"),'[]'::jsonb)) ORDER BY e."createdAt") FROM "AIEmployee" e LEFT JOIN "AIEmployeeSettings" s ON s."employeeId"=e."id" LEFT JOIN "WorkspaceMember" m ON m."id"=e."assignedMemberId" LEFT JOIN "User" u ON u."id"=m."userId" WHERE e."workspaceId"=$1),'[]'::jsonb),
       'sources',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',s."id",'title',s."title",'type',s."type",'status',s."status",'documents',(SELECT count(*) FROM "KnowledgeDocument" d WHERE d."sourceId"=s."id"),'createdAt',s."createdAt") ORDER BY s."createdAt" DESC) FROM "KnowledgeSource" s WHERE s."workspaceId"=$1),'[]'::jsonb),
-      'conversations',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',c."id",'status',c."status",'channel',c."channelType",'customer',cu."name",'employee',COALESCE(e."name','—'),'createdAt',c."createdAt",'assignee',CASE WHEN wm."id" IS NULL THEN NULL ELSE jsonb_build_object('id',wm."id",'name',COALESCE(au."name",au."email")) END,'messages',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',msg."id",'direction',msg."direction",'content',msg."content",'createdAt',msg."createdAt") ORDER BY msg."createdAt") FROM "Message" msg WHERE msg."conversationId"=c."id"),'[]'::jsonb),'handoff',(SELECT jsonb_build_object('reason',h."reason",'summary',h."summary") FROM "HumanHandoff" h WHERE h."conversationId"=c."id" AND h."status"='OPEN' ORDER BY h."createdAt" DESC LIMIT 1)) ORDER BY c."updatedAt" DESC) FROM (SELECT * FROM "Conversation" WHERE "workspaceId"=$1 ORDER BY "updatedAt" DESC LIMIT 100) c JOIN "Customer" cu ON cu."id"=c."customerId" LEFT JOIN "AIEmployee" e ON e."id"=c."employeeId" LEFT JOIN "WorkspaceMember" wm ON wm."id"=c."assignedMemberId" LEFT JOIN "User" au ON au."id"=wm."userId"),'[]'::jsonb),
+      'conversations',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',c."id",'status',c."status",'channel',c."channelType",'customer',cu."name",'employee',COALESCE(e."name",'—'),'createdAt',c."createdAt",'assignee',CASE WHEN wm."id" IS NULL THEN NULL ELSE jsonb_build_object('id',wm."id",'name',COALESCE(au."name",au."email")) END,'messages',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',msg."id",'direction',msg."direction",'content',msg."content",'author',CASE WHEN jsonb_typeof(msg."sources")='object' THEN msg."sources"->>'authorType' ELSE NULL END,'createdAt',msg."createdAt") ORDER BY msg."createdAt") FROM "Message" msg WHERE msg."conversationId"=c."id"),'[]'::jsonb),'handoff',(SELECT jsonb_build_object('reason',h."reason",'summary',h."summary") FROM "HumanHandoff" h WHERE h."conversationId"=c."id" AND h."status"='OPEN' ORDER BY h."createdAt" DESC LIMIT 1)) ORDER BY c."updatedAt" DESC) FROM (SELECT * FROM "Conversation" WHERE "workspaceId"=$1 ORDER BY "updatedAt" DESC LIMIT 100) c JOIN "Customer" cu ON cu."id"=c."customerId" LEFT JOIN "AIEmployee" e ON e."id"=c."employeeId" LEFT JOIN "WorkspaceMember" wm ON wm."id"=c."assignedMemberId" LEFT JOIN "User" au ON au."id"=wm."userId"),'[]'::jsonb),
       'leads',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',l."id",'stage',l."stage",'interest',COALESCE(l."interest",''),'customer',c."name",'phone',COALESCE(c."phone",''),'email',COALESCE(c."email",''),'createdAt',l."createdAt",'assignee',CASE WHEN wm."id" IS NULL THEN NULL ELSE jsonb_build_object('id',wm."id",'name',COALESCE(u."name",u."email")) END) ORDER BY l."createdAt" DESC) FROM "Lead" l JOIN "Customer" c ON c."id"=l."customerId" LEFT JOIN "WorkspaceMember" wm ON wm."id"=l."assignedMemberId" LEFT JOIN "User" u ON u."id"=wm."userId" WHERE l."workspaceId"=$1),'[]'::jsonb),
-      'appointments',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',a."id",'service',a."service",'status',a."status",'startsAt',a."startsAt",'customer',c."name") ORDER BY a."startsAt") FROM "Appointment" a JOIN "Customer" c ON c."id"=a."customerId" WHERE a."workspaceId"=$1),'[]'::jsonb),
+      'appointments',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',a."id",'service',a."service",'status',a."status",'startsAt',a."startsAt",'customer',c."name",'phone',COALESCE(c."phone",'')) ORDER BY a."startsAt") FROM "Appointment" a JOIN "Customer" c ON c."id"=a."customerId" WHERE a."workspaceId"=$1),'[]'::jsonb),
       'customers',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',c."id",'name',c."name") ORDER BY c."name") FROM "Customer" c WHERE c."workspaceId"=$1),'[]'::jsonb),
-      'channels',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',c."id",'type',c."type",'status',c."status",'employee',COALESCE(e."name",'—'),'lastError',COALESCE(c."lastError",'')) ORDER BY c."createdAt") FROM "Channel" c LEFT JOIN "AIEmployee" e ON e."id"=c."employeeId" WHERE c."workspaceId"=$1),'[]'::jsonb),
+      'channels',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',c."id",'type',c."type",'status',c."status",'employeeId',c."employeeId",'employee',COALESCE(e."name",'—'),'lastError',COALESCE(c."lastError",'')) ORDER BY c."createdAt") FROM "Channel" c LEFT JOIN "AIEmployee" e ON e."id"=c."employeeId" WHERE c."workspaceId"=$1),'[]'::jsonb),
       'members',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',m."id",'role',m."role",'user',jsonb_build_object('id',u."id",'name',u."name",'email',u."email"))) FROM "WorkspaceMember" m JOIN "User" u ON u."id"=m."userId" WHERE m."workspaceId"=$1),'[]'::jsonb),
       'invitations',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',i."id",'email',i."email",'role',i."role",'expiresAt',i."expiresAt")) FROM "WorkspaceInvitation" i WHERE i."workspaceId"=$1 AND i."acceptedAt" IS NULL AND i."expiresAt">CURRENT_TIMESTAMP),'[]'::jsonb),
       'settings',COALESCE((SELECT jsonb_build_object('locale',s."locale",'timezone',s."timezone",'dataRetentionDays',s."dataRetentionDays",'analyticsEnabled',s."analyticsEnabled",'aiTrainingOptIn',s."aiTrainingOptIn",'logoUrl',COALESCE(s."logoUrl",''),'workingHours',COALESCE(s."workingHours",'{"days":[1,2,3,4,5],"start":"09:00","end":"18:00"}'::jsonb)) FROM "WorkspaceSettings" s WHERE s."workspaceId"=$1),jsonb_build_object('locale','ru','timezone','Europe/Moscow','dataRetentionDays',365,'analyticsEnabled',true,'aiTrainingOptIn',false,'logoUrl','','workingHours','{"days":[1,2,3,4,5],"start":"09:00","end":"18:00"}'::jsonb)),
@@ -149,7 +162,7 @@ export async function getDirectAppSnapshot(workspaceId:string){
       'usage',jsonb_build_object('messages',(SELECT count(*) FROM "Message" m JOIN "Conversation" c ON c."id"=m."conversationId" WHERE c."workspaceId"=$1),'conversations',(SELECT count(*) FROM "Conversation" WHERE "workspaceId"=$1),'actions',(SELECT count(*) FROM "ActionExecution" x JOIN "AIEmployee" e ON e."id"=x."employeeId" WHERE e."workspaceId"=$1),'aiUsage',(SELECT count(*) FROM "AnalyticsEvent" WHERE "workspaceId"=$1 AND "type"='AI_RESPONSE'),'knowledgeBytes',(SELECT COALESCE(sum(octet_length(d."content")),0) FROM "KnowledgeDocument" d JOIN "KnowledgeSource" s ON s."id"=d."sourceId" WHERE s."workspaceId"=$1),'activeEmployees',(SELECT count(*) FROM "AIEmployee" WHERE "workspaceId"=$1 AND "status"='ACTIVE'))
     ) AS snapshot
   `;
-  const rows=await client().query(sql.replace(`e."name',`,`e."name",`),[workspaceId]);
+  const rows=await client().query(sql,[workspaceId]);
   return (rows[0] as {snapshot:Record<string,unknown>}).snapshot;
   } catch(error) {
     const value=error as Error&{code?:unknown;detail?:unknown;hint?:unknown;position?:unknown;severity?:unknown;cause?:unknown};

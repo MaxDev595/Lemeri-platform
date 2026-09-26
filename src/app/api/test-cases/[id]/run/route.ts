@@ -4,16 +4,18 @@ import { getApiWorkspace } from "@/lib/auth/api";
 import { canWorkspace } from "@/lib/auth/permissions";
 import { retrieveKnowledge } from "@/lib/knowledge/retrieve";
 import { configuredAIProvider } from "@/lib/ai/provider";
+import { employeeRoleLabel, employeeToneLabel } from "@/lib/employee-domain";
 
 export async function POST(_: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await getApiWorkspace();
   if (!auth) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
   if (!canWorkspace(auth.membership.role, "RUN_AI_TESTS")) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
   const { id } = await params;
-  const item = await db.aITestCase.findFirst({ where: { id, workspaceId: auth.workspaceId }, include: { employee: { include: { settings: true } } } });
+  const item = await db.aITestCase.findFirst({ where: { id, workspaceId: auth.workspaceId }, include: { employee: { include: { settings: true, permissions: { where: { enabled: true } } } } } });
   if (!item?.employee.settings) return NextResponse.json({ error: "NOT_FOUND" }, { status: 404 });
   const knowledge = await retrieveKnowledge(auth.workspaceId, item.customerMessage);
-  const result = await configuredAIProvider().generateResponse({ employeeName: item.employee.name, role: item.employee.role, goal: item.employee.settings.goal, tone: item.employee.settings.tone, messages: [{ role: "user", content: item.customerMessage }], knowledge });
+  // Same prompt inputs as live conversations (orchestrator), so a passing test reflects real behaviour.
+  const result = await configuredAIProvider().generateResponse({ employeeName: item.employee.name, role: employeeRoleLabel(item.employee.role, auth.locale), goal: item.employee.settings.goal, tone: employeeToneLabel(item.employee.settings.tone, auth.locale), instructions: item.employee.settings.instructions ?? undefined, handoffRules: item.employee.settings.handoffRules as Record<string, unknown>, messages: [{ role: "user", content: item.customerMessage }], knowledge, allowedActionKeys: item.employee.permissions.map((permission) => permission.actionKey) });
   const passed = (!item.expectedContains || result.text.toLocaleLowerCase().includes(item.expectedContains.toLocaleLowerCase())) && (item.expectedHandoff == null || Boolean(result.handoffReason) === item.expectedHandoff);
   const status = passed ? "PASSED" : "FAILED";
   await db.aITestCase.update({ where: { id: item.id }, data: { lastStatus: status, lastResponse: result.text, lastConfidence: result.confidence, lastRunAt: new Date() } });

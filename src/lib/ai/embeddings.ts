@@ -22,5 +22,8 @@ export class OpenAIEmbeddingProvider implements EmbeddingProvider {
 
 export function configuredEmbeddingProvider(): EmbeddingProvider | null {
   if ((process.env.AI_PROVIDER ?? "mock") === "mock") return null;
+  // Groq has no embeddings endpoint. Without an OpenAI key every retrieval used to
+  // throw, so each customer message failed with a 500. Fall back to lexical search.
+  if (!process.env.OPENAI_API_KEY?.trim()) return null;
   return new OpenAIEmbeddingProvider(process.env.OPENAI_API_KEY ?? "", process.env.OPENAI_EMBEDDING_MODEL ?? "text-embedding-3-small");
 }

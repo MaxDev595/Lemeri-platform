@@ -46,6 +46,8 @@ export function WebsiteWidget({ locale, employeeId, employeeName }: { locale: Lo
   const [visitorId, setVisitorId] = useState("");
   const [embedAuth, setEmbedAuth] = useState<{ token: string; origin: string }>();
   const seenMessageIds=useRef(new Set<string>());
+  const authRef=useRef<{ token: string; origin: string }>(undefined);
+  const authWaiters=useRef<Array<(value:{ token: string; origin: string })=>void>>([]);
   const pollCursor=useRef(new Date(0).toISOString());
 
   useEffect(() => { document.documentElement.lang = locale; }, [locale]);
@@ -60,12 +62,22 @@ export function WebsiteWidget({ locale, employeeId, employeeName }: { locale: Lo
   useEffect(() => {
     const receive = (event: MessageEvent) => {
       if (event.source !== window.parent || event.data?.type !== "lemiri:configure" || typeof event.data.token !== "string") return;
-      setEmbedAuth({ token: event.data.token, origin: event.origin });
+      const next = { token: event.data.token, origin: event.origin };
+      authRef.current = next;
+      setEmbedAuth(next);
+      authWaiters.current.splice(0).forEach((resolve) => resolve(next));
     };
     addEventListener("message", receive);
     window.parent.postMessage({ type: "lemiri:ready" }, "*");
-    return () => removeEventListener("message", receive);
+    // Tokens expire after 10 minutes; renew them ahead of time while the page stays open.
+    const renew = window.setInterval(() => window.parent.postMessage({ type: "lemiri:refresh" }, "*"), 8 * 60_000);
+    return () => { removeEventListener("message", receive); window.clearInterval(renew); };
   }, []);
+  const refreshAuth = () => new Promise<{ token: string; origin: string } | undefined>((resolve) => {
+    const timer = window.setTimeout(() => resolve(undefined), 5000);
+    authWaiters.current.push((value) => { window.clearTimeout(timer); resolve(value); });
+    window.parent.postMessage({ type: "lemiri:refresh" }, "*");
+  });
 
   useEffect(()=>{
     if(!conversationId||!visitorId||!embedAuth)return;
@@ -89,8 +101,14 @@ export function WebsiteWidget({ locale, employeeId, employeeName }: { locale: Lo
     setMessages((value) => [...value, { role: "user", text: input }]);
     setBusy(true);
     try {
-      const response = await fetch(`/api/widget/${employeeId}/messages`, { method: "POST", headers: { "content-type": "application/json", "x-lemiri-widget-token": embedAuth.token, "x-lemiri-parent-origin": embedAuth.origin }, body: JSON.stringify({ visitorId, conversationId, messageId: crypto.randomUUID(), message: input }) });
-      const body = await response.json() as { conversationId?: string; messageId?:string; message?: string; error?: string };
+      const messageId = crypto.randomUUID();
+      const post = (auth: { token: string; origin: string }) => fetch(`/api/widget/${employeeId}/messages`, { method: "POST", headers: { "content-type": "application/json", "x-lemiri-widget-token": auth.token, "x-lemiri-parent-origin": auth.origin }, body: JSON.stringify({ visitorId, conversationId, messageId, message: input }) });
+      let response = await post(authRef.current ?? embedAuth);
+      let body = await response.json() as { conversationId?: string; messageId?:string; message?: string; error?: string };
+      if (response.status === 403 && body.error === "WIDGET_AUTH_REQUIRED") {
+        const renewed = await refreshAuth();
+        if (renewed) { response = await post(renewed); body = await response.json() as typeof body; }
+      }
       if (!response.ok) throw new Error(body.error === "PLAN_CONVERSATION_LIMIT_REACHED" ? copy.planLimit : copy.sendFailed);
       setConversationId(body.conversationId);
       if(body.messageId)seenMessageIds.current.add(body.messageId);

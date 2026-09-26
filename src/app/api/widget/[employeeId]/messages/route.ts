@@ -9,6 +9,7 @@ import { assertConversationCreationAllowed, BillingLimitError, lockConversationC
 import { checkRateLimit, requestIp } from "@/lib/security/request";
 import { verifyWidgetToken } from "@/lib/security/widget-token";
 import { getWorkspaceTranslator } from "@/lib/workspace-locale";
+import { drainJobsAfterResponse } from "@/lib/jobs/kick";
 
 const payloadSchema = z.object({ conversationId: z.string().cuid().optional(), visitorId: z.string().min(8).max(128), messageId: z.string().uuid(), name: z.string().trim().min(2).max(80).optional(), message: z.string().trim().min(1).max(4000) });
 
@@ -87,5 +88,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ emp
     return NextResponse.json({ conversationId: conversation.id, message: t("server.messageToManager"), confidence: 1, handoff: true });
   }
   const result = await handleIncomingMessage({ workspaceId: employee.workspaceId, employeeId, conversationId: conversation.id, content: parsed.data.message });
+  // Deliver CRM events (lead/appointment created by the AI) without waiting for the scheduler.
+  drainJobsAfterResponse();
   return NextResponse.json({ conversationId: conversation.id, messageId:result.message.id, message: result.message.content, confidence: result.confidence, handoff: result.handoff });
 }

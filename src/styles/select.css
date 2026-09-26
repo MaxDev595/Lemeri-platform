@@ -222,3 +222,15 @@
 .employeeSelect {
   min-width: 200px;
 }
+
+/* Lead stage / appointment status pickers inside tables and cards */
+.stageSelect {
+  min-width: 150px;
+}
+.stageSelect .appSelectTrigger {
+  min-height: 32px;
+  font-size: var(--fs-13);
+}
+.appointmentCard .stageSelect {
+  align-self: start;
+}

@@ -5,6 +5,7 @@ import { canWorkspace } from "@/lib/auth/permissions";
 import { extractDocumentText, MAX_KNOWLEDGE_FILE_BYTES } from "@/lib/knowledge/documents";
 import { chunkText } from "@/lib/knowledge/chunk";
 import { enqueueJob } from "@/lib/jobs/queue";
+import { drainJobsAfterResponse } from "@/lib/jobs/kick";
 import { createTranslator } from "@/lib/i18n";
 
 export const runtime = "nodejs";
@@ -26,5 +27,6 @@ export async function POST(request: Request) {
   const t=createTranslator(auth.locale);
   const item = await db.knowledgeSource.create({ data: { workspaceId: auth.workspaceId, title: file.name, type: "DOCUMENT", status: "PROCESSING", documents: { create: { title: file.name, content, chunks: { create: chunkText(content).map((part, index) => ({ content: part, sourceLabel: `${file.name} · ${t("server.fragment",{index:index+1})}` })) } } } }, include: { documents: true } });
   await enqueueJob(auth.workspaceId, "KNOWLEDGE_INDEX", { sourceId: item.id });
+  drainJobsAfterResponse();
   return NextResponse.json(item, { status: 202 });
 }

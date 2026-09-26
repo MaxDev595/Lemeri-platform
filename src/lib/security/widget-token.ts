@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
+export const WIDGET_TOKEN_TTL_MS=10*60_000;
 type WidgetTokenPayload={employeeId:string;origin:string;expiresAt:number};
 
 function secret(){const value=process.env.CREDENTIALS_ENCRYPTION_KEY;if(!value&&process.env.NODE_ENV==="production")throw new Error("CREDENTIALS_ENCRYPTION_KEY is required");return value??"lemiri-development-key-change-me"}

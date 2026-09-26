@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { selectActiveMembership } from "./workspace";
-import { createDirectSession, deleteDirectSession, getDirectSessionUser } from "@/lib/neon-direct";
+import { createDirectSession, createDirectWorkspace, deleteDirectSession, getDirectSessionUser } from "@/lib/neon-direct";
 
 const COOKIE = process.env.NODE_ENV === "production" ? "__Host-lemiri_session" : "lemiri_session";
 export const WORKSPACE_COOKIE = process.env.NODE_ENV === "production" ? "__Host-lemiri_workspace" : "lemiri_workspace";
@@ -52,9 +52,20 @@ export async function requireUser() {
 }
 
 export async function requireWorkspace() {
-  const user = await requireUser();
+  let user = await requireUser();
   const activeWorkspaceId=(await cookies()).get(WORKSPACE_COOKIE)?.value;
-  const membership = selectActiveMembership(user.memberships,activeWorkspaceId);
-  if (!membership) redirect("/onboarding");
+  let membership = selectActiveMembership(user.memberships,activeWorkspaceId);
+  if (!membership) {
+    // A signed-in user without any workspace (e.g. after deleting their only
+    // one) previously bounced between /app and /onboarding forever. Give them a
+    // fresh workspace so onboarding can start again.
+    const name=user.name?.trim()?`${user.name.trim().slice(0,100)}`:"Workspace";
+    const slug=`${name.toLowerCase().replace(/[^a-zа-я0-9]+/gi,"-")}-${crypto.randomUUID().slice(0,6)}`;
+    if(process.env.NODE_ENV==="production")await createDirectWorkspace({userId:user.id,name,slug,locale:"ru"});
+    else await db.workspace.create({data:{name,slug,settings:{create:{}},members:{create:{userId:user.id,role:"OWNER"}}}});
+    user = (await getSessionUser()) ?? user;
+    membership = selectActiveMembership(user.memberships,undefined);
+    if (!membership) redirect("/login");
+  }
   return { user, membership, workspace: membership.workspace };
 }

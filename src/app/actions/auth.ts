@@ -75,11 +75,12 @@ export async function login(_: AuthState, formData: FormData): Promise<AuthState
   const user = process.env.NODE_ENV==="production"
     ? await verifyDirectUserPassword(parsed.data.email,parsed.data.password)
     : await db.user.findUnique({ where: { email: parsed.data.email } });
-  if (!user) return { error: t("auth.accountNotFound") };
+  // One message for both cases so the login form cannot be used to probe which emails are registered.
+  if (!user) return { error: t("auth.invalidLogin") };
   if ("legacyPassword" in user&&Boolean(user.legacyPassword))return{error:t("auth.loginTemporarilyUnavailable")};
   let passwordValid=false;
   try{passwordValid="passwordValid" in user?Boolean(user.passwordValid):await verifyPassword(parsed.data.password,user.passwordHash)}catch(error){console.error("Login password verification failed",error);return{error:t("auth.loginTemporarilyUnavailable")}}
-  if (!passwordValid) return { error: t("auth.invalidCredentials") };
+  if (!passwordValid) return { error: t("auth.invalidLogin") };
   await createSession(user.id);
   redirect(safeReturnTo(formData.get("returnTo"))??"/app");
 }

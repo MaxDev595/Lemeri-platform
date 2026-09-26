@@ -123,6 +123,9 @@ export function TiltStage({ children }: { children: ReactNode }) {
 export function TypeCycle({ words }: { words: readonly string[] }) {
   const [text, setText] = useState(words[0] ?? "");
   useEffect(() => {
+    // Switching the landing language keeps this component mounted; start over
+    // with the new words instead of showing the previous language's text.
+    setText(words[0] ?? "");
     if (words.length < 2 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let index = 0;
     let length = words[0]!.length;

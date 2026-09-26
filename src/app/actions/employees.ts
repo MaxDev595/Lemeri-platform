@@ -12,7 +12,15 @@ import { encryptCredentials } from "@/lib/security/encryption";
 import { employeeSchema } from "@/lib/validation/employee";
 import { createTranslator } from "@/lib/i18n";
 import { assertEmployeeActivationAllowed, BillingLimitError } from "@/lib/billing/limits";
-import { createDirectOnboardingEmployee } from "@/lib/neon-direct";
+import { createDirectActionPermissions, createDirectOnboardingEmployee } from "@/lib/neon-direct";
+import { drainJobsAfterResponse } from "@/lib/jobs/kick";
+import { randomBytes } from "node:crypto";
+
+// Default action permissions for a newly created employee, by role.
+const defaultEnabledActions=(role:string)=>role==="SUPPORT"?["notifyManager","handoffToHuman"]:["createLead","createAppointment","notifyManager","handoffToHuman"];
+// The CRM webhook entered during onboarding is stored in the same shape the
+// Integrations page, the connection test and the CRM delivery queue use.
+const onboardingCrmCredentials=(endpoint:string)=>encryptCredentials({endpoint,signingSecret:randomBytes(24).toString("base64url")});
 
 export type EmployeeState = { error?: string };
 export async function createEmployee(_: EmployeeState, formData: FormData): Promise<EmployeeState> {
@@ -27,8 +35,10 @@ export async function createEmployee(_: EmployeeState, formData: FormData): Prom
     try{
       const chunks=chunkText(details.knowledgeContent??"").map((content,index)=>({content,sourceLabel:`${details.knowledgeTitle} · ${t("knowledge.fragment",{index:index+1})}`}));
       const websiteConfigEncrypted=details.websiteOrigin?encryptCredentials({allowedOrigins:[new URL(details.websiteOrigin).origin]}):undefined;
-      const crmCredentialsEncrypted=details.crmWebhook?encryptCredentials({webhookUrl:details.crmWebhook}):undefined;
-      await createDirectOnboardingEmployee({workspaceId:workspace.id,userId:user.id,name:parsed.data.name,role:parsed.data.role,status:details.publish==="on"?"ACTIVE":"DRAFT",goal:parsed.data.goal,tone:parsed.data.tone,instructions:details.instructions||null,handoffRules:{uncertainty:details.handoffUncertainty==="on",complaint:details.handoffComplaint==="on",humanRequested:details.handoffHumanRequested==="on",businessTemplate:details.businessTemplate??"custom"},knowledgeTitle:details.knowledgeTitle,knowledgeContent:details.knowledgeContent,chunks,websiteConfigEncrypted,crmCredentialsEncrypted,auditMetadata:{role:parsed.data.role,businessTemplate:details.businessTemplate??"custom",websiteConnected:Boolean(details.websiteOrigin),crmConnected:Boolean(details.crmWebhook),knowledgeAdded:Boolean(details.knowledgeContent)}});
+      const crmCredentialsEncrypted=details.crmWebhook?onboardingCrmCredentials(details.crmWebhook):undefined;
+      const {employeeId}=await createDirectOnboardingEmployee({workspaceId:workspace.id,userId:user.id,name:parsed.data.name,role:parsed.data.role,status:details.publish==="on"?"ACTIVE":"DRAFT",goal:parsed.data.goal,tone:parsed.data.tone,instructions:details.instructions||null,handoffRules:{uncertainty:details.handoffUncertainty==="on",complaint:details.handoffComplaint==="on",humanRequested:details.handoffHumanRequested==="on",businessTemplate:details.businessTemplate??"custom"},knowledgeTitle:details.knowledgeTitle,knowledgeContent:details.knowledgeContent,chunks,websiteConfigEncrypted,crmCredentialsEncrypted,auditMetadata:{role:parsed.data.role,businessTemplate:details.businessTemplate??"custom",websiteConnected:Boolean(details.websiteOrigin),crmConnected:Boolean(details.crmWebhook),knowledgeAdded:Boolean(details.knowledgeContent)}});
+      await createDirectActionPermissions({employeeId,definitions:actionCatalog.map(action=>({key:action.key,name:action.name,description:action.description})),enabledKeys:defaultEnabledActions(parsed.data.role)});
+      if(details.knowledgeContent)drainJobsAfterResponse();
       revalidatePath("/app");redirect("/app");
     }catch(error){
       if((error as {digest?:string})?.digest?.startsWith("NEXT_REDIRECT"))throw error;
@@ -41,12 +51,12 @@ export async function createEmployee(_: EmployeeState, formData: FormData): Prom
   const persistEmployee=async(tx:Parameters<Parameters<typeof db.$transaction>[0]>[0])=>{
     if(details?.publish==="on"&&process.env.NODE_ENV!=="production")await assertEmployeeActivationAllowed(tx,workspace.id);
     const employee=await tx.aIEmployee.create({data:{workspaceId:workspace.id,name:parsed.data.name,role:parsed.data.role,status:details?.publish==="on"?"ACTIVE":"DRAFT",settings:{create:{goal:parsed.data.goal,tone:parsed.data.tone,instructions:details?.instructions||null,handoffRules:{uncertainty:details?details.handoffUncertainty==="on":true,complaint:details?details.handoffComplaint==="on":true,humanRequested:details?details.handoffHumanRequested==="on":true,businessTemplate:details?.businessTemplate??"custom"}}}}});
-    const enabled=parsed.data.role==="SUPPORT"?["notifyManager","handoffToHuman"]:["createLead","createAppointment","notifyManager","handoffToHuman"];
+    const enabled=defaultEnabledActions(parsed.data.role);
     if(definitions.length)await tx.actionPermission.createMany({data:definitions.map(definition=>({employeeId:employee.id,actionId:definition.id,actionKey:definition.key,enabled:enabled.includes(definition.key)}))});
     let sourceId:string|undefined;
     if(details?.knowledgeContent){const source=await tx.knowledgeSource.create({data:{workspaceId:workspace.id,type:"TEXT",title:details.knowledgeTitle!,status:"PROCESSING",documents:{create:{title:details.knowledgeTitle!,content:details.knowledgeContent,chunks:{create:chunkText(details.knowledgeContent).map((content,index)=>({content,sourceLabel:`${details.knowledgeTitle} · ${t("knowledge.fragment",{index:index+1})}`}))}}}}});sourceId=source.id}
     if(details?.websiteOrigin){const origin=new URL(details.websiteOrigin).origin;await tx.channel.create({data:{workspaceId:workspace.id,employeeId:employee.id,type:"WEBSITE",status:"CONNECTED",externalId:"embedded-widget",configEncrypted:encryptCredentials({allowedOrigins:[origin]})}})}
-    if(details?.crmWebhook)await tx.integration.create({data:{workspaceId:workspace.id,provider:"CRM_WEBHOOK",status:"CONNECTED",credentialsEncrypted:encryptCredentials({webhookUrl:details.crmWebhook})}});
+    if(details?.crmWebhook)await tx.integration.create({data:{workspaceId:workspace.id,provider:"WEBHOOK_CRM",status:"PENDING",credentialsEncrypted:onboardingCrmCredentials(details.crmWebhook)}});
     await tx.auditLog.create({data:{workspaceId:workspace.id,userId:user.id,actorType:"USER",action:details?.publish==="on"?"AI_EMPLOYEE_PUBLISHED":"AI_EMPLOYEE_CREATED",entityType:"AIEmployee",entityId:employee.id,metadata:{role:parsed.data.role,businessTemplate:details?.businessTemplate??"custom",websiteConnected:Boolean(details?.websiteOrigin),crmConnected:Boolean(details?.crmWebhook),knowledgeAdded:Boolean(sourceId)}}});return{employee,sourceId};
   };
   try {
@@ -55,6 +65,6 @@ export async function createEmployee(_: EmployeeState, formData: FormData): Prom
     // in the deployed Worker, so production persists through the HTTP client.
     result=process.env.NODE_ENV==="production"?await persistEmployee(db):await db.$transaction(persistEmployee);
   } catch(error) { if(error instanceof BillingLimitError)return{error:t("billing.employeeLimitReached")};throw error }
-  if(result.sourceId)await enqueueJob(workspace.id,"KNOWLEDGE_INDEX",{sourceId:result.sourceId});
+  if(result.sourceId){await enqueueJob(workspace.id,"KNOWLEDGE_INDEX",{sourceId:result.sourceId});drainJobsAfterResponse();}
   revalidatePath("/app");redirect("/app");
 }

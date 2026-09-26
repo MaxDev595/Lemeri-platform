@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getApiWorkspace } from "@/lib/auth/api";
 import { canWorkspace } from "@/lib/auth/permissions";
 import { db } from "@/lib/db";
+import { drainJobsAfterResponse } from "@/lib/jobs/kick";
 
 const replySchema=z.object({content:z.string().trim().min(1).max(4000)});
 
@@ -15,13 +16,17 @@ export async function POST(request:Request,{params}:{params:Promise<{id:string}>
   if(conversation.status!=="HUMAN_ACTIVE")return NextResponse.json({error:"TAKEOVER_REQUIRED"},{status:409});
   const channel=conversation.channelType==="WEBSITE"?null:await db.channel.findFirst({where:{workspaceId:auth.workspaceId,type:conversation.channelType,status:"CONNECTED"}});
   if(conversation.channelType!=="WEBSITE"&&(!channel?.configEncrypted||!conversation.customer.externalId))return NextResponse.json({error:"DELIVERY_CHANNEL_UNAVAILABLE"},{status:409});
+  // Email replies keep the thread subject taken from the first customer message.
+  const firstInbound=conversation.channelType==="EMAIL"?await db.message.findFirst({where:{conversationId:id,direction:"INBOUND"},orderBy:{createdAt:"asc"},select:{content:true}}):null;
+  const emailSubject=firstInbound?.content.match(/^Subject: (.+)/)?.[1]?.trim();
   const message=await db.$transaction(async tx=>{
-    const saved=await tx.message.create({data:{conversationId:id,direction:"OUTBOUND",content:parsed.data.content}});
+    const saved=await tx.message.create({data:{conversationId:id,direction:"OUTBOUND",content:parsed.data.content,sources:{authorType:"HUMAN",memberId:auth.membership.id,name:auth.user.name??auth.user.email}}});
     await tx.conversation.update({where:{id},data:{updatedAt:new Date(),assignedMemberId:auth.membership.id}});
     await tx.humanHandoff.updateMany({where:{conversationId:id,status:"OPEN"},data:{status:"RESOLVED"}});
     await tx.analyticsEvent.create({data:{workspaceId:auth.workspaceId,type:"HUMAN_RESPONSE",payload:{conversationId:id,messageId:saved.id,userId:auth.user.id}}});
-    if(channel&&conversation.customer.externalId)await tx.backgroundJob.create({data:{workspaceId:auth.workspaceId,type:"OUTBOUND_CHANNEL_MESSAGE",payload:{channelId:channel.id,recipientId:conversation.customer.externalId,text:saved.content,messageId:saved.id}}});
+    if(channel&&conversation.customer.externalId)await tx.backgroundJob.create({data:{workspaceId:auth.workspaceId,type:"OUTBOUND_CHANNEL_MESSAGE",payload:{channelId:channel.id,recipientId:conversation.customer.externalId,text:saved.content,messageId:saved.id,...(emailSubject?{subject:emailSubject}:{})}}});
     return saved;
   });
+  if(channel)drainJobsAfterResponse();
   return NextResponse.json({...message,createdAt:message.createdAt.toISOString()},{status:201});
 }

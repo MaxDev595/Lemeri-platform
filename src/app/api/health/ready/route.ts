@@ -8,9 +8,12 @@ export async function GET() {
   const configurationErrors = runtimeConfigurationErrors();
   const connectionString=process.env.DATABASE_URL?.trim();
   if (!connectionString) return NextResponse.json({ status: "unavailable", database: "unknown", configuration: "error", diagnostic: { code: "DATABASE_URL_MISSING" } }, { status: 503, headers: { "cache-control": "no-store" } });
+  // Neon's HTTP transport cannot reach a plain PostgreSQL server (docker compose,
+  // a local install). Local development checks such databases through Prisma.
+  const localDatabase=process.env.NODE_ENV!=="production"&&!/\.neon\.(tech|build)\b/.test(connectionString);
   try {
-    const sql=neon(connectionString);
-    await sql.query("SELECT 1",[]);
+    if(localDatabase){const { db }=await import("@/lib/db");await db.$queryRaw`SELECT 1`;}
+    else{const sql=neon(connectionString);await sql.query("SELECT 1",[]);}
   } catch(error) {
     const record=error&&typeof error==="object"?error as Record<string,unknown>:undefined;
     const diagnostic={name:error instanceof Error?error.name:"UnknownError",code:typeof record?.code==="string"?record.code:undefined,message:error instanceof Error?error.message.slice(0,500):undefined};
@@ -20,8 +23,8 @@ export async function GET() {
   return NextResponse.json({
     status: "ready",
     database: "ok",
-    databaseTransport: "neon-direct-http",
-    prisma: "bypassed",
+    databaseTransport: localDatabase ? "prisma-local" : "neon-direct-http",
+    prisma: localDatabase ? "ok" : "bypassed",
     prismaRuntime: "workerd",
     configuration: configurationErrors.length ? "partial" : "ok",
     issueCount: configurationErrors.length,

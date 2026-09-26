@@ -46,12 +46,15 @@ export async function runJobBatch(limit = 10) {
         if (!payload.sourceId) throw new Error("KNOWLEDGE_INDEX requires sourceId");
         await indexKnowledgeSource(job.workspaceId, payload.sourceId);
       } else if (job.type === "OUTBOUND_CHANNEL_MESSAGE") {
-        const payload = job.payload as { channelId?: string; recipientId?: string; text?: string; messageId?: string };
+        const payload = job.payload as { channelId?: string; recipientId?: string; text?: string; messageId?: string; subject?: string };
         if (!payload.channelId || !payload.recipientId || !payload.text || !payload.messageId) throw new Error("Invalid outbound channel payload");
         const channel = await db.channel.findFirst({ where: { id: payload.channelId, workspaceId: job.workspaceId, status: "CONNECTED" } });
         if (!channel?.configEncrypted) throw new Error("Connected channel not found");
-        const sent = await getConnector(channel.type).sendMessage(decryptCredentials<Record<string, string>>(channel.configEncrypted), payload.recipientId, payload.text);
-        await db.message.updateMany({ where: { id: payload.messageId, conversation: { workspaceId: job.workspaceId } }, data: { externalId: `${channel.type}:${sent.externalMessageId}` } });
+        const sent = await getConnector(channel.type).sendMessage(decryptCredentials<Record<string, string>>(channel.configEncrypted), payload.recipientId, payload.text, { subject: payload.subject });
+        // The message is already delivered at this point: recording the provider id must never
+        // fail the job (a retry would send the reply to the customer twice). Provider ids are only
+        // unique per chat, so the stored key includes the channel and recipient.
+        await db.message.updateMany({ where: { id: payload.messageId, conversation: { workspaceId: job.workspaceId } }, data: { externalId: `${channel.type}:${channel.id}:out:${payload.recipientId}:${sent.externalMessageId}` } }).catch(() => undefined);
         await db.channel.update({ where: { id: channel.id }, data: { lastError: null } });
       } else if (job.type === "CRM_EVENT") {
         const payload = job.payload as { integrationId?: string; event?: string; data?: object; idempotencyKey?: string };

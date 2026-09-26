@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { entityId } from "@/lib/validation/id";
 import { getApiWorkspace } from "@/lib/auth/api";
 import { canWorkspace } from "@/lib/auth/permissions";
 import { db } from "@/lib/db";
 import { canReceiveAssignment } from "@/lib/assignments";
 
-const assignmentSchema=z.object({entityType:z.enum(["EMPLOYEE","CONVERSATION","LEAD"]),entityId:z.string().cuid(),memberId:z.string().cuid().nullable()});
+const assignmentSchema=z.object({entityType:z.enum(["EMPLOYEE","CONVERSATION","LEAD"]),entityId,memberId:entityId.nullable()});
 
 export async function PUT(request:Request){
   const auth=await getApiWorkspace();if(!auth)return NextResponse.json({error:"UNAUTHORIZED"},{status:401});

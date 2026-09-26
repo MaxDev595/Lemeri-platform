@@ -542,6 +542,13 @@ a.planButton:hover {
   background: linear-gradient(145deg, var(--indigo-500), var(--indigo-700));
   color: #fff;
   box-shadow: var(--highlight), 0 1px 2px rgba(67, 54, 180, 0.4);
+  overflow: hidden;
+}
+.workspaceAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #fff;
 }
 
 /* -------- Errors / success ----------------------------------------------- */
