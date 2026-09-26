@@ -23,3 +23,4 @@ import "./encoding.test.ts";
 import "./assignments.test.ts";
 import "./human-reply.test.ts";
 import "./conversation-events.test.ts";
+import "./floating-card.test.ts";

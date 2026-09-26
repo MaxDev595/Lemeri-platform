@@ -38,7 +38,7 @@ const widgetCopy = {
   },
 } as const;
 
-export function WebsiteWidget({ locale, employeeId, employeeName }: { locale: Locale; employeeId: string; employeeName: string }) {
+export function WebsiteWidget({ locale, employeeId, employeeName, embedded = false, theme = "auto" }: { locale: Locale; employeeId: string; employeeName: string; embedded?: boolean; theme?: "light" | "dark" | "auto" }) {
   const copy = widgetCopy[locale];
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversationId, setConversationId] = useState<string>();
@@ -51,6 +51,22 @@ export function WebsiteWidget({ locale, employeeId, employeeName }: { locale: Lo
   const pollCursor=useRef(new Date(0).toISOString());
 
   useEffect(() => { document.documentElement.lang = locale; }, [locale]);
+  // Follows the host card's theme: light, dark, or the visitor's system setting.
+  useEffect(() => { document.documentElement.dataset.theme = theme === "auto" ? "" : theme; }, [theme]);
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (!embedded) return;
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") window.parent.postMessage({ type: "lemiri:close" }, "*"); };
+    const onMessage = (event: MessageEvent) => { if (event.source === window.parent && event.data?.type === "lemiri:focus") inputRef.current?.focus(); };
+    addEventListener("keydown", onKey); addEventListener("message", onMessage);
+    return () => { removeEventListener("keydown", onKey); removeEventListener("message", onMessage); };
+  }, [embedded]);
+  const assistantCount = useRef(0);
+  useEffect(() => {
+    const count = messages.filter(message => message.role === "assistant").length;
+    if (embedded && count > assistantCount.current) window.parent.postMessage({ type: "lemiri:message" }, "*");
+    assistantCount.current = count;
+  }, [messages, embedded]);
   useEffect(() => {
     const key = `lemiri:${employeeId}:visitor`;
     const existing = localStorage.getItem(key);
@@ -118,5 +134,5 @@ export function WebsiteWidget({ locale, employeeId, employeeName }: { locale: Lo
     } finally { setBusy(false); }
   }
 
-  return <main className="publicWidget"><header><span className="widgetAvatar"><LemiriGlyph size={22}/></span><div><b>{employeeName}</b><small>{copy.status}</small></div></header><section aria-live="polite" ref={streamRef}>{messages.length === 0 && <div className="widgetWelcome"><span><LemiriGlyph size={26}/></span><h1>{copy.hello}</h1><p>{copy.help}</p><div className="widgetSuggestions">{copy.suggestions.map(item=><button type="button" key={item} disabled={busy||!visitorId||!embedAuth} onClick={()=>void send(item)}>{item}</button>)}</div></div>}{messages.map((message, index) => <div className={`widgetBubble ${message.role}`} key={index}>{message.text}</div>)}{busy && <div className="widgetBubble assistant typing" aria-label="…"><i/><i/><i/></div>}</section><form onSubmit={submit}><input name="message" required maxLength={4000} autoComplete="off" placeholder={embedAuth ? copy.message : copy.connecting} aria-label={copy.messageLabel}/><button disabled={busy || !visitorId || !embedAuth} aria-label={copy.send}><ArrowUp size={18}/></button></form><footer>{copy.powered}</footer></main>;
+  return <main className={embedded ? "publicWidget embedded" : "publicWidget"}>{!embedded && <header><span className="widgetAvatar"><LemiriGlyph size={22}/></span><div><b>{employeeName}</b><small>{copy.status}</small></div></header>}<section aria-live="polite" ref={streamRef}>{messages.length === 0 && <div className="widgetWelcome"><span><LemiriGlyph size={26}/></span><h1>{copy.hello}</h1><p>{copy.help}</p><div className="widgetSuggestions">{copy.suggestions.map(item=><button type="button" key={item} disabled={busy||!visitorId||!embedAuth} onClick={()=>void send(item)}>{item}</button>)}</div></div>}{messages.map((message, index) => <div className={`widgetBubble ${message.role}`} key={index}>{message.text}</div>)}{busy && <div className="widgetBubble assistant typing" aria-label="…"><i/><i/><i/></div>}</section><form onSubmit={submit}><input ref={inputRef} name="message" required maxLength={4000} autoComplete="off" placeholder={embedAuth ? copy.message : copy.connecting} aria-label={copy.messageLabel}/><button disabled={busy || !visitorId || !embedAuth} aria-label={copy.send}><ArrowUp size={18}/></button></form><footer>{copy.powered}</footer></main>;
 }

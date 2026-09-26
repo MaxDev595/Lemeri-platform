@@ -10,6 +10,7 @@ import "@/styles/views.css";
 import "@/styles/auth.css";
 import "@/styles/onboarding.css";
 import "@/styles/widget.css";
+import "@/styles/assistant.css";
 import "@/styles/landing.css";
 
 export const metadata: Metadata = { title: "Lemiri AI — цифровые сотрудники для бизнеса", description: "Единая платформа для AI-сотрудников, диалогов, лидов, записей и базы знаний." };

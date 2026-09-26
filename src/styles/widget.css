@@ -206,3 +206,13 @@
   color: var(--text-4);
   font-size: 11px;
 }
+
+/* Inside the floating card on a customer's site the card draws the header;
+   the frame must never show its own scrollbars. */
+html:has(.publicWidget.embedded),
+html:has(.publicWidget.embedded) body {
+  overflow: hidden;
+}
+.publicWidget.embedded {
+  background: var(--surface-2);
+}
