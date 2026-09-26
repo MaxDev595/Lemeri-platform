@@ -1,3 +1,4 @@
+import "@/lib/neon-local";
 import { neon } from "@neondatabase/serverless";
 
 function client() {

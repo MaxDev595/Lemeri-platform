@@ -20,9 +20,11 @@ export async function POST(request: Request) {
   if (file.size > MAX_KNOWLEDGE_FILE_BYTES) return NextResponse.json({ error: "FILE_TOO_LARGE", maxBytes: MAX_KNOWLEDGE_FILE_BYTES }, { status: 413 });
   let content: string;
   try {
-    content = await extractDocumentText(file.name, Buffer.from(await file.arrayBuffer()));
+    const clientText = form.get("text");
+    content = await extractDocumentText(file.name, Buffer.from(await file.arrayBuffer()), typeof clientText === "string" ? clientText : null);
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : "DOCUMENT_PARSE_FAILED" }, { status: 422 });
+    console.error("Document parsing failed", file.name, error instanceof Error ? error.message : error);
+    return NextResponse.json({ error: error instanceof Error && /^[A-Z_]+$/.test(error.message) ? error.message : "DOCUMENT_PARSE_FAILED" }, { status: 422 });
   }
   const t=createTranslator(auth.locale);
   const item = await db.knowledgeSource.create({ data: { workspaceId: auth.workspaceId, title: file.name, type: "DOCUMENT", status: "PROCESSING", documents: { create: { title: file.name, content, chunks: { create: chunkText(content).map((part, index) => ({ content: part, sourceLabel: `${file.name} · ${t("server.fragment",{index:index+1})}` })) } } } }, include: { documents: true } });

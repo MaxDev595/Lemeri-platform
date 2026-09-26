@@ -12,3 +12,4 @@ outputs/
 
 Claude outputs/
 env-local-dev.txt
+public/vendor/pdfjs/

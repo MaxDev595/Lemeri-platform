@@ -1,3 +1,4 @@
+import "@/lib/neon-local";
 import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 import { runtimeConfigurationErrors } from "@/lib/runtime-config";

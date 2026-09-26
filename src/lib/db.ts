@@ -1,3 +1,4 @@
+import "@/lib/neon-local";
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaNeon, PrismaNeonHTTP } from "@prisma/adapter-neon";
 
@@ -51,15 +52,57 @@ const developmentClient =
     ? (globalForPrisma.prisma ??= isNeonDatabase ? createTransactionClient() : await createLocalClient())
     : undefined;
 
-export const db: PrismaClient =
-  developmentClient ??
-  new Proxy({} as PrismaClient, {
-    get(_target, property) {
-      const client =
-        property === "$transaction"
-          ? createTransactionClient()
-          : createHttpClient();
-      const value = Reflect.get(client, property, client);
-      return typeof value === "function" ? value.bind(client) : value;
+// Prisma operations that are a single read can use Neon's stateless HTTP
+// transport. Writes cannot: Prisma's query compiler wraps nested creates,
+// upserts, createMany, cascaded updates, etc. in an implicit transaction, which
+// the HTTP adapter rejects ("Transactions are not supported in HTTP mode"). They
+// run over a short-lived WebSocket connection (PrismaNeon) that is closed again
+// right after the operation, so no socket outlives the request that opened it.
+const readOperations = new Set(["findUnique", "findUniqueOrThrow", "findFirst", "findFirstOrThrow", "findMany", "count", "aggregate", "groupBy"]);
+
+async function withTransactionClient<T>(run: (client: PrismaClient) => Promise<T>) {
+  const client = createTransactionClient();
+  try {
+    return await run(client);
+  } finally {
+    await client.$disconnect().catch(() => undefined);
+  }
+}
+
+function modelDelegate(model: string) {
+  return new Proxy({}, {
+    get(_target, operation) {
+      if (typeof operation !== "string") return undefined;
+      if (readOperations.has(operation)) {
+        const client = createHttpClient();
+        const delegate = Reflect.get(client, model) as Record<string, unknown>;
+        const value = delegate[operation];
+        return typeof value === "function" ? value.bind(delegate) : value;
+      }
+      return (...args: unknown[]) => withTransactionClient(client => {
+        const delegate = Reflect.get(client, model) as Record<string, (...input: unknown[]) => Promise<unknown>>;
+        return delegate[operation](...args);
+      });
     },
   });
+}
+
+const productionClient = new Proxy({} as PrismaClient, {
+  get(_target, property) {
+    if (property === "$transaction") {
+      return (input: unknown, options?: unknown) => {
+        // Array form: the operations were already started through this proxy
+        // (each on its own connection), so wait for all of them.
+        if (Array.isArray(input)) return Promise.all(input);
+        return withTransactionClient(client => (client.$transaction as (fn: unknown, options?: unknown) => Promise<unknown>)(input, options));
+      };
+    }
+    if (typeof property === "string" && !property.startsWith("$") && property !== "then") return modelDelegate(property);
+    // $queryRaw / $executeRaw and other client-level helpers: single statements over HTTP.
+    const client = createHttpClient();
+    const value = Reflect.get(client, property, client);
+    return typeof value === "function" ? value.bind(client) : value;
+  },
+});
+
+export const db: PrismaClient = developmentClient ?? productionClient;

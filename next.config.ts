@@ -17,7 +17,16 @@ const config:NextConfig={
   // Next's broad server trace from adding resvg.wasm (~1.35 MiB) to the Worker.
   outputFileTracingExcludes:{"*":["node_modules/next/dist/compiled/@vercel/og/**/*",
     // The TCP Postgres driver is only used by `next dev` against a local database (see src/lib/db.ts).
-    "node_modules/@prisma/adapter-pg/**/*","node_modules/pg/**/*","node_modules/pg-*/**/*","node_modules/pgpass/**/*","node_modules/postgres-*/**/*"]},
+    "node_modules/@prisma/adapter-pg/**/*","node_modules/pg/**/*","node_modules/pg-*/**/*","node_modules/pgpass/**/*","node_modules/postgres-*/**/*",
+    // Prisma CLI / engines (schema engine, per-database query engines) are build tools. The
+    // Worker only needs the generated client's own query compiler in src/generated/prisma.
+    // Since OpenNext statically bundles every traced .wasm, leaving them in pushed the Worker
+    // far beyond Cloudflare's size limit.
+    "node_modules/prisma/**/*","node_modules/@prisma/engines/**/*","node_modules/@prisma/prisma-schema-wasm/**/*","node_modules/@prisma/query-compiler-wasm/**/*","node_modules/@prisma/query-engine-wasm/**/*",
+    // Build/dev tooling that must never ship in the server bundle.
+    "node_modules/wrangler/**/*","node_modules/miniflare/**/*","node_modules/@cloudflare/workerd-*/**/*","node_modules/blake3-wasm/**/*","node_modules/@opennextjs/cloudflare/dist/cli/**/*",
+    // pdf.js runs only in the browser (served from public/vendor/pdfjs).
+    "node_modules/pdfjs-dist/**/*"]},
   reactStrictMode:true,
   poweredByHeader:false,
   async headers(){return[{source:"/widget/:path*",headers:widgetHeaders},{source:"/:path((?!widget(?:/|$)).*)",headers:securityHeaders}]}
