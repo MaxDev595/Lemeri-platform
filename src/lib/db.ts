@@ -30,8 +30,13 @@ const createTransactionClient = () =>
 // This bypasses Node sockets and WebSocket pools entirely on the registration
 // and readiness paths. Explicit Prisma transactions are routed separately to
 // PrismaNeon, because the HTTP adapter intentionally cannot hold a transaction.
+// Creating a PrismaClient instantiates its WASM query compiler, which costs far
+// more CPU than the query itself and pushed requests over Cloudflare's CPU limit
+// (error 1102). The HTTP transport keeps no sockets between queries, so one client
+// per isolate is safe to share across requests.
+let httpClient: PrismaClient | undefined;
 const createHttpClient = () =>
-  new PrismaClient({ adapter: new PrismaNeonHTTP(connectionString, {}) });
+  (httpClient ??= new PrismaClient({ adapter: new PrismaNeonHTTP(connectionString, {}) }));
 
 // A Cloudflare Worker must not reuse sockets/pools that were created for a
 // different request. Keep the convenient singleton in local development, but

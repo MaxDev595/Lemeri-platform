@@ -34,41 +34,56 @@ export class GroqProvider implements AIProvider {
     const actionProperties = { interest:{anyOf:[{type:"string"},{type:"null"}]}, stage:{anyOf:[{type:"string"},{type:"null"}]}, service:{anyOf:[{type:"string"},{type:"null"}]}, startsAt:{anyOf:[{type:"string"},{type:"null"}]}, title:{anyOf:[{type:"string"},{type:"null"}]}, body:{anyOf:[{type:"string"},{type:"null"}]}, reason:{anyOf:[{type:"string"},{type:"null"}]}, summary:{anyOf:[{type:"string"},{type:"null"}]},name:{anyOf:[{type:"string"},{type:"null"}]},phone:{anyOf:[{type:"string"},{type:"null"}]},email:{anyOf:[{type:"string"},{type:"null"}]} };
     const actionRequestSchema = allowedActions.length ? { anyOf:[{type:"object",additionalProperties:false,properties:{key:{type:"string",enum:allowedActions},input:{type:"object",additionalProperties:false,properties:actionProperties,required:Object.keys(actionProperties)}},required:["key","input"]},{type:"null"}] } : { type:"null" };
     const system = `You are ${input.employeeName}, a ${input.role}. Goal: ${input.goal}. Tone: ${input.tone}. Business instructions: ${input.instructions || "No additional instructions."}. Handoff rules: ${JSON.stringify(input.handoffRules ?? {})}. Follow business instructions unless they conflict with these safety rules. Answer factual questions only from supplied knowledge. If the answer is not supported, or an enabled handoff rule applies, request human handoff. Never invent prices, dates, policies, or source ids. You may request at most one explicitly allowed action after the customer has supplied and confirmed every required value. Allowed actions: ${allowedActions.join(", ") || "none"}. Never claim that an action succeeded; say that you are processing it. Use null for unused action input fields. When creating a lead or appointment, pass the customer's name, phone and email if they gave them. startsAt must be an ISO 8601 date-time with the business time zone offset. ${input.context ?? ""}`;
-    const response = await this.fetcher(`${process.env.GROQ_API_BASE ?? "https://api.groq.com"}/openai/v1/chat/completions`, {
-      method: "POST",
-      headers: { authorization: `Bearer ${this.apiKey}`, "content-type": "application/json" },
-      body: JSON.stringify({
-        model: this.model,
-        messages: [
-          { role: "system", content: system },
-          ...input.messages,
-          { role: "user", content: `VERIFIED KNOWLEDGE:\n${knowledge || "No verified knowledge available."}` },
-        ],
-        temperature: 1,
-        max_completion_tokens: 2048,
-        top_p: 1,
-        reasoning_effort: "medium",
-        stream: false,
-        response_format: { type: "json_schema", json_schema: { name: "lemiri_answer", strict: true, schema: {
-          type: "object", additionalProperties: false,
-          properties: {
-            text: { type: "string" }, confidence: { type: "number", minimum: 0, maximum: 1 },
-            usedSourceIds: { type: "array", items: { type: "string" } },
-            handoffReason: { anyOf: [{ type: "string" }, { type: "null" }] },
-            actionRequest: actionRequestSchema,
-          }, required: ["text", "confidence", "usedSourceIds", "handoffReason", "actionRequest"],
-        } } },
-      }),
-      signal: AbortSignal.timeout(45_000),
-    });
-    const body = await response.json() as GroqResponse;
-    if (!response.ok) throw new Error(`Groq Chat Completions API failed (${response.status}): ${body.error?.message ?? "unknown error"}`);
-    const content = body.choices?.[0]?.message?.content;
-    if (!content) throw new Error("Groq returned an empty response");
-    const parsed = outputSchema.parse(JSON.parse(content));
-    const usedSourceIds = parsed.usedSourceIds.filter(id => allowedSourceIds.has(id));
-    if (parsed.usedSourceIds.length !== usedSourceIds.length) throw new Error("Model returned an unknown knowledge source id");
-    if (parsed.actionRequest && !allowedActions.includes(parsed.actionRequest.key)) throw new Error("Model requested a disallowed action");
+    const strictFormat = { type: "json_schema", json_schema: { name: "lemiri_answer", strict: true, schema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        text: { type: "string" }, confidence: { type: "number", minimum: 0, maximum: 1 },
+        usedSourceIds: { type: "array", items: { type: "string" } },
+        handoffReason: { anyOf: [{ type: "string" }, { type: "null" }] },
+        actionRequest: actionRequestSchema,
+      }, required: ["text", "confidence", "usedSourceIds", "handoffReason", "actionRequest"],
+    } } };
+    // GPT-OSS occasionally fails strict JSON generation (Groq 400 "Failed to
+    // generate JSON") or cites an id it was not given. One retry in plain JSON
+    // mode with the shape spelled out recovers almost all of these, so a customer
+    // is not handed to a manager because of a transient formatting error.
+    const jsonModeHint = `Reply with ONLY one JSON object: {"text": string, "confidence": number 0..1, "usedSourceIds": string[] (only ids shown in VERIFIED KNOWLEDGE), "handoffReason": string|null, "actionRequest": null|{"key": one of [${allowedActions.join(", ")}], "input": {${Object.keys(actionProperties).map(key => `"${key}": string|null`).join(", ")}}}}.`;
+    const attempt = async (strict: boolean) => {
+      const response = await this.fetcher(`${process.env.GROQ_API_BASE ?? "https://api.groq.com"}/openai/v1/chat/completions`, {
+        method: "POST",
+        headers: { authorization: `Bearer ${this.apiKey}`, "content-type": "application/json" },
+        body: JSON.stringify({
+          model: this.model,
+          messages: [
+            { role: "system", content: strict ? system : `${system}\n${jsonModeHint}` },
+            ...input.messages,
+            { role: "user", content: `VERIFIED KNOWLEDGE:\n${knowledge || "No verified knowledge available."}` },
+          ],
+          temperature: strict ? 0.6 : 0.3,
+          max_completion_tokens: 2048,
+          top_p: 1,
+          reasoning_effort: "medium",
+          stream: false,
+          response_format: strict ? strictFormat : { type: "json_object" },
+        }),
+        signal: AbortSignal.timeout(40_000),
+      });
+      const body = await response.json() as GroqResponse;
+      if (!response.ok) throw new Error(`Groq Chat Completions API failed (${response.status}): ${body.error?.message ?? "unknown error"}`);
+      const content = body.choices?.[0]?.message?.content;
+      if (!content) throw new Error("Groq returned an empty response");
+      const parsed = outputSchema.parse(JSON.parse(content));
+      if (parsed.usedSourceIds.some(id => !allowedSourceIds.has(id))) throw new Error("Model returned an unknown knowledge source id");
+      if (parsed.actionRequest && !allowedActions.includes(parsed.actionRequest.key)) throw new Error("Model requested a disallowed action");
+      return parsed;
+    };
+    let parsed: z.infer<typeof outputSchema>;
+    try { parsed = await attempt(true); }
+    catch (error) {
+      console.warn("Groq structured answer failed, retrying in JSON mode", error instanceof Error ? error.message.slice(0, 200) : error);
+      parsed = await attempt(false);
+    }
+    const usedSourceIds = parsed.usedSourceIds;
     const actionRequest = parsed.actionRequest ? { key:parsed.actionRequest.key, input:Object.fromEntries(Object.entries(parsed.actionRequest.input).filter(([,value]) => value !== null)) } : undefined;
     return { text:parsed.text, confidence:parsed.confidence, usedSourceIds, handoffReason:parsed.handoffReason ?? undefined, actionRequest };
   }

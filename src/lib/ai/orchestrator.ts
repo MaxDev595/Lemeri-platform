@@ -60,6 +60,6 @@ function businessContext(timezone: string, workingHours: unknown, conversation: 
     `Current date and time: ${local}.`,
     `Business working hours: ${days} ${hours?.start ?? "09:00"}-${hours?.end ?? "18:00"}; only offer appointment times inside them.`,
     conversation ? `Channel: ${conversation.channelType}.` : "",
-    customer ? `Known customer data (CRM): name=${customer.name.slice(0, 80)}; phone=${customer.phone?.slice(0, 40) ?? "unknown"}; email=${customer.email?.slice(0, 120) ?? "unknown"}. Ask for missing contact details before creating a lead or appointment.` : "",
+    customer ? `Known customer data (CRM): name=${customer.name.slice(0, 80)}; phone=${customer.phone?.slice(0, 40) ?? "unknown"}; email=${customer.email?.slice(0, 120) ?? "unknown"}. Before creating a lead or appointment you need the customer name and at least one contact (phone OR email); do not insist on email when a phone number is given.` : "",
   ].filter(Boolean).join(" ");
 }
