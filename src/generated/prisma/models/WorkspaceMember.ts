@@ -179,6 +179,10 @@ export type WorkspaceMemberWhereInput = {
   assignedEmployees?: Prisma.AIEmployeeListRelationFilter
   assignedConversations?: Prisma.ConversationListRelationFilter
   assignedLeads?: Prisma.LeadListRelationFilter
+  ownedCustomers?: Prisma.CustomerListRelationFilter
+  ownedCompanies?: Prisma.CompanyListRelationFilter
+  ownedDeals?: Prisma.DealListRelationFilter
+  crmTasks?: Prisma.CrmTaskListRelationFilter
 }
 
 export type WorkspaceMemberOrderByWithRelationInput = {
@@ -191,6 +195,10 @@ export type WorkspaceMemberOrderByWithRelationInput = {
   assignedEmployees?: Prisma.AIEmployeeOrderByRelationAggregateInput
   assignedConversations?: Prisma.ConversationOrderByRelationAggregateInput
   assignedLeads?: Prisma.LeadOrderByRelationAggregateInput
+  ownedCustomers?: Prisma.CustomerOrderByRelationAggregateInput
+  ownedCompanies?: Prisma.CompanyOrderByRelationAggregateInput
+  ownedDeals?: Prisma.DealOrderByRelationAggregateInput
+  crmTasks?: Prisma.CrmTaskOrderByRelationAggregateInput
 }
 
 export type WorkspaceMemberWhereUniqueInput = Prisma.AtLeast<{
@@ -207,6 +215,10 @@ export type WorkspaceMemberWhereUniqueInput = Prisma.AtLeast<{
   assignedEmployees?: Prisma.AIEmployeeListRelationFilter
   assignedConversations?: Prisma.ConversationListRelationFilter
   assignedLeads?: Prisma.LeadListRelationFilter
+  ownedCustomers?: Prisma.CustomerListRelationFilter
+  ownedCompanies?: Prisma.CompanyListRelationFilter
+  ownedDeals?: Prisma.DealListRelationFilter
+  crmTasks?: Prisma.CrmTaskListRelationFilter
 }, "id" | "workspaceId_userId">
 
 export type WorkspaceMemberOrderByWithAggregationInput = {
@@ -237,6 +249,10 @@ export type WorkspaceMemberCreateInput = {
   assignedEmployees?: Prisma.AIEmployeeCreateNestedManyWithoutAssigneeInput
   assignedConversations?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   assignedLeads?: Prisma.LeadCreateNestedManyWithoutAssigneeInput
+  ownedCustomers?: Prisma.CustomerCreateNestedManyWithoutOwnerInput
+  ownedCompanies?: Prisma.CompanyCreateNestedManyWithoutOwnerInput
+  ownedDeals?: Prisma.DealCreateNestedManyWithoutOwnerInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutAssigneeInput
 }
 
 export type WorkspaceMemberUncheckedCreateInput = {
@@ -247,6 +263,10 @@ export type WorkspaceMemberUncheckedCreateInput = {
   assignedEmployees?: Prisma.AIEmployeeUncheckedCreateNestedManyWithoutAssigneeInput
   assignedConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   assignedLeads?: Prisma.LeadUncheckedCreateNestedManyWithoutAssigneeInput
+  ownedCustomers?: Prisma.CustomerUncheckedCreateNestedManyWithoutOwnerInput
+  ownedCompanies?: Prisma.CompanyUncheckedCreateNestedManyWithoutOwnerInput
+  ownedDeals?: Prisma.DealUncheckedCreateNestedManyWithoutOwnerInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutAssigneeInput
 }
 
 export type WorkspaceMemberUpdateInput = {
@@ -257,6 +277,10 @@ export type WorkspaceMemberUpdateInput = {
   assignedEmployees?: Prisma.AIEmployeeUpdateManyWithoutAssigneeNestedInput
   assignedConversations?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   assignedLeads?: Prisma.LeadUpdateManyWithoutAssigneeNestedInput
+  ownedCustomers?: Prisma.CustomerUpdateManyWithoutOwnerNestedInput
+  ownedCompanies?: Prisma.CompanyUpdateManyWithoutOwnerNestedInput
+  ownedDeals?: Prisma.DealUpdateManyWithoutOwnerNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutAssigneeNestedInput
 }
 
 export type WorkspaceMemberUncheckedUpdateInput = {
@@ -267,6 +291,10 @@ export type WorkspaceMemberUncheckedUpdateInput = {
   assignedEmployees?: Prisma.AIEmployeeUncheckedUpdateManyWithoutAssigneeNestedInput
   assignedConversations?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   assignedLeads?: Prisma.LeadUncheckedUpdateManyWithoutAssigneeNestedInput
+  ownedCustomers?: Prisma.CustomerUncheckedUpdateManyWithoutOwnerNestedInput
+  ownedCompanies?: Prisma.CompanyUncheckedUpdateManyWithoutOwnerNestedInput
+  ownedDeals?: Prisma.DealUncheckedUpdateManyWithoutOwnerNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutAssigneeNestedInput
 }
 
 export type WorkspaceMemberCreateManyInput = {
@@ -433,6 +461,22 @@ export type WorkspaceMemberUpdateOneWithoutAssignedEmployeesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.WorkspaceMemberUpdateToOneWithWhereWithoutAssignedEmployeesInput, Prisma.WorkspaceMemberUpdateWithoutAssignedEmployeesInput>, Prisma.WorkspaceMemberUncheckedUpdateWithoutAssignedEmployeesInput>
 }
 
+export type WorkspaceMemberCreateNestedOneWithoutOwnedCustomersInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceMemberCreateWithoutOwnedCustomersInput, Prisma.WorkspaceMemberUncheckedCreateWithoutOwnedCustomersInput>
+  connectOrCreate?: Prisma.WorkspaceMemberCreateOrConnectWithoutOwnedCustomersInput
+  connect?: Prisma.WorkspaceMemberWhereUniqueInput
+}
+
+export type WorkspaceMemberUpdateOneWithoutOwnedCustomersNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceMemberCreateWithoutOwnedCustomersInput, Prisma.WorkspaceMemberUncheckedCreateWithoutOwnedCustomersInput>
+  connectOrCreate?: Prisma.WorkspaceMemberCreateOrConnectWithoutOwnedCustomersInput
+  upsert?: Prisma.WorkspaceMemberUpsertWithoutOwnedCustomersInput
+  disconnect?: Prisma.WorkspaceMemberWhereInput | boolean
+  delete?: Prisma.WorkspaceMemberWhereInput | boolean
+  connect?: Prisma.WorkspaceMemberWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.WorkspaceMemberUpdateToOneWithWhereWithoutOwnedCustomersInput, Prisma.WorkspaceMemberUpdateWithoutOwnedCustomersInput>, Prisma.WorkspaceMemberUncheckedUpdateWithoutOwnedCustomersInput>
+}
+
 export type WorkspaceMemberCreateNestedOneWithoutAssignedConversationsInput = {
   create?: Prisma.XOR<Prisma.WorkspaceMemberCreateWithoutAssignedConversationsInput, Prisma.WorkspaceMemberUncheckedCreateWithoutAssignedConversationsInput>
   connectOrCreate?: Prisma.WorkspaceMemberCreateOrConnectWithoutAssignedConversationsInput
@@ -465,6 +509,54 @@ export type WorkspaceMemberUpdateOneWithoutAssignedLeadsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.WorkspaceMemberUpdateToOneWithWhereWithoutAssignedLeadsInput, Prisma.WorkspaceMemberUpdateWithoutAssignedLeadsInput>, Prisma.WorkspaceMemberUncheckedUpdateWithoutAssignedLeadsInput>
 }
 
+export type WorkspaceMemberCreateNestedOneWithoutOwnedCompaniesInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceMemberCreateWithoutOwnedCompaniesInput, Prisma.WorkspaceMemberUncheckedCreateWithoutOwnedCompaniesInput>
+  connectOrCreate?: Prisma.WorkspaceMemberCreateOrConnectWithoutOwnedCompaniesInput
+  connect?: Prisma.WorkspaceMemberWhereUniqueInput
+}
+
+export type WorkspaceMemberUpdateOneWithoutOwnedCompaniesNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceMemberCreateWithoutOwnedCompaniesInput, Prisma.WorkspaceMemberUncheckedCreateWithoutOwnedCompaniesInput>
+  connectOrCreate?: Prisma.WorkspaceMemberCreateOrConnectWithoutOwnedCompaniesInput
+  upsert?: Prisma.WorkspaceMemberUpsertWithoutOwnedCompaniesInput
+  disconnect?: Prisma.WorkspaceMemberWhereInput | boolean
+  delete?: Prisma.WorkspaceMemberWhereInput | boolean
+  connect?: Prisma.WorkspaceMemberWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.WorkspaceMemberUpdateToOneWithWhereWithoutOwnedCompaniesInput, Prisma.WorkspaceMemberUpdateWithoutOwnedCompaniesInput>, Prisma.WorkspaceMemberUncheckedUpdateWithoutOwnedCompaniesInput>
+}
+
+export type WorkspaceMemberCreateNestedOneWithoutOwnedDealsInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceMemberCreateWithoutOwnedDealsInput, Prisma.WorkspaceMemberUncheckedCreateWithoutOwnedDealsInput>
+  connectOrCreate?: Prisma.WorkspaceMemberCreateOrConnectWithoutOwnedDealsInput
+  connect?: Prisma.WorkspaceMemberWhereUniqueInput
+}
+
+export type WorkspaceMemberUpdateOneWithoutOwnedDealsNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceMemberCreateWithoutOwnedDealsInput, Prisma.WorkspaceMemberUncheckedCreateWithoutOwnedDealsInput>
+  connectOrCreate?: Prisma.WorkspaceMemberCreateOrConnectWithoutOwnedDealsInput
+  upsert?: Prisma.WorkspaceMemberUpsertWithoutOwnedDealsInput
+  disconnect?: Prisma.WorkspaceMemberWhereInput | boolean
+  delete?: Prisma.WorkspaceMemberWhereInput | boolean
+  connect?: Prisma.WorkspaceMemberWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.WorkspaceMemberUpdateToOneWithWhereWithoutOwnedDealsInput, Prisma.WorkspaceMemberUpdateWithoutOwnedDealsInput>, Prisma.WorkspaceMemberUncheckedUpdateWithoutOwnedDealsInput>
+}
+
+export type WorkspaceMemberCreateNestedOneWithoutCrmTasksInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceMemberCreateWithoutCrmTasksInput, Prisma.WorkspaceMemberUncheckedCreateWithoutCrmTasksInput>
+  connectOrCreate?: Prisma.WorkspaceMemberCreateOrConnectWithoutCrmTasksInput
+  connect?: Prisma.WorkspaceMemberWhereUniqueInput
+}
+
+export type WorkspaceMemberUpdateOneWithoutCrmTasksNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceMemberCreateWithoutCrmTasksInput, Prisma.WorkspaceMemberUncheckedCreateWithoutCrmTasksInput>
+  connectOrCreate?: Prisma.WorkspaceMemberCreateOrConnectWithoutCrmTasksInput
+  upsert?: Prisma.WorkspaceMemberUpsertWithoutCrmTasksInput
+  disconnect?: Prisma.WorkspaceMemberWhereInput | boolean
+  delete?: Prisma.WorkspaceMemberWhereInput | boolean
+  connect?: Prisma.WorkspaceMemberWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.WorkspaceMemberUpdateToOneWithWhereWithoutCrmTasksInput, Prisma.WorkspaceMemberUpdateWithoutCrmTasksInput>, Prisma.WorkspaceMemberUncheckedUpdateWithoutCrmTasksInput>
+}
+
 export type WorkspaceMemberCreateWithoutUserInput = {
   id?: string
   role?: $Enums.MemberRole
@@ -472,6 +564,10 @@ export type WorkspaceMemberCreateWithoutUserInput = {
   assignedEmployees?: Prisma.AIEmployeeCreateNestedManyWithoutAssigneeInput
   assignedConversations?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   assignedLeads?: Prisma.LeadCreateNestedManyWithoutAssigneeInput
+  ownedCustomers?: Prisma.CustomerCreateNestedManyWithoutOwnerInput
+  ownedCompanies?: Prisma.CompanyCreateNestedManyWithoutOwnerInput
+  ownedDeals?: Prisma.DealCreateNestedManyWithoutOwnerInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutAssigneeInput
 }
 
 export type WorkspaceMemberUncheckedCreateWithoutUserInput = {
@@ -481,6 +577,10 @@ export type WorkspaceMemberUncheckedCreateWithoutUserInput = {
   assignedEmployees?: Prisma.AIEmployeeUncheckedCreateNestedManyWithoutAssigneeInput
   assignedConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   assignedLeads?: Prisma.LeadUncheckedCreateNestedManyWithoutAssigneeInput
+  ownedCustomers?: Prisma.CustomerUncheckedCreateNestedManyWithoutOwnerInput
+  ownedCompanies?: Prisma.CompanyUncheckedCreateNestedManyWithoutOwnerInput
+  ownedDeals?: Prisma.DealUncheckedCreateNestedManyWithoutOwnerInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutAssigneeInput
 }
 
 export type WorkspaceMemberCreateOrConnectWithoutUserInput = {
@@ -526,6 +626,10 @@ export type WorkspaceMemberCreateWithoutWorkspaceInput = {
   assignedEmployees?: Prisma.AIEmployeeCreateNestedManyWithoutAssigneeInput
   assignedConversations?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   assignedLeads?: Prisma.LeadCreateNestedManyWithoutAssigneeInput
+  ownedCustomers?: Prisma.CustomerCreateNestedManyWithoutOwnerInput
+  ownedCompanies?: Prisma.CompanyCreateNestedManyWithoutOwnerInput
+  ownedDeals?: Prisma.DealCreateNestedManyWithoutOwnerInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutAssigneeInput
 }
 
 export type WorkspaceMemberUncheckedCreateWithoutWorkspaceInput = {
@@ -535,6 +639,10 @@ export type WorkspaceMemberUncheckedCreateWithoutWorkspaceInput = {
   assignedEmployees?: Prisma.AIEmployeeUncheckedCreateNestedManyWithoutAssigneeInput
   assignedConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   assignedLeads?: Prisma.LeadUncheckedCreateNestedManyWithoutAssigneeInput
+  ownedCustomers?: Prisma.CustomerUncheckedCreateNestedManyWithoutOwnerInput
+  ownedCompanies?: Prisma.CompanyUncheckedCreateNestedManyWithoutOwnerInput
+  ownedDeals?: Prisma.DealUncheckedCreateNestedManyWithoutOwnerInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutAssigneeInput
 }
 
 export type WorkspaceMemberCreateOrConnectWithoutWorkspaceInput = {
@@ -570,6 +678,10 @@ export type WorkspaceMemberCreateWithoutAssignedEmployeesInput = {
   user: Prisma.UserCreateNestedOneWithoutMembershipsInput
   assignedConversations?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   assignedLeads?: Prisma.LeadCreateNestedManyWithoutAssigneeInput
+  ownedCustomers?: Prisma.CustomerCreateNestedManyWithoutOwnerInput
+  ownedCompanies?: Prisma.CompanyCreateNestedManyWithoutOwnerInput
+  ownedDeals?: Prisma.DealCreateNestedManyWithoutOwnerInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutAssigneeInput
 }
 
 export type WorkspaceMemberUncheckedCreateWithoutAssignedEmployeesInput = {
@@ -579,6 +691,10 @@ export type WorkspaceMemberUncheckedCreateWithoutAssignedEmployeesInput = {
   role?: $Enums.MemberRole
   assignedConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   assignedLeads?: Prisma.LeadUncheckedCreateNestedManyWithoutAssigneeInput
+  ownedCustomers?: Prisma.CustomerUncheckedCreateNestedManyWithoutOwnerInput
+  ownedCompanies?: Prisma.CompanyUncheckedCreateNestedManyWithoutOwnerInput
+  ownedDeals?: Prisma.DealUncheckedCreateNestedManyWithoutOwnerInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutAssigneeInput
 }
 
 export type WorkspaceMemberCreateOrConnectWithoutAssignedEmployeesInput = {
@@ -604,6 +720,10 @@ export type WorkspaceMemberUpdateWithoutAssignedEmployeesInput = {
   user?: Prisma.UserUpdateOneRequiredWithoutMembershipsNestedInput
   assignedConversations?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   assignedLeads?: Prisma.LeadUpdateManyWithoutAssigneeNestedInput
+  ownedCustomers?: Prisma.CustomerUpdateManyWithoutOwnerNestedInput
+  ownedCompanies?: Prisma.CompanyUpdateManyWithoutOwnerNestedInput
+  ownedDeals?: Prisma.DealUpdateManyWithoutOwnerNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutAssigneeNestedInput
 }
 
 export type WorkspaceMemberUncheckedUpdateWithoutAssignedEmployeesInput = {
@@ -613,6 +733,78 @@ export type WorkspaceMemberUncheckedUpdateWithoutAssignedEmployeesInput = {
   role?: Prisma.EnumMemberRoleFieldUpdateOperationsInput | $Enums.MemberRole
   assignedConversations?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   assignedLeads?: Prisma.LeadUncheckedUpdateManyWithoutAssigneeNestedInput
+  ownedCustomers?: Prisma.CustomerUncheckedUpdateManyWithoutOwnerNestedInput
+  ownedCompanies?: Prisma.CompanyUncheckedUpdateManyWithoutOwnerNestedInput
+  ownedDeals?: Prisma.DealUncheckedUpdateManyWithoutOwnerNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutAssigneeNestedInput
+}
+
+export type WorkspaceMemberCreateWithoutOwnedCustomersInput = {
+  id?: string
+  role?: $Enums.MemberRole
+  workspace: Prisma.WorkspaceCreateNestedOneWithoutMembersInput
+  user: Prisma.UserCreateNestedOneWithoutMembershipsInput
+  assignedEmployees?: Prisma.AIEmployeeCreateNestedManyWithoutAssigneeInput
+  assignedConversations?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
+  assignedLeads?: Prisma.LeadCreateNestedManyWithoutAssigneeInput
+  ownedCompanies?: Prisma.CompanyCreateNestedManyWithoutOwnerInput
+  ownedDeals?: Prisma.DealCreateNestedManyWithoutOwnerInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutAssigneeInput
+}
+
+export type WorkspaceMemberUncheckedCreateWithoutOwnedCustomersInput = {
+  id?: string
+  workspaceId: string
+  userId: string
+  role?: $Enums.MemberRole
+  assignedEmployees?: Prisma.AIEmployeeUncheckedCreateNestedManyWithoutAssigneeInput
+  assignedConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
+  assignedLeads?: Prisma.LeadUncheckedCreateNestedManyWithoutAssigneeInput
+  ownedCompanies?: Prisma.CompanyUncheckedCreateNestedManyWithoutOwnerInput
+  ownedDeals?: Prisma.DealUncheckedCreateNestedManyWithoutOwnerInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutAssigneeInput
+}
+
+export type WorkspaceMemberCreateOrConnectWithoutOwnedCustomersInput = {
+  where: Prisma.WorkspaceMemberWhereUniqueInput
+  create: Prisma.XOR<Prisma.WorkspaceMemberCreateWithoutOwnedCustomersInput, Prisma.WorkspaceMemberUncheckedCreateWithoutOwnedCustomersInput>
+}
+
+export type WorkspaceMemberUpsertWithoutOwnedCustomersInput = {
+  update: Prisma.XOR<Prisma.WorkspaceMemberUpdateWithoutOwnedCustomersInput, Prisma.WorkspaceMemberUncheckedUpdateWithoutOwnedCustomersInput>
+  create: Prisma.XOR<Prisma.WorkspaceMemberCreateWithoutOwnedCustomersInput, Prisma.WorkspaceMemberUncheckedCreateWithoutOwnedCustomersInput>
+  where?: Prisma.WorkspaceMemberWhereInput
+}
+
+export type WorkspaceMemberUpdateToOneWithWhereWithoutOwnedCustomersInput = {
+  where?: Prisma.WorkspaceMemberWhereInput
+  data: Prisma.XOR<Prisma.WorkspaceMemberUpdateWithoutOwnedCustomersInput, Prisma.WorkspaceMemberUncheckedUpdateWithoutOwnedCustomersInput>
+}
+
+export type WorkspaceMemberUpdateWithoutOwnedCustomersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumMemberRoleFieldUpdateOperationsInput | $Enums.MemberRole
+  workspace?: Prisma.WorkspaceUpdateOneRequiredWithoutMembersNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutMembershipsNestedInput
+  assignedEmployees?: Prisma.AIEmployeeUpdateManyWithoutAssigneeNestedInput
+  assignedConversations?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
+  assignedLeads?: Prisma.LeadUpdateManyWithoutAssigneeNestedInput
+  ownedCompanies?: Prisma.CompanyUpdateManyWithoutOwnerNestedInput
+  ownedDeals?: Prisma.DealUpdateManyWithoutOwnerNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutAssigneeNestedInput
+}
+
+export type WorkspaceMemberUncheckedUpdateWithoutOwnedCustomersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  workspaceId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumMemberRoleFieldUpdateOperationsInput | $Enums.MemberRole
+  assignedEmployees?: Prisma.AIEmployeeUncheckedUpdateManyWithoutAssigneeNestedInput
+  assignedConversations?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
+  assignedLeads?: Prisma.LeadUncheckedUpdateManyWithoutAssigneeNestedInput
+  ownedCompanies?: Prisma.CompanyUncheckedUpdateManyWithoutOwnerNestedInput
+  ownedDeals?: Prisma.DealUncheckedUpdateManyWithoutOwnerNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutAssigneeNestedInput
 }
 
 export type WorkspaceMemberCreateWithoutAssignedConversationsInput = {
@@ -622,6 +814,10 @@ export type WorkspaceMemberCreateWithoutAssignedConversationsInput = {
   user: Prisma.UserCreateNestedOneWithoutMembershipsInput
   assignedEmployees?: Prisma.AIEmployeeCreateNestedManyWithoutAssigneeInput
   assignedLeads?: Prisma.LeadCreateNestedManyWithoutAssigneeInput
+  ownedCustomers?: Prisma.CustomerCreateNestedManyWithoutOwnerInput
+  ownedCompanies?: Prisma.CompanyCreateNestedManyWithoutOwnerInput
+  ownedDeals?: Prisma.DealCreateNestedManyWithoutOwnerInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutAssigneeInput
 }
 
 export type WorkspaceMemberUncheckedCreateWithoutAssignedConversationsInput = {
@@ -631,6 +827,10 @@ export type WorkspaceMemberUncheckedCreateWithoutAssignedConversationsInput = {
   role?: $Enums.MemberRole
   assignedEmployees?: Prisma.AIEmployeeUncheckedCreateNestedManyWithoutAssigneeInput
   assignedLeads?: Prisma.LeadUncheckedCreateNestedManyWithoutAssigneeInput
+  ownedCustomers?: Prisma.CustomerUncheckedCreateNestedManyWithoutOwnerInput
+  ownedCompanies?: Prisma.CompanyUncheckedCreateNestedManyWithoutOwnerInput
+  ownedDeals?: Prisma.DealUncheckedCreateNestedManyWithoutOwnerInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutAssigneeInput
 }
 
 export type WorkspaceMemberCreateOrConnectWithoutAssignedConversationsInput = {
@@ -656,6 +856,10 @@ export type WorkspaceMemberUpdateWithoutAssignedConversationsInput = {
   user?: Prisma.UserUpdateOneRequiredWithoutMembershipsNestedInput
   assignedEmployees?: Prisma.AIEmployeeUpdateManyWithoutAssigneeNestedInput
   assignedLeads?: Prisma.LeadUpdateManyWithoutAssigneeNestedInput
+  ownedCustomers?: Prisma.CustomerUpdateManyWithoutOwnerNestedInput
+  ownedCompanies?: Prisma.CompanyUpdateManyWithoutOwnerNestedInput
+  ownedDeals?: Prisma.DealUpdateManyWithoutOwnerNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutAssigneeNestedInput
 }
 
 export type WorkspaceMemberUncheckedUpdateWithoutAssignedConversationsInput = {
@@ -665,6 +869,10 @@ export type WorkspaceMemberUncheckedUpdateWithoutAssignedConversationsInput = {
   role?: Prisma.EnumMemberRoleFieldUpdateOperationsInput | $Enums.MemberRole
   assignedEmployees?: Prisma.AIEmployeeUncheckedUpdateManyWithoutAssigneeNestedInput
   assignedLeads?: Prisma.LeadUncheckedUpdateManyWithoutAssigneeNestedInput
+  ownedCustomers?: Prisma.CustomerUncheckedUpdateManyWithoutOwnerNestedInput
+  ownedCompanies?: Prisma.CompanyUncheckedUpdateManyWithoutOwnerNestedInput
+  ownedDeals?: Prisma.DealUncheckedUpdateManyWithoutOwnerNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutAssigneeNestedInput
 }
 
 export type WorkspaceMemberCreateWithoutAssignedLeadsInput = {
@@ -674,6 +882,10 @@ export type WorkspaceMemberCreateWithoutAssignedLeadsInput = {
   user: Prisma.UserCreateNestedOneWithoutMembershipsInput
   assignedEmployees?: Prisma.AIEmployeeCreateNestedManyWithoutAssigneeInput
   assignedConversations?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
+  ownedCustomers?: Prisma.CustomerCreateNestedManyWithoutOwnerInput
+  ownedCompanies?: Prisma.CompanyCreateNestedManyWithoutOwnerInput
+  ownedDeals?: Prisma.DealCreateNestedManyWithoutOwnerInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutAssigneeInput
 }
 
 export type WorkspaceMemberUncheckedCreateWithoutAssignedLeadsInput = {
@@ -683,6 +895,10 @@ export type WorkspaceMemberUncheckedCreateWithoutAssignedLeadsInput = {
   role?: $Enums.MemberRole
   assignedEmployees?: Prisma.AIEmployeeUncheckedCreateNestedManyWithoutAssigneeInput
   assignedConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
+  ownedCustomers?: Prisma.CustomerUncheckedCreateNestedManyWithoutOwnerInput
+  ownedCompanies?: Prisma.CompanyUncheckedCreateNestedManyWithoutOwnerInput
+  ownedDeals?: Prisma.DealUncheckedCreateNestedManyWithoutOwnerInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutAssigneeInput
 }
 
 export type WorkspaceMemberCreateOrConnectWithoutAssignedLeadsInput = {
@@ -708,6 +924,10 @@ export type WorkspaceMemberUpdateWithoutAssignedLeadsInput = {
   user?: Prisma.UserUpdateOneRequiredWithoutMembershipsNestedInput
   assignedEmployees?: Prisma.AIEmployeeUpdateManyWithoutAssigneeNestedInput
   assignedConversations?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
+  ownedCustomers?: Prisma.CustomerUpdateManyWithoutOwnerNestedInput
+  ownedCompanies?: Prisma.CompanyUpdateManyWithoutOwnerNestedInput
+  ownedDeals?: Prisma.DealUpdateManyWithoutOwnerNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutAssigneeNestedInput
 }
 
 export type WorkspaceMemberUncheckedUpdateWithoutAssignedLeadsInput = {
@@ -717,6 +937,214 @@ export type WorkspaceMemberUncheckedUpdateWithoutAssignedLeadsInput = {
   role?: Prisma.EnumMemberRoleFieldUpdateOperationsInput | $Enums.MemberRole
   assignedEmployees?: Prisma.AIEmployeeUncheckedUpdateManyWithoutAssigneeNestedInput
   assignedConversations?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
+  ownedCustomers?: Prisma.CustomerUncheckedUpdateManyWithoutOwnerNestedInput
+  ownedCompanies?: Prisma.CompanyUncheckedUpdateManyWithoutOwnerNestedInput
+  ownedDeals?: Prisma.DealUncheckedUpdateManyWithoutOwnerNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutAssigneeNestedInput
+}
+
+export type WorkspaceMemberCreateWithoutOwnedCompaniesInput = {
+  id?: string
+  role?: $Enums.MemberRole
+  workspace: Prisma.WorkspaceCreateNestedOneWithoutMembersInput
+  user: Prisma.UserCreateNestedOneWithoutMembershipsInput
+  assignedEmployees?: Prisma.AIEmployeeCreateNestedManyWithoutAssigneeInput
+  assignedConversations?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
+  assignedLeads?: Prisma.LeadCreateNestedManyWithoutAssigneeInput
+  ownedCustomers?: Prisma.CustomerCreateNestedManyWithoutOwnerInput
+  ownedDeals?: Prisma.DealCreateNestedManyWithoutOwnerInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutAssigneeInput
+}
+
+export type WorkspaceMemberUncheckedCreateWithoutOwnedCompaniesInput = {
+  id?: string
+  workspaceId: string
+  userId: string
+  role?: $Enums.MemberRole
+  assignedEmployees?: Prisma.AIEmployeeUncheckedCreateNestedManyWithoutAssigneeInput
+  assignedConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
+  assignedLeads?: Prisma.LeadUncheckedCreateNestedManyWithoutAssigneeInput
+  ownedCustomers?: Prisma.CustomerUncheckedCreateNestedManyWithoutOwnerInput
+  ownedDeals?: Prisma.DealUncheckedCreateNestedManyWithoutOwnerInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutAssigneeInput
+}
+
+export type WorkspaceMemberCreateOrConnectWithoutOwnedCompaniesInput = {
+  where: Prisma.WorkspaceMemberWhereUniqueInput
+  create: Prisma.XOR<Prisma.WorkspaceMemberCreateWithoutOwnedCompaniesInput, Prisma.WorkspaceMemberUncheckedCreateWithoutOwnedCompaniesInput>
+}
+
+export type WorkspaceMemberUpsertWithoutOwnedCompaniesInput = {
+  update: Prisma.XOR<Prisma.WorkspaceMemberUpdateWithoutOwnedCompaniesInput, Prisma.WorkspaceMemberUncheckedUpdateWithoutOwnedCompaniesInput>
+  create: Prisma.XOR<Prisma.WorkspaceMemberCreateWithoutOwnedCompaniesInput, Prisma.WorkspaceMemberUncheckedCreateWithoutOwnedCompaniesInput>
+  where?: Prisma.WorkspaceMemberWhereInput
+}
+
+export type WorkspaceMemberUpdateToOneWithWhereWithoutOwnedCompaniesInput = {
+  where?: Prisma.WorkspaceMemberWhereInput
+  data: Prisma.XOR<Prisma.WorkspaceMemberUpdateWithoutOwnedCompaniesInput, Prisma.WorkspaceMemberUncheckedUpdateWithoutOwnedCompaniesInput>
+}
+
+export type WorkspaceMemberUpdateWithoutOwnedCompaniesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumMemberRoleFieldUpdateOperationsInput | $Enums.MemberRole
+  workspace?: Prisma.WorkspaceUpdateOneRequiredWithoutMembersNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutMembershipsNestedInput
+  assignedEmployees?: Prisma.AIEmployeeUpdateManyWithoutAssigneeNestedInput
+  assignedConversations?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
+  assignedLeads?: Prisma.LeadUpdateManyWithoutAssigneeNestedInput
+  ownedCustomers?: Prisma.CustomerUpdateManyWithoutOwnerNestedInput
+  ownedDeals?: Prisma.DealUpdateManyWithoutOwnerNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutAssigneeNestedInput
+}
+
+export type WorkspaceMemberUncheckedUpdateWithoutOwnedCompaniesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  workspaceId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumMemberRoleFieldUpdateOperationsInput | $Enums.MemberRole
+  assignedEmployees?: Prisma.AIEmployeeUncheckedUpdateManyWithoutAssigneeNestedInput
+  assignedConversations?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
+  assignedLeads?: Prisma.LeadUncheckedUpdateManyWithoutAssigneeNestedInput
+  ownedCustomers?: Prisma.CustomerUncheckedUpdateManyWithoutOwnerNestedInput
+  ownedDeals?: Prisma.DealUncheckedUpdateManyWithoutOwnerNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutAssigneeNestedInput
+}
+
+export type WorkspaceMemberCreateWithoutOwnedDealsInput = {
+  id?: string
+  role?: $Enums.MemberRole
+  workspace: Prisma.WorkspaceCreateNestedOneWithoutMembersInput
+  user: Prisma.UserCreateNestedOneWithoutMembershipsInput
+  assignedEmployees?: Prisma.AIEmployeeCreateNestedManyWithoutAssigneeInput
+  assignedConversations?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
+  assignedLeads?: Prisma.LeadCreateNestedManyWithoutAssigneeInput
+  ownedCustomers?: Prisma.CustomerCreateNestedManyWithoutOwnerInput
+  ownedCompanies?: Prisma.CompanyCreateNestedManyWithoutOwnerInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutAssigneeInput
+}
+
+export type WorkspaceMemberUncheckedCreateWithoutOwnedDealsInput = {
+  id?: string
+  workspaceId: string
+  userId: string
+  role?: $Enums.MemberRole
+  assignedEmployees?: Prisma.AIEmployeeUncheckedCreateNestedManyWithoutAssigneeInput
+  assignedConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
+  assignedLeads?: Prisma.LeadUncheckedCreateNestedManyWithoutAssigneeInput
+  ownedCustomers?: Prisma.CustomerUncheckedCreateNestedManyWithoutOwnerInput
+  ownedCompanies?: Prisma.CompanyUncheckedCreateNestedManyWithoutOwnerInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutAssigneeInput
+}
+
+export type WorkspaceMemberCreateOrConnectWithoutOwnedDealsInput = {
+  where: Prisma.WorkspaceMemberWhereUniqueInput
+  create: Prisma.XOR<Prisma.WorkspaceMemberCreateWithoutOwnedDealsInput, Prisma.WorkspaceMemberUncheckedCreateWithoutOwnedDealsInput>
+}
+
+export type WorkspaceMemberUpsertWithoutOwnedDealsInput = {
+  update: Prisma.XOR<Prisma.WorkspaceMemberUpdateWithoutOwnedDealsInput, Prisma.WorkspaceMemberUncheckedUpdateWithoutOwnedDealsInput>
+  create: Prisma.XOR<Prisma.WorkspaceMemberCreateWithoutOwnedDealsInput, Prisma.WorkspaceMemberUncheckedCreateWithoutOwnedDealsInput>
+  where?: Prisma.WorkspaceMemberWhereInput
+}
+
+export type WorkspaceMemberUpdateToOneWithWhereWithoutOwnedDealsInput = {
+  where?: Prisma.WorkspaceMemberWhereInput
+  data: Prisma.XOR<Prisma.WorkspaceMemberUpdateWithoutOwnedDealsInput, Prisma.WorkspaceMemberUncheckedUpdateWithoutOwnedDealsInput>
+}
+
+export type WorkspaceMemberUpdateWithoutOwnedDealsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumMemberRoleFieldUpdateOperationsInput | $Enums.MemberRole
+  workspace?: Prisma.WorkspaceUpdateOneRequiredWithoutMembersNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutMembershipsNestedInput
+  assignedEmployees?: Prisma.AIEmployeeUpdateManyWithoutAssigneeNestedInput
+  assignedConversations?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
+  assignedLeads?: Prisma.LeadUpdateManyWithoutAssigneeNestedInput
+  ownedCustomers?: Prisma.CustomerUpdateManyWithoutOwnerNestedInput
+  ownedCompanies?: Prisma.CompanyUpdateManyWithoutOwnerNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutAssigneeNestedInput
+}
+
+export type WorkspaceMemberUncheckedUpdateWithoutOwnedDealsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  workspaceId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumMemberRoleFieldUpdateOperationsInput | $Enums.MemberRole
+  assignedEmployees?: Prisma.AIEmployeeUncheckedUpdateManyWithoutAssigneeNestedInput
+  assignedConversations?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
+  assignedLeads?: Prisma.LeadUncheckedUpdateManyWithoutAssigneeNestedInput
+  ownedCustomers?: Prisma.CustomerUncheckedUpdateManyWithoutOwnerNestedInput
+  ownedCompanies?: Prisma.CompanyUncheckedUpdateManyWithoutOwnerNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutAssigneeNestedInput
+}
+
+export type WorkspaceMemberCreateWithoutCrmTasksInput = {
+  id?: string
+  role?: $Enums.MemberRole
+  workspace: Prisma.WorkspaceCreateNestedOneWithoutMembersInput
+  user: Prisma.UserCreateNestedOneWithoutMembershipsInput
+  assignedEmployees?: Prisma.AIEmployeeCreateNestedManyWithoutAssigneeInput
+  assignedConversations?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
+  assignedLeads?: Prisma.LeadCreateNestedManyWithoutAssigneeInput
+  ownedCustomers?: Prisma.CustomerCreateNestedManyWithoutOwnerInput
+  ownedCompanies?: Prisma.CompanyCreateNestedManyWithoutOwnerInput
+  ownedDeals?: Prisma.DealCreateNestedManyWithoutOwnerInput
+}
+
+export type WorkspaceMemberUncheckedCreateWithoutCrmTasksInput = {
+  id?: string
+  workspaceId: string
+  userId: string
+  role?: $Enums.MemberRole
+  assignedEmployees?: Prisma.AIEmployeeUncheckedCreateNestedManyWithoutAssigneeInput
+  assignedConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
+  assignedLeads?: Prisma.LeadUncheckedCreateNestedManyWithoutAssigneeInput
+  ownedCustomers?: Prisma.CustomerUncheckedCreateNestedManyWithoutOwnerInput
+  ownedCompanies?: Prisma.CompanyUncheckedCreateNestedManyWithoutOwnerInput
+  ownedDeals?: Prisma.DealUncheckedCreateNestedManyWithoutOwnerInput
+}
+
+export type WorkspaceMemberCreateOrConnectWithoutCrmTasksInput = {
+  where: Prisma.WorkspaceMemberWhereUniqueInput
+  create: Prisma.XOR<Prisma.WorkspaceMemberCreateWithoutCrmTasksInput, Prisma.WorkspaceMemberUncheckedCreateWithoutCrmTasksInput>
+}
+
+export type WorkspaceMemberUpsertWithoutCrmTasksInput = {
+  update: Prisma.XOR<Prisma.WorkspaceMemberUpdateWithoutCrmTasksInput, Prisma.WorkspaceMemberUncheckedUpdateWithoutCrmTasksInput>
+  create: Prisma.XOR<Prisma.WorkspaceMemberCreateWithoutCrmTasksInput, Prisma.WorkspaceMemberUncheckedCreateWithoutCrmTasksInput>
+  where?: Prisma.WorkspaceMemberWhereInput
+}
+
+export type WorkspaceMemberUpdateToOneWithWhereWithoutCrmTasksInput = {
+  where?: Prisma.WorkspaceMemberWhereInput
+  data: Prisma.XOR<Prisma.WorkspaceMemberUpdateWithoutCrmTasksInput, Prisma.WorkspaceMemberUncheckedUpdateWithoutCrmTasksInput>
+}
+
+export type WorkspaceMemberUpdateWithoutCrmTasksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumMemberRoleFieldUpdateOperationsInput | $Enums.MemberRole
+  workspace?: Prisma.WorkspaceUpdateOneRequiredWithoutMembersNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutMembershipsNestedInput
+  assignedEmployees?: Prisma.AIEmployeeUpdateManyWithoutAssigneeNestedInput
+  assignedConversations?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
+  assignedLeads?: Prisma.LeadUpdateManyWithoutAssigneeNestedInput
+  ownedCustomers?: Prisma.CustomerUpdateManyWithoutOwnerNestedInput
+  ownedCompanies?: Prisma.CompanyUpdateManyWithoutOwnerNestedInput
+  ownedDeals?: Prisma.DealUpdateManyWithoutOwnerNestedInput
+}
+
+export type WorkspaceMemberUncheckedUpdateWithoutCrmTasksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  workspaceId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumMemberRoleFieldUpdateOperationsInput | $Enums.MemberRole
+  assignedEmployees?: Prisma.AIEmployeeUncheckedUpdateManyWithoutAssigneeNestedInput
+  assignedConversations?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
+  assignedLeads?: Prisma.LeadUncheckedUpdateManyWithoutAssigneeNestedInput
+  ownedCustomers?: Prisma.CustomerUncheckedUpdateManyWithoutOwnerNestedInput
+  ownedCompanies?: Prisma.CompanyUncheckedUpdateManyWithoutOwnerNestedInput
+  ownedDeals?: Prisma.DealUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type WorkspaceMemberCreateManyUserInput = {
@@ -732,6 +1160,10 @@ export type WorkspaceMemberUpdateWithoutUserInput = {
   assignedEmployees?: Prisma.AIEmployeeUpdateManyWithoutAssigneeNestedInput
   assignedConversations?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   assignedLeads?: Prisma.LeadUpdateManyWithoutAssigneeNestedInput
+  ownedCustomers?: Prisma.CustomerUpdateManyWithoutOwnerNestedInput
+  ownedCompanies?: Prisma.CompanyUpdateManyWithoutOwnerNestedInput
+  ownedDeals?: Prisma.DealUpdateManyWithoutOwnerNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutAssigneeNestedInput
 }
 
 export type WorkspaceMemberUncheckedUpdateWithoutUserInput = {
@@ -741,6 +1173,10 @@ export type WorkspaceMemberUncheckedUpdateWithoutUserInput = {
   assignedEmployees?: Prisma.AIEmployeeUncheckedUpdateManyWithoutAssigneeNestedInput
   assignedConversations?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   assignedLeads?: Prisma.LeadUncheckedUpdateManyWithoutAssigneeNestedInput
+  ownedCustomers?: Prisma.CustomerUncheckedUpdateManyWithoutOwnerNestedInput
+  ownedCompanies?: Prisma.CompanyUncheckedUpdateManyWithoutOwnerNestedInput
+  ownedDeals?: Prisma.DealUncheckedUpdateManyWithoutOwnerNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutAssigneeNestedInput
 }
 
 export type WorkspaceMemberUncheckedUpdateManyWithoutUserInput = {
@@ -762,6 +1198,10 @@ export type WorkspaceMemberUpdateWithoutWorkspaceInput = {
   assignedEmployees?: Prisma.AIEmployeeUpdateManyWithoutAssigneeNestedInput
   assignedConversations?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   assignedLeads?: Prisma.LeadUpdateManyWithoutAssigneeNestedInput
+  ownedCustomers?: Prisma.CustomerUpdateManyWithoutOwnerNestedInput
+  ownedCompanies?: Prisma.CompanyUpdateManyWithoutOwnerNestedInput
+  ownedDeals?: Prisma.DealUpdateManyWithoutOwnerNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutAssigneeNestedInput
 }
 
 export type WorkspaceMemberUncheckedUpdateWithoutWorkspaceInput = {
@@ -771,6 +1211,10 @@ export type WorkspaceMemberUncheckedUpdateWithoutWorkspaceInput = {
   assignedEmployees?: Prisma.AIEmployeeUncheckedUpdateManyWithoutAssigneeNestedInput
   assignedConversations?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   assignedLeads?: Prisma.LeadUncheckedUpdateManyWithoutAssigneeNestedInput
+  ownedCustomers?: Prisma.CustomerUncheckedUpdateManyWithoutOwnerNestedInput
+  ownedCompanies?: Prisma.CompanyUncheckedUpdateManyWithoutOwnerNestedInput
+  ownedDeals?: Prisma.DealUncheckedUpdateManyWithoutOwnerNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutAssigneeNestedInput
 }
 
 export type WorkspaceMemberUncheckedUpdateManyWithoutWorkspaceInput = {
@@ -788,12 +1232,20 @@ export type WorkspaceMemberCountOutputType = {
   assignedEmployees: number
   assignedConversations: number
   assignedLeads: number
+  ownedCustomers: number
+  ownedCompanies: number
+  ownedDeals: number
+  crmTasks: number
 }
 
 export type WorkspaceMemberCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assignedEmployees?: boolean | WorkspaceMemberCountOutputTypeCountAssignedEmployeesArgs
   assignedConversations?: boolean | WorkspaceMemberCountOutputTypeCountAssignedConversationsArgs
   assignedLeads?: boolean | WorkspaceMemberCountOutputTypeCountAssignedLeadsArgs
+  ownedCustomers?: boolean | WorkspaceMemberCountOutputTypeCountOwnedCustomersArgs
+  ownedCompanies?: boolean | WorkspaceMemberCountOutputTypeCountOwnedCompaniesArgs
+  ownedDeals?: boolean | WorkspaceMemberCountOutputTypeCountOwnedDealsArgs
+  crmTasks?: boolean | WorkspaceMemberCountOutputTypeCountCrmTasksArgs
 }
 
 /**
@@ -827,6 +1279,34 @@ export type WorkspaceMemberCountOutputTypeCountAssignedLeadsArgs<ExtArgs extends
   where?: Prisma.LeadWhereInput
 }
 
+/**
+ * WorkspaceMemberCountOutputType without action
+ */
+export type WorkspaceMemberCountOutputTypeCountOwnedCustomersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CustomerWhereInput
+}
+
+/**
+ * WorkspaceMemberCountOutputType without action
+ */
+export type WorkspaceMemberCountOutputTypeCountOwnedCompaniesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CompanyWhereInput
+}
+
+/**
+ * WorkspaceMemberCountOutputType without action
+ */
+export type WorkspaceMemberCountOutputTypeCountOwnedDealsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DealWhereInput
+}
+
+/**
+ * WorkspaceMemberCountOutputType without action
+ */
+export type WorkspaceMemberCountOutputTypeCountCrmTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CrmTaskWhereInput
+}
+
 
 export type WorkspaceMemberSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -838,6 +1318,10 @@ export type WorkspaceMemberSelect<ExtArgs extends runtime.Types.Extensions.Inter
   assignedEmployees?: boolean | Prisma.WorkspaceMember$assignedEmployeesArgs<ExtArgs>
   assignedConversations?: boolean | Prisma.WorkspaceMember$assignedConversationsArgs<ExtArgs>
   assignedLeads?: boolean | Prisma.WorkspaceMember$assignedLeadsArgs<ExtArgs>
+  ownedCustomers?: boolean | Prisma.WorkspaceMember$ownedCustomersArgs<ExtArgs>
+  ownedCompanies?: boolean | Prisma.WorkspaceMember$ownedCompaniesArgs<ExtArgs>
+  ownedDeals?: boolean | Prisma.WorkspaceMember$ownedDealsArgs<ExtArgs>
+  crmTasks?: boolean | Prisma.WorkspaceMember$crmTasksArgs<ExtArgs>
   _count?: boolean | Prisma.WorkspaceMemberCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["workspaceMember"]>
 
@@ -873,6 +1357,10 @@ export type WorkspaceMemberInclude<ExtArgs extends runtime.Types.Extensions.Inte
   assignedEmployees?: boolean | Prisma.WorkspaceMember$assignedEmployeesArgs<ExtArgs>
   assignedConversations?: boolean | Prisma.WorkspaceMember$assignedConversationsArgs<ExtArgs>
   assignedLeads?: boolean | Prisma.WorkspaceMember$assignedLeadsArgs<ExtArgs>
+  ownedCustomers?: boolean | Prisma.WorkspaceMember$ownedCustomersArgs<ExtArgs>
+  ownedCompanies?: boolean | Prisma.WorkspaceMember$ownedCompaniesArgs<ExtArgs>
+  ownedDeals?: boolean | Prisma.WorkspaceMember$ownedDealsArgs<ExtArgs>
+  crmTasks?: boolean | Prisma.WorkspaceMember$crmTasksArgs<ExtArgs>
   _count?: boolean | Prisma.WorkspaceMemberCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type WorkspaceMemberIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -892,6 +1380,10 @@ export type $WorkspaceMemberPayload<ExtArgs extends runtime.Types.Extensions.Int
     assignedEmployees: Prisma.$AIEmployeePayload<ExtArgs>[]
     assignedConversations: Prisma.$ConversationPayload<ExtArgs>[]
     assignedLeads: Prisma.$LeadPayload<ExtArgs>[]
+    ownedCustomers: Prisma.$CustomerPayload<ExtArgs>[]
+    ownedCompanies: Prisma.$CompanyPayload<ExtArgs>[]
+    ownedDeals: Prisma.$DealPayload<ExtArgs>[]
+    crmTasks: Prisma.$CrmTaskPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1297,6 +1789,10 @@ export interface Prisma__WorkspaceMemberClient<T, Null = never, ExtArgs extends 
   assignedEmployees<T extends Prisma.WorkspaceMember$assignedEmployeesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WorkspaceMember$assignedEmployeesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AIEmployeePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assignedConversations<T extends Prisma.WorkspaceMember$assignedConversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WorkspaceMember$assignedConversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assignedLeads<T extends Prisma.WorkspaceMember$assignedLeadsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WorkspaceMember$assignedLeadsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LeadPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  ownedCustomers<T extends Prisma.WorkspaceMember$ownedCustomersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WorkspaceMember$ownedCustomersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  ownedCompanies<T extends Prisma.WorkspaceMember$ownedCompaniesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WorkspaceMember$ownedCompaniesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  ownedDeals<T extends Prisma.WorkspaceMember$ownedDealsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WorkspaceMember$ownedDealsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DealPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  crmTasks<T extends Prisma.WorkspaceMember$crmTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WorkspaceMember$crmTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CrmTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1795,6 +2291,102 @@ export type WorkspaceMember$assignedLeadsArgs<ExtArgs extends runtime.Types.Exte
   take?: number
   skip?: number
   distinct?: Prisma.LeadScalarFieldEnum | Prisma.LeadScalarFieldEnum[]
+}
+
+/**
+ * WorkspaceMember.ownedCustomers
+ */
+export type WorkspaceMember$ownedCustomersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Customer
+   */
+  select?: Prisma.CustomerSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Customer
+   */
+  omit?: Prisma.CustomerOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CustomerInclude<ExtArgs> | null
+  where?: Prisma.CustomerWhereInput
+  orderBy?: Prisma.CustomerOrderByWithRelationInput | Prisma.CustomerOrderByWithRelationInput[]
+  cursor?: Prisma.CustomerWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CustomerScalarFieldEnum | Prisma.CustomerScalarFieldEnum[]
+}
+
+/**
+ * WorkspaceMember.ownedCompanies
+ */
+export type WorkspaceMember$ownedCompaniesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Company
+   */
+  select?: Prisma.CompanySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Company
+   */
+  omit?: Prisma.CompanyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanyInclude<ExtArgs> | null
+  where?: Prisma.CompanyWhereInput
+  orderBy?: Prisma.CompanyOrderByWithRelationInput | Prisma.CompanyOrderByWithRelationInput[]
+  cursor?: Prisma.CompanyWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CompanyScalarFieldEnum | Prisma.CompanyScalarFieldEnum[]
+}
+
+/**
+ * WorkspaceMember.ownedDeals
+ */
+export type WorkspaceMember$ownedDealsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Deal
+   */
+  select?: Prisma.DealSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Deal
+   */
+  omit?: Prisma.DealOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DealInclude<ExtArgs> | null
+  where?: Prisma.DealWhereInput
+  orderBy?: Prisma.DealOrderByWithRelationInput | Prisma.DealOrderByWithRelationInput[]
+  cursor?: Prisma.DealWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DealScalarFieldEnum | Prisma.DealScalarFieldEnum[]
+}
+
+/**
+ * WorkspaceMember.crmTasks
+ */
+export type WorkspaceMember$crmTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CrmTask
+   */
+  select?: Prisma.CrmTaskSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CrmTask
+   */
+  omit?: Prisma.CrmTaskOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CrmTaskInclude<ExtArgs> | null
+  where?: Prisma.CrmTaskWhereInput
+  orderBy?: Prisma.CrmTaskOrderByWithRelationInput | Prisma.CrmTaskOrderByWithRelationInput[]
+  cursor?: Prisma.CrmTaskWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CrmTaskScalarFieldEnum | Prisma.CrmTaskScalarFieldEnum[]
 }
 
 /**

@@ -196,6 +196,13 @@ export type WorkspaceWhereInput = {
   testCases?: Prisma.AITestCaseListRelationFilter
   knowledgeGaps?: Prisma.KnowledgeGapListRelationFilter
   insights?: Prisma.AIInsightListRelationFilter
+  companies?: Prisma.CompanyListRelationFilter
+  pipelines?: Prisma.PipelineListRelationFilter
+  deals?: Prisma.DealListRelationFilter
+  products?: Prisma.ProductListRelationFilter
+  crmTasks?: Prisma.CrmTaskListRelationFilter
+  crmActivities?: Prisma.CrmActivityListRelationFilter
+  crmFields?: Prisma.CrmFieldDefinitionListRelationFilter
 }
 
 export type WorkspaceOrderByWithRelationInput = {
@@ -225,6 +232,13 @@ export type WorkspaceOrderByWithRelationInput = {
   testCases?: Prisma.AITestCaseOrderByRelationAggregateInput
   knowledgeGaps?: Prisma.KnowledgeGapOrderByRelationAggregateInput
   insights?: Prisma.AIInsightOrderByRelationAggregateInput
+  companies?: Prisma.CompanyOrderByRelationAggregateInput
+  pipelines?: Prisma.PipelineOrderByRelationAggregateInput
+  deals?: Prisma.DealOrderByRelationAggregateInput
+  products?: Prisma.ProductOrderByRelationAggregateInput
+  crmTasks?: Prisma.CrmTaskOrderByRelationAggregateInput
+  crmActivities?: Prisma.CrmActivityOrderByRelationAggregateInput
+  crmFields?: Prisma.CrmFieldDefinitionOrderByRelationAggregateInput
 }
 
 export type WorkspaceWhereUniqueInput = Prisma.AtLeast<{
@@ -257,6 +271,13 @@ export type WorkspaceWhereUniqueInput = Prisma.AtLeast<{
   testCases?: Prisma.AITestCaseListRelationFilter
   knowledgeGaps?: Prisma.KnowledgeGapListRelationFilter
   insights?: Prisma.AIInsightListRelationFilter
+  companies?: Prisma.CompanyListRelationFilter
+  pipelines?: Prisma.PipelineListRelationFilter
+  deals?: Prisma.DealListRelationFilter
+  products?: Prisma.ProductListRelationFilter
+  crmTasks?: Prisma.CrmTaskListRelationFilter
+  crmActivities?: Prisma.CrmActivityListRelationFilter
+  crmFields?: Prisma.CrmFieldDefinitionListRelationFilter
 }, "id" | "slug">
 
 export type WorkspaceOrderByWithAggregationInput = {
@@ -306,6 +327,13 @@ export type WorkspaceCreateInput = {
   testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateInput = {
@@ -335,6 +363,13 @@ export type WorkspaceUncheckedCreateInput = {
   testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUpdateInput = {
@@ -364,6 +399,13 @@ export type WorkspaceUpdateInput = {
   testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateInput = {
@@ -393,6 +435,13 @@ export type WorkspaceUncheckedUpdateInput = {
   testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateManyInput = {
@@ -757,6 +806,104 @@ export type WorkspaceUpdateOneRequiredWithoutInsightsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.WorkspaceUpdateToOneWithWhereWithoutInsightsInput, Prisma.WorkspaceUpdateWithoutInsightsInput>, Prisma.WorkspaceUncheckedUpdateWithoutInsightsInput>
 }
 
+export type WorkspaceCreateNestedOneWithoutCompaniesInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutCompaniesInput, Prisma.WorkspaceUncheckedCreateWithoutCompaniesInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutCompaniesInput
+  connect?: Prisma.WorkspaceWhereUniqueInput
+}
+
+export type WorkspaceUpdateOneRequiredWithoutCompaniesNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutCompaniesInput, Prisma.WorkspaceUncheckedCreateWithoutCompaniesInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutCompaniesInput
+  upsert?: Prisma.WorkspaceUpsertWithoutCompaniesInput
+  connect?: Prisma.WorkspaceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.WorkspaceUpdateToOneWithWhereWithoutCompaniesInput, Prisma.WorkspaceUpdateWithoutCompaniesInput>, Prisma.WorkspaceUncheckedUpdateWithoutCompaniesInput>
+}
+
+export type WorkspaceCreateNestedOneWithoutPipelinesInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutPipelinesInput, Prisma.WorkspaceUncheckedCreateWithoutPipelinesInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutPipelinesInput
+  connect?: Prisma.WorkspaceWhereUniqueInput
+}
+
+export type WorkspaceUpdateOneRequiredWithoutPipelinesNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutPipelinesInput, Prisma.WorkspaceUncheckedCreateWithoutPipelinesInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutPipelinesInput
+  upsert?: Prisma.WorkspaceUpsertWithoutPipelinesInput
+  connect?: Prisma.WorkspaceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.WorkspaceUpdateToOneWithWhereWithoutPipelinesInput, Prisma.WorkspaceUpdateWithoutPipelinesInput>, Prisma.WorkspaceUncheckedUpdateWithoutPipelinesInput>
+}
+
+export type WorkspaceCreateNestedOneWithoutDealsInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutDealsInput, Prisma.WorkspaceUncheckedCreateWithoutDealsInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutDealsInput
+  connect?: Prisma.WorkspaceWhereUniqueInput
+}
+
+export type WorkspaceUpdateOneRequiredWithoutDealsNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutDealsInput, Prisma.WorkspaceUncheckedCreateWithoutDealsInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutDealsInput
+  upsert?: Prisma.WorkspaceUpsertWithoutDealsInput
+  connect?: Prisma.WorkspaceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.WorkspaceUpdateToOneWithWhereWithoutDealsInput, Prisma.WorkspaceUpdateWithoutDealsInput>, Prisma.WorkspaceUncheckedUpdateWithoutDealsInput>
+}
+
+export type WorkspaceCreateNestedOneWithoutProductsInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutProductsInput, Prisma.WorkspaceUncheckedCreateWithoutProductsInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutProductsInput
+  connect?: Prisma.WorkspaceWhereUniqueInput
+}
+
+export type WorkspaceUpdateOneRequiredWithoutProductsNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutProductsInput, Prisma.WorkspaceUncheckedCreateWithoutProductsInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutProductsInput
+  upsert?: Prisma.WorkspaceUpsertWithoutProductsInput
+  connect?: Prisma.WorkspaceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.WorkspaceUpdateToOneWithWhereWithoutProductsInput, Prisma.WorkspaceUpdateWithoutProductsInput>, Prisma.WorkspaceUncheckedUpdateWithoutProductsInput>
+}
+
+export type WorkspaceCreateNestedOneWithoutCrmTasksInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutCrmTasksInput, Prisma.WorkspaceUncheckedCreateWithoutCrmTasksInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutCrmTasksInput
+  connect?: Prisma.WorkspaceWhereUniqueInput
+}
+
+export type WorkspaceUpdateOneRequiredWithoutCrmTasksNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutCrmTasksInput, Prisma.WorkspaceUncheckedCreateWithoutCrmTasksInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutCrmTasksInput
+  upsert?: Prisma.WorkspaceUpsertWithoutCrmTasksInput
+  connect?: Prisma.WorkspaceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.WorkspaceUpdateToOneWithWhereWithoutCrmTasksInput, Prisma.WorkspaceUpdateWithoutCrmTasksInput>, Prisma.WorkspaceUncheckedUpdateWithoutCrmTasksInput>
+}
+
+export type WorkspaceCreateNestedOneWithoutCrmActivitiesInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutCrmActivitiesInput, Prisma.WorkspaceUncheckedCreateWithoutCrmActivitiesInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutCrmActivitiesInput
+  connect?: Prisma.WorkspaceWhereUniqueInput
+}
+
+export type WorkspaceUpdateOneRequiredWithoutCrmActivitiesNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutCrmActivitiesInput, Prisma.WorkspaceUncheckedCreateWithoutCrmActivitiesInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutCrmActivitiesInput
+  upsert?: Prisma.WorkspaceUpsertWithoutCrmActivitiesInput
+  connect?: Prisma.WorkspaceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.WorkspaceUpdateToOneWithWhereWithoutCrmActivitiesInput, Prisma.WorkspaceUpdateWithoutCrmActivitiesInput>, Prisma.WorkspaceUncheckedUpdateWithoutCrmActivitiesInput>
+}
+
+export type WorkspaceCreateNestedOneWithoutCrmFieldsInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutCrmFieldsInput, Prisma.WorkspaceUncheckedCreateWithoutCrmFieldsInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutCrmFieldsInput
+  connect?: Prisma.WorkspaceWhereUniqueInput
+}
+
+export type WorkspaceUpdateOneRequiredWithoutCrmFieldsNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutCrmFieldsInput, Prisma.WorkspaceUncheckedCreateWithoutCrmFieldsInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutCrmFieldsInput
+  upsert?: Prisma.WorkspaceUpsertWithoutCrmFieldsInput
+  connect?: Prisma.WorkspaceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.WorkspaceUpdateToOneWithWhereWithoutCrmFieldsInput, Prisma.WorkspaceUpdateWithoutCrmFieldsInput>, Prisma.WorkspaceUncheckedUpdateWithoutCrmFieldsInput>
+}
+
 export type WorkspaceCreateWithoutMembersInput = {
   id?: string
   name: string
@@ -783,6 +930,13 @@ export type WorkspaceCreateWithoutMembersInput = {
   testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutMembersInput = {
@@ -811,6 +965,13 @@ export type WorkspaceUncheckedCreateWithoutMembersInput = {
   testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutMembersInput = {
@@ -855,6 +1016,13 @@ export type WorkspaceUpdateWithoutMembersInput = {
   testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutMembersInput = {
@@ -883,6 +1051,13 @@ export type WorkspaceUncheckedUpdateWithoutMembersInput = {
   testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateWithoutInvitationsInput = {
@@ -911,6 +1086,13 @@ export type WorkspaceCreateWithoutInvitationsInput = {
   testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutInvitationsInput = {
@@ -939,6 +1121,13 @@ export type WorkspaceUncheckedCreateWithoutInvitationsInput = {
   testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutInvitationsInput = {
@@ -983,6 +1172,13 @@ export type WorkspaceUpdateWithoutInvitationsInput = {
   testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutInvitationsInput = {
@@ -1011,6 +1207,13 @@ export type WorkspaceUncheckedUpdateWithoutInvitationsInput = {
   testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateWithoutSettingsInput = {
@@ -1039,6 +1242,13 @@ export type WorkspaceCreateWithoutSettingsInput = {
   testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutSettingsInput = {
@@ -1067,6 +1277,13 @@ export type WorkspaceUncheckedCreateWithoutSettingsInput = {
   testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutSettingsInput = {
@@ -1111,6 +1328,13 @@ export type WorkspaceUpdateWithoutSettingsInput = {
   testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutSettingsInput = {
@@ -1139,6 +1363,13 @@ export type WorkspaceUncheckedUpdateWithoutSettingsInput = {
   testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateWithoutEmployeesInput = {
@@ -1167,6 +1398,13 @@ export type WorkspaceCreateWithoutEmployeesInput = {
   testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutEmployeesInput = {
@@ -1195,6 +1433,13 @@ export type WorkspaceUncheckedCreateWithoutEmployeesInput = {
   testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutEmployeesInput = {
@@ -1239,6 +1484,13 @@ export type WorkspaceUpdateWithoutEmployeesInput = {
   testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutEmployeesInput = {
@@ -1267,6 +1519,13 @@ export type WorkspaceUncheckedUpdateWithoutEmployeesInput = {
   testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateWithoutSourcesInput = {
@@ -1295,6 +1554,13 @@ export type WorkspaceCreateWithoutSourcesInput = {
   testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutSourcesInput = {
@@ -1323,6 +1589,13 @@ export type WorkspaceUncheckedCreateWithoutSourcesInput = {
   testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutSourcesInput = {
@@ -1367,6 +1640,13 @@ export type WorkspaceUpdateWithoutSourcesInput = {
   testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutSourcesInput = {
@@ -1395,6 +1675,13 @@ export type WorkspaceUncheckedUpdateWithoutSourcesInput = {
   testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateWithoutCustomersInput = {
@@ -1423,6 +1710,13 @@ export type WorkspaceCreateWithoutCustomersInput = {
   testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutCustomersInput = {
@@ -1451,6 +1745,13 @@ export type WorkspaceUncheckedCreateWithoutCustomersInput = {
   testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutCustomersInput = {
@@ -1495,6 +1796,13 @@ export type WorkspaceUpdateWithoutCustomersInput = {
   testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutCustomersInput = {
@@ -1523,6 +1831,13 @@ export type WorkspaceUncheckedUpdateWithoutCustomersInput = {
   testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateWithoutConversationsInput = {
@@ -1551,6 +1866,13 @@ export type WorkspaceCreateWithoutConversationsInput = {
   testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutConversationsInput = {
@@ -1579,6 +1901,13 @@ export type WorkspaceUncheckedCreateWithoutConversationsInput = {
   testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutConversationsInput = {
@@ -1623,6 +1952,13 @@ export type WorkspaceUpdateWithoutConversationsInput = {
   testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutConversationsInput = {
@@ -1651,6 +1987,13 @@ export type WorkspaceUncheckedUpdateWithoutConversationsInput = {
   testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateWithoutLeadsInput = {
@@ -1679,6 +2022,13 @@ export type WorkspaceCreateWithoutLeadsInput = {
   testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutLeadsInput = {
@@ -1707,6 +2057,13 @@ export type WorkspaceUncheckedCreateWithoutLeadsInput = {
   testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutLeadsInput = {
@@ -1751,6 +2108,13 @@ export type WorkspaceUpdateWithoutLeadsInput = {
   testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutLeadsInput = {
@@ -1779,6 +2143,13 @@ export type WorkspaceUncheckedUpdateWithoutLeadsInput = {
   testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateWithoutAppointmentsInput = {
@@ -1807,6 +2178,13 @@ export type WorkspaceCreateWithoutAppointmentsInput = {
   testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutAppointmentsInput = {
@@ -1835,6 +2213,13 @@ export type WorkspaceUncheckedCreateWithoutAppointmentsInput = {
   testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutAppointmentsInput = {
@@ -1879,6 +2264,13 @@ export type WorkspaceUpdateWithoutAppointmentsInput = {
   testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutAppointmentsInput = {
@@ -1907,6 +2299,13 @@ export type WorkspaceUncheckedUpdateWithoutAppointmentsInput = {
   testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateWithoutChannelsInput = {
@@ -1935,6 +2334,13 @@ export type WorkspaceCreateWithoutChannelsInput = {
   testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutChannelsInput = {
@@ -1963,6 +2369,13 @@ export type WorkspaceUncheckedCreateWithoutChannelsInput = {
   testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutChannelsInput = {
@@ -2007,6 +2420,13 @@ export type WorkspaceUpdateWithoutChannelsInput = {
   testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutChannelsInput = {
@@ -2035,6 +2455,13 @@ export type WorkspaceUncheckedUpdateWithoutChannelsInput = {
   testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateWithoutIntegrationsInput = {
@@ -2063,6 +2490,13 @@ export type WorkspaceCreateWithoutIntegrationsInput = {
   testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutIntegrationsInput = {
@@ -2091,6 +2525,13 @@ export type WorkspaceUncheckedCreateWithoutIntegrationsInput = {
   testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutIntegrationsInput = {
@@ -2135,6 +2576,13 @@ export type WorkspaceUpdateWithoutIntegrationsInput = {
   testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutIntegrationsInput = {
@@ -2163,6 +2611,13 @@ export type WorkspaceUncheckedUpdateWithoutIntegrationsInput = {
   testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateWithoutAutomationsInput = {
@@ -2191,6 +2646,13 @@ export type WorkspaceCreateWithoutAutomationsInput = {
   testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutAutomationsInput = {
@@ -2219,6 +2681,13 @@ export type WorkspaceUncheckedCreateWithoutAutomationsInput = {
   testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutAutomationsInput = {
@@ -2263,6 +2732,13 @@ export type WorkspaceUpdateWithoutAutomationsInput = {
   testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutAutomationsInput = {
@@ -2291,6 +2767,13 @@ export type WorkspaceUncheckedUpdateWithoutAutomationsInput = {
   testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateWithoutNotificationsInput = {
@@ -2319,6 +2802,13 @@ export type WorkspaceCreateWithoutNotificationsInput = {
   testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutNotificationsInput = {
@@ -2347,6 +2837,13 @@ export type WorkspaceUncheckedCreateWithoutNotificationsInput = {
   testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutNotificationsInput = {
@@ -2391,6 +2888,13 @@ export type WorkspaceUpdateWithoutNotificationsInput = {
   testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutNotificationsInput = {
@@ -2419,6 +2923,13 @@ export type WorkspaceUncheckedUpdateWithoutNotificationsInput = {
   testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateWithoutJobsInput = {
@@ -2447,6 +2958,13 @@ export type WorkspaceCreateWithoutJobsInput = {
   testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutJobsInput = {
@@ -2475,6 +2993,13 @@ export type WorkspaceUncheckedCreateWithoutJobsInput = {
   testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutJobsInput = {
@@ -2519,6 +3044,13 @@ export type WorkspaceUpdateWithoutJobsInput = {
   testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutJobsInput = {
@@ -2547,6 +3079,13 @@ export type WorkspaceUncheckedUpdateWithoutJobsInput = {
   testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateWithoutAuditLogsInput = {
@@ -2575,6 +3114,13 @@ export type WorkspaceCreateWithoutAuditLogsInput = {
   testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutAuditLogsInput = {
@@ -2603,6 +3149,13 @@ export type WorkspaceUncheckedCreateWithoutAuditLogsInput = {
   testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutAuditLogsInput = {
@@ -2647,6 +3200,13 @@ export type WorkspaceUpdateWithoutAuditLogsInput = {
   testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutAuditLogsInput = {
@@ -2675,6 +3235,13 @@ export type WorkspaceUncheckedUpdateWithoutAuditLogsInput = {
   testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateWithoutEventsInput = {
@@ -2703,6 +3270,13 @@ export type WorkspaceCreateWithoutEventsInput = {
   testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutEventsInput = {
@@ -2731,6 +3305,13 @@ export type WorkspaceUncheckedCreateWithoutEventsInput = {
   testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutEventsInput = {
@@ -2775,6 +3356,13 @@ export type WorkspaceUpdateWithoutEventsInput = {
   testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutEventsInput = {
@@ -2803,6 +3391,13 @@ export type WorkspaceUncheckedUpdateWithoutEventsInput = {
   testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateWithoutSubscriptionInput = {
@@ -2831,6 +3426,13 @@ export type WorkspaceCreateWithoutSubscriptionInput = {
   testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutSubscriptionInput = {
@@ -2859,6 +3461,13 @@ export type WorkspaceUncheckedCreateWithoutSubscriptionInput = {
   testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutSubscriptionInput = {
@@ -2903,6 +3512,13 @@ export type WorkspaceUpdateWithoutSubscriptionInput = {
   testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutSubscriptionInput = {
@@ -2931,6 +3547,13 @@ export type WorkspaceUncheckedUpdateWithoutSubscriptionInput = {
   testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateWithoutUsageRecordsInput = {
@@ -2959,6 +3582,13 @@ export type WorkspaceCreateWithoutUsageRecordsInput = {
   testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutUsageRecordsInput = {
@@ -2987,6 +3617,13 @@ export type WorkspaceUncheckedCreateWithoutUsageRecordsInput = {
   testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutUsageRecordsInput = {
@@ -3031,6 +3668,13 @@ export type WorkspaceUpdateWithoutUsageRecordsInput = {
   testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutUsageRecordsInput = {
@@ -3059,6 +3703,13 @@ export type WorkspaceUncheckedUpdateWithoutUsageRecordsInput = {
   testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateWithoutOperationalEventsInput = {
@@ -3087,6 +3738,13 @@ export type WorkspaceCreateWithoutOperationalEventsInput = {
   testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutOperationalEventsInput = {
@@ -3115,6 +3773,13 @@ export type WorkspaceUncheckedCreateWithoutOperationalEventsInput = {
   testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutOperationalEventsInput = {
@@ -3159,6 +3824,13 @@ export type WorkspaceUpdateWithoutOperationalEventsInput = {
   testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutOperationalEventsInput = {
@@ -3187,6 +3859,13 @@ export type WorkspaceUncheckedUpdateWithoutOperationalEventsInput = {
   testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateWithoutTestCasesInput = {
@@ -3215,6 +3894,13 @@ export type WorkspaceCreateWithoutTestCasesInput = {
   events?: Prisma.AnalyticsEventCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutTestCasesInput = {
@@ -3243,6 +3929,13 @@ export type WorkspaceUncheckedCreateWithoutTestCasesInput = {
   events?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutTestCasesInput = {
@@ -3287,6 +3980,13 @@ export type WorkspaceUpdateWithoutTestCasesInput = {
   events?: Prisma.AnalyticsEventUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutTestCasesInput = {
@@ -3315,6 +4015,13 @@ export type WorkspaceUncheckedUpdateWithoutTestCasesInput = {
   events?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateWithoutKnowledgeGapsInput = {
@@ -3343,6 +4050,13 @@ export type WorkspaceCreateWithoutKnowledgeGapsInput = {
   events?: Prisma.AnalyticsEventCreateNestedManyWithoutWorkspaceInput
   testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutKnowledgeGapsInput = {
@@ -3371,6 +4085,13 @@ export type WorkspaceUncheckedCreateWithoutKnowledgeGapsInput = {
   events?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutWorkspaceInput
   testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
   insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutKnowledgeGapsInput = {
@@ -3415,6 +4136,13 @@ export type WorkspaceUpdateWithoutKnowledgeGapsInput = {
   events?: Prisma.AnalyticsEventUpdateManyWithoutWorkspaceNestedInput
   testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutKnowledgeGapsInput = {
@@ -3443,6 +4171,13 @@ export type WorkspaceUncheckedUpdateWithoutKnowledgeGapsInput = {
   events?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutWorkspaceNestedInput
   testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
   insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceCreateWithoutInsightsInput = {
@@ -3471,6 +4206,13 @@ export type WorkspaceCreateWithoutInsightsInput = {
   events?: Prisma.AnalyticsEventCreateNestedManyWithoutWorkspaceInput
   testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceUncheckedCreateWithoutInsightsInput = {
@@ -3499,6 +4241,13 @@ export type WorkspaceUncheckedCreateWithoutInsightsInput = {
   events?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutWorkspaceInput
   testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
 export type WorkspaceCreateOrConnectWithoutInsightsInput = {
@@ -3543,6 +4292,13 @@ export type WorkspaceUpdateWithoutInsightsInput = {
   events?: Prisma.AnalyticsEventUpdateManyWithoutWorkspaceNestedInput
   testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
 }
 
 export type WorkspaceUncheckedUpdateWithoutInsightsInput = {
@@ -3571,6 +4327,1105 @@ export type WorkspaceUncheckedUpdateWithoutInsightsInput = {
   events?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutWorkspaceNestedInput
   testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
   knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceCreateWithoutCompaniesInput = {
+  id?: string
+  name: string
+  slug: string
+  createdAt?: Date | string
+  members?: Prisma.WorkspaceMemberCreateNestedManyWithoutWorkspaceInput
+  employees?: Prisma.AIEmployeeCreateNestedManyWithoutWorkspaceInput
+  sources?: Prisma.KnowledgeSourceCreateNestedManyWithoutWorkspaceInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutWorkspaceInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutWorkspaceInput
+  leads?: Prisma.LeadCreateNestedManyWithoutWorkspaceInput
+  appointments?: Prisma.AppointmentCreateNestedManyWithoutWorkspaceInput
+  channels?: Prisma.ChannelCreateNestedManyWithoutWorkspaceInput
+  integrations?: Prisma.IntegrationCreateNestedManyWithoutWorkspaceInput
+  automations?: Prisma.AutomationCreateNestedManyWithoutWorkspaceInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutWorkspaceInput
+  jobs?: Prisma.BackgroundJobCreateNestedManyWithoutWorkspaceInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutWorkspaceInput
+  invitations?: Prisma.WorkspaceInvitationCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutWorkspaceInput
+  usageRecords?: Prisma.UsageRecordCreateNestedManyWithoutWorkspaceInput
+  operationalEvents?: Prisma.OperationalEventCreateNestedManyWithoutWorkspaceInput
+  events?: Prisma.AnalyticsEventCreateNestedManyWithoutWorkspaceInput
+  testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
+  knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
+  insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceUncheckedCreateWithoutCompaniesInput = {
+  id?: string
+  name: string
+  slug: string
+  createdAt?: Date | string
+  members?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutWorkspaceInput
+  employees?: Prisma.AIEmployeeUncheckedCreateNestedManyWithoutWorkspaceInput
+  sources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutWorkspaceInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutWorkspaceInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutWorkspaceInput
+  leads?: Prisma.LeadUncheckedCreateNestedManyWithoutWorkspaceInput
+  appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutWorkspaceInput
+  channels?: Prisma.ChannelUncheckedCreateNestedManyWithoutWorkspaceInput
+  integrations?: Prisma.IntegrationUncheckedCreateNestedManyWithoutWorkspaceInput
+  automations?: Prisma.AutomationUncheckedCreateNestedManyWithoutWorkspaceInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutWorkspaceInput
+  jobs?: Prisma.BackgroundJobUncheckedCreateNestedManyWithoutWorkspaceInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutWorkspaceInput
+  invitations?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutWorkspaceInput
+  usageRecords?: Prisma.UsageRecordUncheckedCreateNestedManyWithoutWorkspaceInput
+  operationalEvents?: Prisma.OperationalEventUncheckedCreateNestedManyWithoutWorkspaceInput
+  events?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutWorkspaceInput
+  testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
+  knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
+  insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceCreateOrConnectWithoutCompaniesInput = {
+  where: Prisma.WorkspaceWhereUniqueInput
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutCompaniesInput, Prisma.WorkspaceUncheckedCreateWithoutCompaniesInput>
+}
+
+export type WorkspaceUpsertWithoutCompaniesInput = {
+  update: Prisma.XOR<Prisma.WorkspaceUpdateWithoutCompaniesInput, Prisma.WorkspaceUncheckedUpdateWithoutCompaniesInput>
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutCompaniesInput, Prisma.WorkspaceUncheckedCreateWithoutCompaniesInput>
+  where?: Prisma.WorkspaceWhereInput
+}
+
+export type WorkspaceUpdateToOneWithWhereWithoutCompaniesInput = {
+  where?: Prisma.WorkspaceWhereInput
+  data: Prisma.XOR<Prisma.WorkspaceUpdateWithoutCompaniesInput, Prisma.WorkspaceUncheckedUpdateWithoutCompaniesInput>
+}
+
+export type WorkspaceUpdateWithoutCompaniesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.WorkspaceMemberUpdateManyWithoutWorkspaceNestedInput
+  employees?: Prisma.AIEmployeeUpdateManyWithoutWorkspaceNestedInput
+  sources?: Prisma.KnowledgeSourceUpdateManyWithoutWorkspaceNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutWorkspaceNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutWorkspaceNestedInput
+  leads?: Prisma.LeadUpdateManyWithoutWorkspaceNestedInput
+  appointments?: Prisma.AppointmentUpdateManyWithoutWorkspaceNestedInput
+  channels?: Prisma.ChannelUpdateManyWithoutWorkspaceNestedInput
+  integrations?: Prisma.IntegrationUpdateManyWithoutWorkspaceNestedInput
+  automations?: Prisma.AutomationUpdateManyWithoutWorkspaceNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutWorkspaceNestedInput
+  jobs?: Prisma.BackgroundJobUpdateManyWithoutWorkspaceNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutWorkspaceNestedInput
+  invitations?: Prisma.WorkspaceInvitationUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutWorkspaceNestedInput
+  usageRecords?: Prisma.UsageRecordUpdateManyWithoutWorkspaceNestedInput
+  operationalEvents?: Prisma.OperationalEventUpdateManyWithoutWorkspaceNestedInput
+  events?: Prisma.AnalyticsEventUpdateManyWithoutWorkspaceNestedInput
+  testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
+  knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
+  insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceUncheckedUpdateWithoutCompaniesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutWorkspaceNestedInput
+  employees?: Prisma.AIEmployeeUncheckedUpdateManyWithoutWorkspaceNestedInput
+  sources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutWorkspaceNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutWorkspaceNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  leads?: Prisma.LeadUncheckedUpdateManyWithoutWorkspaceNestedInput
+  appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutWorkspaceNestedInput
+  channels?: Prisma.ChannelUncheckedUpdateManyWithoutWorkspaceNestedInput
+  integrations?: Prisma.IntegrationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  automations?: Prisma.AutomationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  jobs?: Prisma.BackgroundJobUncheckedUpdateManyWithoutWorkspaceNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutWorkspaceNestedInput
+  invitations?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutWorkspaceNestedInput
+  usageRecords?: Prisma.UsageRecordUncheckedUpdateManyWithoutWorkspaceNestedInput
+  operationalEvents?: Prisma.OperationalEventUncheckedUpdateManyWithoutWorkspaceNestedInput
+  events?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutWorkspaceNestedInput
+  testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
+  knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
+  insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceCreateWithoutPipelinesInput = {
+  id?: string
+  name: string
+  slug: string
+  createdAt?: Date | string
+  members?: Prisma.WorkspaceMemberCreateNestedManyWithoutWorkspaceInput
+  employees?: Prisma.AIEmployeeCreateNestedManyWithoutWorkspaceInput
+  sources?: Prisma.KnowledgeSourceCreateNestedManyWithoutWorkspaceInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutWorkspaceInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutWorkspaceInput
+  leads?: Prisma.LeadCreateNestedManyWithoutWorkspaceInput
+  appointments?: Prisma.AppointmentCreateNestedManyWithoutWorkspaceInput
+  channels?: Prisma.ChannelCreateNestedManyWithoutWorkspaceInput
+  integrations?: Prisma.IntegrationCreateNestedManyWithoutWorkspaceInput
+  automations?: Prisma.AutomationCreateNestedManyWithoutWorkspaceInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutWorkspaceInput
+  jobs?: Prisma.BackgroundJobCreateNestedManyWithoutWorkspaceInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutWorkspaceInput
+  invitations?: Prisma.WorkspaceInvitationCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutWorkspaceInput
+  usageRecords?: Prisma.UsageRecordCreateNestedManyWithoutWorkspaceInput
+  operationalEvents?: Prisma.OperationalEventCreateNestedManyWithoutWorkspaceInput
+  events?: Prisma.AnalyticsEventCreateNestedManyWithoutWorkspaceInput
+  testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
+  knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
+  insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceUncheckedCreateWithoutPipelinesInput = {
+  id?: string
+  name: string
+  slug: string
+  createdAt?: Date | string
+  members?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutWorkspaceInput
+  employees?: Prisma.AIEmployeeUncheckedCreateNestedManyWithoutWorkspaceInput
+  sources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutWorkspaceInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutWorkspaceInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutWorkspaceInput
+  leads?: Prisma.LeadUncheckedCreateNestedManyWithoutWorkspaceInput
+  appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutWorkspaceInput
+  channels?: Prisma.ChannelUncheckedCreateNestedManyWithoutWorkspaceInput
+  integrations?: Prisma.IntegrationUncheckedCreateNestedManyWithoutWorkspaceInput
+  automations?: Prisma.AutomationUncheckedCreateNestedManyWithoutWorkspaceInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutWorkspaceInput
+  jobs?: Prisma.BackgroundJobUncheckedCreateNestedManyWithoutWorkspaceInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutWorkspaceInput
+  invitations?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutWorkspaceInput
+  usageRecords?: Prisma.UsageRecordUncheckedCreateNestedManyWithoutWorkspaceInput
+  operationalEvents?: Prisma.OperationalEventUncheckedCreateNestedManyWithoutWorkspaceInput
+  events?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutWorkspaceInput
+  testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
+  knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
+  insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceCreateOrConnectWithoutPipelinesInput = {
+  where: Prisma.WorkspaceWhereUniqueInput
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutPipelinesInput, Prisma.WorkspaceUncheckedCreateWithoutPipelinesInput>
+}
+
+export type WorkspaceUpsertWithoutPipelinesInput = {
+  update: Prisma.XOR<Prisma.WorkspaceUpdateWithoutPipelinesInput, Prisma.WorkspaceUncheckedUpdateWithoutPipelinesInput>
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutPipelinesInput, Prisma.WorkspaceUncheckedCreateWithoutPipelinesInput>
+  where?: Prisma.WorkspaceWhereInput
+}
+
+export type WorkspaceUpdateToOneWithWhereWithoutPipelinesInput = {
+  where?: Prisma.WorkspaceWhereInput
+  data: Prisma.XOR<Prisma.WorkspaceUpdateWithoutPipelinesInput, Prisma.WorkspaceUncheckedUpdateWithoutPipelinesInput>
+}
+
+export type WorkspaceUpdateWithoutPipelinesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.WorkspaceMemberUpdateManyWithoutWorkspaceNestedInput
+  employees?: Prisma.AIEmployeeUpdateManyWithoutWorkspaceNestedInput
+  sources?: Prisma.KnowledgeSourceUpdateManyWithoutWorkspaceNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutWorkspaceNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutWorkspaceNestedInput
+  leads?: Prisma.LeadUpdateManyWithoutWorkspaceNestedInput
+  appointments?: Prisma.AppointmentUpdateManyWithoutWorkspaceNestedInput
+  channels?: Prisma.ChannelUpdateManyWithoutWorkspaceNestedInput
+  integrations?: Prisma.IntegrationUpdateManyWithoutWorkspaceNestedInput
+  automations?: Prisma.AutomationUpdateManyWithoutWorkspaceNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutWorkspaceNestedInput
+  jobs?: Prisma.BackgroundJobUpdateManyWithoutWorkspaceNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutWorkspaceNestedInput
+  invitations?: Prisma.WorkspaceInvitationUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutWorkspaceNestedInput
+  usageRecords?: Prisma.UsageRecordUpdateManyWithoutWorkspaceNestedInput
+  operationalEvents?: Prisma.OperationalEventUpdateManyWithoutWorkspaceNestedInput
+  events?: Prisma.AnalyticsEventUpdateManyWithoutWorkspaceNestedInput
+  testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
+  knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
+  insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceUncheckedUpdateWithoutPipelinesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutWorkspaceNestedInput
+  employees?: Prisma.AIEmployeeUncheckedUpdateManyWithoutWorkspaceNestedInput
+  sources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutWorkspaceNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutWorkspaceNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  leads?: Prisma.LeadUncheckedUpdateManyWithoutWorkspaceNestedInput
+  appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutWorkspaceNestedInput
+  channels?: Prisma.ChannelUncheckedUpdateManyWithoutWorkspaceNestedInput
+  integrations?: Prisma.IntegrationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  automations?: Prisma.AutomationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  jobs?: Prisma.BackgroundJobUncheckedUpdateManyWithoutWorkspaceNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutWorkspaceNestedInput
+  invitations?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutWorkspaceNestedInput
+  usageRecords?: Prisma.UsageRecordUncheckedUpdateManyWithoutWorkspaceNestedInput
+  operationalEvents?: Prisma.OperationalEventUncheckedUpdateManyWithoutWorkspaceNestedInput
+  events?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutWorkspaceNestedInput
+  testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
+  knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
+  insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceCreateWithoutDealsInput = {
+  id?: string
+  name: string
+  slug: string
+  createdAt?: Date | string
+  members?: Prisma.WorkspaceMemberCreateNestedManyWithoutWorkspaceInput
+  employees?: Prisma.AIEmployeeCreateNestedManyWithoutWorkspaceInput
+  sources?: Prisma.KnowledgeSourceCreateNestedManyWithoutWorkspaceInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutWorkspaceInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutWorkspaceInput
+  leads?: Prisma.LeadCreateNestedManyWithoutWorkspaceInput
+  appointments?: Prisma.AppointmentCreateNestedManyWithoutWorkspaceInput
+  channels?: Prisma.ChannelCreateNestedManyWithoutWorkspaceInput
+  integrations?: Prisma.IntegrationCreateNestedManyWithoutWorkspaceInput
+  automations?: Prisma.AutomationCreateNestedManyWithoutWorkspaceInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutWorkspaceInput
+  jobs?: Prisma.BackgroundJobCreateNestedManyWithoutWorkspaceInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutWorkspaceInput
+  invitations?: Prisma.WorkspaceInvitationCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutWorkspaceInput
+  usageRecords?: Prisma.UsageRecordCreateNestedManyWithoutWorkspaceInput
+  operationalEvents?: Prisma.OperationalEventCreateNestedManyWithoutWorkspaceInput
+  events?: Prisma.AnalyticsEventCreateNestedManyWithoutWorkspaceInput
+  testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
+  knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
+  insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceUncheckedCreateWithoutDealsInput = {
+  id?: string
+  name: string
+  slug: string
+  createdAt?: Date | string
+  members?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutWorkspaceInput
+  employees?: Prisma.AIEmployeeUncheckedCreateNestedManyWithoutWorkspaceInput
+  sources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutWorkspaceInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutWorkspaceInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutWorkspaceInput
+  leads?: Prisma.LeadUncheckedCreateNestedManyWithoutWorkspaceInput
+  appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutWorkspaceInput
+  channels?: Prisma.ChannelUncheckedCreateNestedManyWithoutWorkspaceInput
+  integrations?: Prisma.IntegrationUncheckedCreateNestedManyWithoutWorkspaceInput
+  automations?: Prisma.AutomationUncheckedCreateNestedManyWithoutWorkspaceInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutWorkspaceInput
+  jobs?: Prisma.BackgroundJobUncheckedCreateNestedManyWithoutWorkspaceInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutWorkspaceInput
+  invitations?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutWorkspaceInput
+  usageRecords?: Prisma.UsageRecordUncheckedCreateNestedManyWithoutWorkspaceInput
+  operationalEvents?: Prisma.OperationalEventUncheckedCreateNestedManyWithoutWorkspaceInput
+  events?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutWorkspaceInput
+  testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
+  knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
+  insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceCreateOrConnectWithoutDealsInput = {
+  where: Prisma.WorkspaceWhereUniqueInput
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutDealsInput, Prisma.WorkspaceUncheckedCreateWithoutDealsInput>
+}
+
+export type WorkspaceUpsertWithoutDealsInput = {
+  update: Prisma.XOR<Prisma.WorkspaceUpdateWithoutDealsInput, Prisma.WorkspaceUncheckedUpdateWithoutDealsInput>
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutDealsInput, Prisma.WorkspaceUncheckedCreateWithoutDealsInput>
+  where?: Prisma.WorkspaceWhereInput
+}
+
+export type WorkspaceUpdateToOneWithWhereWithoutDealsInput = {
+  where?: Prisma.WorkspaceWhereInput
+  data: Prisma.XOR<Prisma.WorkspaceUpdateWithoutDealsInput, Prisma.WorkspaceUncheckedUpdateWithoutDealsInput>
+}
+
+export type WorkspaceUpdateWithoutDealsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.WorkspaceMemberUpdateManyWithoutWorkspaceNestedInput
+  employees?: Prisma.AIEmployeeUpdateManyWithoutWorkspaceNestedInput
+  sources?: Prisma.KnowledgeSourceUpdateManyWithoutWorkspaceNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutWorkspaceNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutWorkspaceNestedInput
+  leads?: Prisma.LeadUpdateManyWithoutWorkspaceNestedInput
+  appointments?: Prisma.AppointmentUpdateManyWithoutWorkspaceNestedInput
+  channels?: Prisma.ChannelUpdateManyWithoutWorkspaceNestedInput
+  integrations?: Prisma.IntegrationUpdateManyWithoutWorkspaceNestedInput
+  automations?: Prisma.AutomationUpdateManyWithoutWorkspaceNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutWorkspaceNestedInput
+  jobs?: Prisma.BackgroundJobUpdateManyWithoutWorkspaceNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutWorkspaceNestedInput
+  invitations?: Prisma.WorkspaceInvitationUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutWorkspaceNestedInput
+  usageRecords?: Prisma.UsageRecordUpdateManyWithoutWorkspaceNestedInput
+  operationalEvents?: Prisma.OperationalEventUpdateManyWithoutWorkspaceNestedInput
+  events?: Prisma.AnalyticsEventUpdateManyWithoutWorkspaceNestedInput
+  testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
+  knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
+  insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceUncheckedUpdateWithoutDealsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutWorkspaceNestedInput
+  employees?: Prisma.AIEmployeeUncheckedUpdateManyWithoutWorkspaceNestedInput
+  sources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutWorkspaceNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutWorkspaceNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  leads?: Prisma.LeadUncheckedUpdateManyWithoutWorkspaceNestedInput
+  appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutWorkspaceNestedInput
+  channels?: Prisma.ChannelUncheckedUpdateManyWithoutWorkspaceNestedInput
+  integrations?: Prisma.IntegrationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  automations?: Prisma.AutomationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  jobs?: Prisma.BackgroundJobUncheckedUpdateManyWithoutWorkspaceNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutWorkspaceNestedInput
+  invitations?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutWorkspaceNestedInput
+  usageRecords?: Prisma.UsageRecordUncheckedUpdateManyWithoutWorkspaceNestedInput
+  operationalEvents?: Prisma.OperationalEventUncheckedUpdateManyWithoutWorkspaceNestedInput
+  events?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutWorkspaceNestedInput
+  testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
+  knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
+  insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceCreateWithoutProductsInput = {
+  id?: string
+  name: string
+  slug: string
+  createdAt?: Date | string
+  members?: Prisma.WorkspaceMemberCreateNestedManyWithoutWorkspaceInput
+  employees?: Prisma.AIEmployeeCreateNestedManyWithoutWorkspaceInput
+  sources?: Prisma.KnowledgeSourceCreateNestedManyWithoutWorkspaceInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutWorkspaceInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutWorkspaceInput
+  leads?: Prisma.LeadCreateNestedManyWithoutWorkspaceInput
+  appointments?: Prisma.AppointmentCreateNestedManyWithoutWorkspaceInput
+  channels?: Prisma.ChannelCreateNestedManyWithoutWorkspaceInput
+  integrations?: Prisma.IntegrationCreateNestedManyWithoutWorkspaceInput
+  automations?: Prisma.AutomationCreateNestedManyWithoutWorkspaceInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutWorkspaceInput
+  jobs?: Prisma.BackgroundJobCreateNestedManyWithoutWorkspaceInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutWorkspaceInput
+  invitations?: Prisma.WorkspaceInvitationCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutWorkspaceInput
+  usageRecords?: Prisma.UsageRecordCreateNestedManyWithoutWorkspaceInput
+  operationalEvents?: Prisma.OperationalEventCreateNestedManyWithoutWorkspaceInput
+  events?: Prisma.AnalyticsEventCreateNestedManyWithoutWorkspaceInput
+  testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
+  knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
+  insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceUncheckedCreateWithoutProductsInput = {
+  id?: string
+  name: string
+  slug: string
+  createdAt?: Date | string
+  members?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutWorkspaceInput
+  employees?: Prisma.AIEmployeeUncheckedCreateNestedManyWithoutWorkspaceInput
+  sources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutWorkspaceInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutWorkspaceInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutWorkspaceInput
+  leads?: Prisma.LeadUncheckedCreateNestedManyWithoutWorkspaceInput
+  appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutWorkspaceInput
+  channels?: Prisma.ChannelUncheckedCreateNestedManyWithoutWorkspaceInput
+  integrations?: Prisma.IntegrationUncheckedCreateNestedManyWithoutWorkspaceInput
+  automations?: Prisma.AutomationUncheckedCreateNestedManyWithoutWorkspaceInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutWorkspaceInput
+  jobs?: Prisma.BackgroundJobUncheckedCreateNestedManyWithoutWorkspaceInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutWorkspaceInput
+  invitations?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutWorkspaceInput
+  usageRecords?: Prisma.UsageRecordUncheckedCreateNestedManyWithoutWorkspaceInput
+  operationalEvents?: Prisma.OperationalEventUncheckedCreateNestedManyWithoutWorkspaceInput
+  events?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutWorkspaceInput
+  testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
+  knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
+  insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceCreateOrConnectWithoutProductsInput = {
+  where: Prisma.WorkspaceWhereUniqueInput
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutProductsInput, Prisma.WorkspaceUncheckedCreateWithoutProductsInput>
+}
+
+export type WorkspaceUpsertWithoutProductsInput = {
+  update: Prisma.XOR<Prisma.WorkspaceUpdateWithoutProductsInput, Prisma.WorkspaceUncheckedUpdateWithoutProductsInput>
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutProductsInput, Prisma.WorkspaceUncheckedCreateWithoutProductsInput>
+  where?: Prisma.WorkspaceWhereInput
+}
+
+export type WorkspaceUpdateToOneWithWhereWithoutProductsInput = {
+  where?: Prisma.WorkspaceWhereInput
+  data: Prisma.XOR<Prisma.WorkspaceUpdateWithoutProductsInput, Prisma.WorkspaceUncheckedUpdateWithoutProductsInput>
+}
+
+export type WorkspaceUpdateWithoutProductsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.WorkspaceMemberUpdateManyWithoutWorkspaceNestedInput
+  employees?: Prisma.AIEmployeeUpdateManyWithoutWorkspaceNestedInput
+  sources?: Prisma.KnowledgeSourceUpdateManyWithoutWorkspaceNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutWorkspaceNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutWorkspaceNestedInput
+  leads?: Prisma.LeadUpdateManyWithoutWorkspaceNestedInput
+  appointments?: Prisma.AppointmentUpdateManyWithoutWorkspaceNestedInput
+  channels?: Prisma.ChannelUpdateManyWithoutWorkspaceNestedInput
+  integrations?: Prisma.IntegrationUpdateManyWithoutWorkspaceNestedInput
+  automations?: Prisma.AutomationUpdateManyWithoutWorkspaceNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutWorkspaceNestedInput
+  jobs?: Prisma.BackgroundJobUpdateManyWithoutWorkspaceNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutWorkspaceNestedInput
+  invitations?: Prisma.WorkspaceInvitationUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutWorkspaceNestedInput
+  usageRecords?: Prisma.UsageRecordUpdateManyWithoutWorkspaceNestedInput
+  operationalEvents?: Prisma.OperationalEventUpdateManyWithoutWorkspaceNestedInput
+  events?: Prisma.AnalyticsEventUpdateManyWithoutWorkspaceNestedInput
+  testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
+  knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
+  insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceUncheckedUpdateWithoutProductsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutWorkspaceNestedInput
+  employees?: Prisma.AIEmployeeUncheckedUpdateManyWithoutWorkspaceNestedInput
+  sources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutWorkspaceNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutWorkspaceNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  leads?: Prisma.LeadUncheckedUpdateManyWithoutWorkspaceNestedInput
+  appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutWorkspaceNestedInput
+  channels?: Prisma.ChannelUncheckedUpdateManyWithoutWorkspaceNestedInput
+  integrations?: Prisma.IntegrationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  automations?: Prisma.AutomationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  jobs?: Prisma.BackgroundJobUncheckedUpdateManyWithoutWorkspaceNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutWorkspaceNestedInput
+  invitations?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutWorkspaceNestedInput
+  usageRecords?: Prisma.UsageRecordUncheckedUpdateManyWithoutWorkspaceNestedInput
+  operationalEvents?: Prisma.OperationalEventUncheckedUpdateManyWithoutWorkspaceNestedInput
+  events?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutWorkspaceNestedInput
+  testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
+  knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
+  insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceCreateWithoutCrmTasksInput = {
+  id?: string
+  name: string
+  slug: string
+  createdAt?: Date | string
+  members?: Prisma.WorkspaceMemberCreateNestedManyWithoutWorkspaceInput
+  employees?: Prisma.AIEmployeeCreateNestedManyWithoutWorkspaceInput
+  sources?: Prisma.KnowledgeSourceCreateNestedManyWithoutWorkspaceInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutWorkspaceInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutWorkspaceInput
+  leads?: Prisma.LeadCreateNestedManyWithoutWorkspaceInput
+  appointments?: Prisma.AppointmentCreateNestedManyWithoutWorkspaceInput
+  channels?: Prisma.ChannelCreateNestedManyWithoutWorkspaceInput
+  integrations?: Prisma.IntegrationCreateNestedManyWithoutWorkspaceInput
+  automations?: Prisma.AutomationCreateNestedManyWithoutWorkspaceInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutWorkspaceInput
+  jobs?: Prisma.BackgroundJobCreateNestedManyWithoutWorkspaceInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutWorkspaceInput
+  invitations?: Prisma.WorkspaceInvitationCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutWorkspaceInput
+  usageRecords?: Prisma.UsageRecordCreateNestedManyWithoutWorkspaceInput
+  operationalEvents?: Prisma.OperationalEventCreateNestedManyWithoutWorkspaceInput
+  events?: Prisma.AnalyticsEventCreateNestedManyWithoutWorkspaceInput
+  testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
+  knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
+  insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceUncheckedCreateWithoutCrmTasksInput = {
+  id?: string
+  name: string
+  slug: string
+  createdAt?: Date | string
+  members?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutWorkspaceInput
+  employees?: Prisma.AIEmployeeUncheckedCreateNestedManyWithoutWorkspaceInput
+  sources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutWorkspaceInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutWorkspaceInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutWorkspaceInput
+  leads?: Prisma.LeadUncheckedCreateNestedManyWithoutWorkspaceInput
+  appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutWorkspaceInput
+  channels?: Prisma.ChannelUncheckedCreateNestedManyWithoutWorkspaceInput
+  integrations?: Prisma.IntegrationUncheckedCreateNestedManyWithoutWorkspaceInput
+  automations?: Prisma.AutomationUncheckedCreateNestedManyWithoutWorkspaceInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutWorkspaceInput
+  jobs?: Prisma.BackgroundJobUncheckedCreateNestedManyWithoutWorkspaceInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutWorkspaceInput
+  invitations?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutWorkspaceInput
+  usageRecords?: Prisma.UsageRecordUncheckedCreateNestedManyWithoutWorkspaceInput
+  operationalEvents?: Prisma.OperationalEventUncheckedCreateNestedManyWithoutWorkspaceInput
+  events?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutWorkspaceInput
+  testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
+  knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
+  insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceCreateOrConnectWithoutCrmTasksInput = {
+  where: Prisma.WorkspaceWhereUniqueInput
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutCrmTasksInput, Prisma.WorkspaceUncheckedCreateWithoutCrmTasksInput>
+}
+
+export type WorkspaceUpsertWithoutCrmTasksInput = {
+  update: Prisma.XOR<Prisma.WorkspaceUpdateWithoutCrmTasksInput, Prisma.WorkspaceUncheckedUpdateWithoutCrmTasksInput>
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutCrmTasksInput, Prisma.WorkspaceUncheckedCreateWithoutCrmTasksInput>
+  where?: Prisma.WorkspaceWhereInput
+}
+
+export type WorkspaceUpdateToOneWithWhereWithoutCrmTasksInput = {
+  where?: Prisma.WorkspaceWhereInput
+  data: Prisma.XOR<Prisma.WorkspaceUpdateWithoutCrmTasksInput, Prisma.WorkspaceUncheckedUpdateWithoutCrmTasksInput>
+}
+
+export type WorkspaceUpdateWithoutCrmTasksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.WorkspaceMemberUpdateManyWithoutWorkspaceNestedInput
+  employees?: Prisma.AIEmployeeUpdateManyWithoutWorkspaceNestedInput
+  sources?: Prisma.KnowledgeSourceUpdateManyWithoutWorkspaceNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutWorkspaceNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutWorkspaceNestedInput
+  leads?: Prisma.LeadUpdateManyWithoutWorkspaceNestedInput
+  appointments?: Prisma.AppointmentUpdateManyWithoutWorkspaceNestedInput
+  channels?: Prisma.ChannelUpdateManyWithoutWorkspaceNestedInput
+  integrations?: Prisma.IntegrationUpdateManyWithoutWorkspaceNestedInput
+  automations?: Prisma.AutomationUpdateManyWithoutWorkspaceNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutWorkspaceNestedInput
+  jobs?: Prisma.BackgroundJobUpdateManyWithoutWorkspaceNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutWorkspaceNestedInput
+  invitations?: Prisma.WorkspaceInvitationUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutWorkspaceNestedInput
+  usageRecords?: Prisma.UsageRecordUpdateManyWithoutWorkspaceNestedInput
+  operationalEvents?: Prisma.OperationalEventUpdateManyWithoutWorkspaceNestedInput
+  events?: Prisma.AnalyticsEventUpdateManyWithoutWorkspaceNestedInput
+  testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
+  knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
+  insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceUncheckedUpdateWithoutCrmTasksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutWorkspaceNestedInput
+  employees?: Prisma.AIEmployeeUncheckedUpdateManyWithoutWorkspaceNestedInput
+  sources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutWorkspaceNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutWorkspaceNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  leads?: Prisma.LeadUncheckedUpdateManyWithoutWorkspaceNestedInput
+  appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutWorkspaceNestedInput
+  channels?: Prisma.ChannelUncheckedUpdateManyWithoutWorkspaceNestedInput
+  integrations?: Prisma.IntegrationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  automations?: Prisma.AutomationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  jobs?: Prisma.BackgroundJobUncheckedUpdateManyWithoutWorkspaceNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutWorkspaceNestedInput
+  invitations?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutWorkspaceNestedInput
+  usageRecords?: Prisma.UsageRecordUncheckedUpdateManyWithoutWorkspaceNestedInput
+  operationalEvents?: Prisma.OperationalEventUncheckedUpdateManyWithoutWorkspaceNestedInput
+  events?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutWorkspaceNestedInput
+  testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
+  knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
+  insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceCreateWithoutCrmActivitiesInput = {
+  id?: string
+  name: string
+  slug: string
+  createdAt?: Date | string
+  members?: Prisma.WorkspaceMemberCreateNestedManyWithoutWorkspaceInput
+  employees?: Prisma.AIEmployeeCreateNestedManyWithoutWorkspaceInput
+  sources?: Prisma.KnowledgeSourceCreateNestedManyWithoutWorkspaceInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutWorkspaceInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutWorkspaceInput
+  leads?: Prisma.LeadCreateNestedManyWithoutWorkspaceInput
+  appointments?: Prisma.AppointmentCreateNestedManyWithoutWorkspaceInput
+  channels?: Prisma.ChannelCreateNestedManyWithoutWorkspaceInput
+  integrations?: Prisma.IntegrationCreateNestedManyWithoutWorkspaceInput
+  automations?: Prisma.AutomationCreateNestedManyWithoutWorkspaceInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutWorkspaceInput
+  jobs?: Prisma.BackgroundJobCreateNestedManyWithoutWorkspaceInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutWorkspaceInput
+  invitations?: Prisma.WorkspaceInvitationCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutWorkspaceInput
+  usageRecords?: Prisma.UsageRecordCreateNestedManyWithoutWorkspaceInput
+  operationalEvents?: Prisma.OperationalEventCreateNestedManyWithoutWorkspaceInput
+  events?: Prisma.AnalyticsEventCreateNestedManyWithoutWorkspaceInput
+  testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
+  knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
+  insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceUncheckedCreateWithoutCrmActivitiesInput = {
+  id?: string
+  name: string
+  slug: string
+  createdAt?: Date | string
+  members?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutWorkspaceInput
+  employees?: Prisma.AIEmployeeUncheckedCreateNestedManyWithoutWorkspaceInput
+  sources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutWorkspaceInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutWorkspaceInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutWorkspaceInput
+  leads?: Prisma.LeadUncheckedCreateNestedManyWithoutWorkspaceInput
+  appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutWorkspaceInput
+  channels?: Prisma.ChannelUncheckedCreateNestedManyWithoutWorkspaceInput
+  integrations?: Prisma.IntegrationUncheckedCreateNestedManyWithoutWorkspaceInput
+  automations?: Prisma.AutomationUncheckedCreateNestedManyWithoutWorkspaceInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutWorkspaceInput
+  jobs?: Prisma.BackgroundJobUncheckedCreateNestedManyWithoutWorkspaceInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutWorkspaceInput
+  invitations?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutWorkspaceInput
+  usageRecords?: Prisma.UsageRecordUncheckedCreateNestedManyWithoutWorkspaceInput
+  operationalEvents?: Prisma.OperationalEventUncheckedCreateNestedManyWithoutWorkspaceInput
+  events?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutWorkspaceInput
+  testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
+  knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
+  insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceCreateOrConnectWithoutCrmActivitiesInput = {
+  where: Prisma.WorkspaceWhereUniqueInput
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutCrmActivitiesInput, Prisma.WorkspaceUncheckedCreateWithoutCrmActivitiesInput>
+}
+
+export type WorkspaceUpsertWithoutCrmActivitiesInput = {
+  update: Prisma.XOR<Prisma.WorkspaceUpdateWithoutCrmActivitiesInput, Prisma.WorkspaceUncheckedUpdateWithoutCrmActivitiesInput>
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutCrmActivitiesInput, Prisma.WorkspaceUncheckedCreateWithoutCrmActivitiesInput>
+  where?: Prisma.WorkspaceWhereInput
+}
+
+export type WorkspaceUpdateToOneWithWhereWithoutCrmActivitiesInput = {
+  where?: Prisma.WorkspaceWhereInput
+  data: Prisma.XOR<Prisma.WorkspaceUpdateWithoutCrmActivitiesInput, Prisma.WorkspaceUncheckedUpdateWithoutCrmActivitiesInput>
+}
+
+export type WorkspaceUpdateWithoutCrmActivitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.WorkspaceMemberUpdateManyWithoutWorkspaceNestedInput
+  employees?: Prisma.AIEmployeeUpdateManyWithoutWorkspaceNestedInput
+  sources?: Prisma.KnowledgeSourceUpdateManyWithoutWorkspaceNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutWorkspaceNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutWorkspaceNestedInput
+  leads?: Prisma.LeadUpdateManyWithoutWorkspaceNestedInput
+  appointments?: Prisma.AppointmentUpdateManyWithoutWorkspaceNestedInput
+  channels?: Prisma.ChannelUpdateManyWithoutWorkspaceNestedInput
+  integrations?: Prisma.IntegrationUpdateManyWithoutWorkspaceNestedInput
+  automations?: Prisma.AutomationUpdateManyWithoutWorkspaceNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutWorkspaceNestedInput
+  jobs?: Prisma.BackgroundJobUpdateManyWithoutWorkspaceNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutWorkspaceNestedInput
+  invitations?: Prisma.WorkspaceInvitationUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutWorkspaceNestedInput
+  usageRecords?: Prisma.UsageRecordUpdateManyWithoutWorkspaceNestedInput
+  operationalEvents?: Prisma.OperationalEventUpdateManyWithoutWorkspaceNestedInput
+  events?: Prisma.AnalyticsEventUpdateManyWithoutWorkspaceNestedInput
+  testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
+  knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
+  insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceUncheckedUpdateWithoutCrmActivitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutWorkspaceNestedInput
+  employees?: Prisma.AIEmployeeUncheckedUpdateManyWithoutWorkspaceNestedInput
+  sources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutWorkspaceNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutWorkspaceNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  leads?: Prisma.LeadUncheckedUpdateManyWithoutWorkspaceNestedInput
+  appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutWorkspaceNestedInput
+  channels?: Prisma.ChannelUncheckedUpdateManyWithoutWorkspaceNestedInput
+  integrations?: Prisma.IntegrationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  automations?: Prisma.AutomationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  jobs?: Prisma.BackgroundJobUncheckedUpdateManyWithoutWorkspaceNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutWorkspaceNestedInput
+  invitations?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutWorkspaceNestedInput
+  usageRecords?: Prisma.UsageRecordUncheckedUpdateManyWithoutWorkspaceNestedInput
+  operationalEvents?: Prisma.OperationalEventUncheckedUpdateManyWithoutWorkspaceNestedInput
+  events?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutWorkspaceNestedInput
+  testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
+  knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
+  insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmFields?: Prisma.CrmFieldDefinitionUncheckedUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceCreateWithoutCrmFieldsInput = {
+  id?: string
+  name: string
+  slug: string
+  createdAt?: Date | string
+  members?: Prisma.WorkspaceMemberCreateNestedManyWithoutWorkspaceInput
+  employees?: Prisma.AIEmployeeCreateNestedManyWithoutWorkspaceInput
+  sources?: Prisma.KnowledgeSourceCreateNestedManyWithoutWorkspaceInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutWorkspaceInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutWorkspaceInput
+  leads?: Prisma.LeadCreateNestedManyWithoutWorkspaceInput
+  appointments?: Prisma.AppointmentCreateNestedManyWithoutWorkspaceInput
+  channels?: Prisma.ChannelCreateNestedManyWithoutWorkspaceInput
+  integrations?: Prisma.IntegrationCreateNestedManyWithoutWorkspaceInput
+  automations?: Prisma.AutomationCreateNestedManyWithoutWorkspaceInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutWorkspaceInput
+  jobs?: Prisma.BackgroundJobCreateNestedManyWithoutWorkspaceInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutWorkspaceInput
+  invitations?: Prisma.WorkspaceInvitationCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutWorkspaceInput
+  usageRecords?: Prisma.UsageRecordCreateNestedManyWithoutWorkspaceInput
+  operationalEvents?: Prisma.OperationalEventCreateNestedManyWithoutWorkspaceInput
+  events?: Prisma.AnalyticsEventCreateNestedManyWithoutWorkspaceInput
+  testCases?: Prisma.AITestCaseCreateNestedManyWithoutWorkspaceInput
+  knowledgeGaps?: Prisma.KnowledgeGapCreateNestedManyWithoutWorkspaceInput
+  insights?: Prisma.AIInsightCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceUncheckedCreateWithoutCrmFieldsInput = {
+  id?: string
+  name: string
+  slug: string
+  createdAt?: Date | string
+  members?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutWorkspaceInput
+  employees?: Prisma.AIEmployeeUncheckedCreateNestedManyWithoutWorkspaceInput
+  sources?: Prisma.KnowledgeSourceUncheckedCreateNestedManyWithoutWorkspaceInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutWorkspaceInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutWorkspaceInput
+  leads?: Prisma.LeadUncheckedCreateNestedManyWithoutWorkspaceInput
+  appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutWorkspaceInput
+  channels?: Prisma.ChannelUncheckedCreateNestedManyWithoutWorkspaceInput
+  integrations?: Prisma.IntegrationUncheckedCreateNestedManyWithoutWorkspaceInput
+  automations?: Prisma.AutomationUncheckedCreateNestedManyWithoutWorkspaceInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutWorkspaceInput
+  jobs?: Prisma.BackgroundJobUncheckedCreateNestedManyWithoutWorkspaceInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutWorkspaceInput
+  invitations?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutWorkspaceInput
+  usageRecords?: Prisma.UsageRecordUncheckedCreateNestedManyWithoutWorkspaceInput
+  operationalEvents?: Prisma.OperationalEventUncheckedCreateNestedManyWithoutWorkspaceInput
+  events?: Prisma.AnalyticsEventUncheckedCreateNestedManyWithoutWorkspaceInput
+  testCases?: Prisma.AITestCaseUncheckedCreateNestedManyWithoutWorkspaceInput
+  knowledgeGaps?: Prisma.KnowledgeGapUncheckedCreateNestedManyWithoutWorkspaceInput
+  insights?: Prisma.AIInsightUncheckedCreateNestedManyWithoutWorkspaceInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutWorkspaceInput
+  pipelines?: Prisma.PipelineUncheckedCreateNestedManyWithoutWorkspaceInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutWorkspaceInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutWorkspaceInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceCreateOrConnectWithoutCrmFieldsInput = {
+  where: Prisma.WorkspaceWhereUniqueInput
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutCrmFieldsInput, Prisma.WorkspaceUncheckedCreateWithoutCrmFieldsInput>
+}
+
+export type WorkspaceUpsertWithoutCrmFieldsInput = {
+  update: Prisma.XOR<Prisma.WorkspaceUpdateWithoutCrmFieldsInput, Prisma.WorkspaceUncheckedUpdateWithoutCrmFieldsInput>
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutCrmFieldsInput, Prisma.WorkspaceUncheckedCreateWithoutCrmFieldsInput>
+  where?: Prisma.WorkspaceWhereInput
+}
+
+export type WorkspaceUpdateToOneWithWhereWithoutCrmFieldsInput = {
+  where?: Prisma.WorkspaceWhereInput
+  data: Prisma.XOR<Prisma.WorkspaceUpdateWithoutCrmFieldsInput, Prisma.WorkspaceUncheckedUpdateWithoutCrmFieldsInput>
+}
+
+export type WorkspaceUpdateWithoutCrmFieldsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.WorkspaceMemberUpdateManyWithoutWorkspaceNestedInput
+  employees?: Prisma.AIEmployeeUpdateManyWithoutWorkspaceNestedInput
+  sources?: Prisma.KnowledgeSourceUpdateManyWithoutWorkspaceNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutWorkspaceNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutWorkspaceNestedInput
+  leads?: Prisma.LeadUpdateManyWithoutWorkspaceNestedInput
+  appointments?: Prisma.AppointmentUpdateManyWithoutWorkspaceNestedInput
+  channels?: Prisma.ChannelUpdateManyWithoutWorkspaceNestedInput
+  integrations?: Prisma.IntegrationUpdateManyWithoutWorkspaceNestedInput
+  automations?: Prisma.AutomationUpdateManyWithoutWorkspaceNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutWorkspaceNestedInput
+  jobs?: Prisma.BackgroundJobUpdateManyWithoutWorkspaceNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutWorkspaceNestedInput
+  invitations?: Prisma.WorkspaceInvitationUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutWorkspaceNestedInput
+  usageRecords?: Prisma.UsageRecordUpdateManyWithoutWorkspaceNestedInput
+  operationalEvents?: Prisma.OperationalEventUpdateManyWithoutWorkspaceNestedInput
+  events?: Prisma.AnalyticsEventUpdateManyWithoutWorkspaceNestedInput
+  testCases?: Prisma.AITestCaseUpdateManyWithoutWorkspaceNestedInput
+  knowledgeGaps?: Prisma.KnowledgeGapUpdateManyWithoutWorkspaceNestedInput
+  insights?: Prisma.AIInsightUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceUncheckedUpdateWithoutCrmFieldsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutWorkspaceNestedInput
+  employees?: Prisma.AIEmployeeUncheckedUpdateManyWithoutWorkspaceNestedInput
+  sources?: Prisma.KnowledgeSourceUncheckedUpdateManyWithoutWorkspaceNestedInput
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutWorkspaceNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  leads?: Prisma.LeadUncheckedUpdateManyWithoutWorkspaceNestedInput
+  appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutWorkspaceNestedInput
+  channels?: Prisma.ChannelUncheckedUpdateManyWithoutWorkspaceNestedInput
+  integrations?: Prisma.IntegrationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  automations?: Prisma.AutomationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  jobs?: Prisma.BackgroundJobUncheckedUpdateManyWithoutWorkspaceNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutWorkspaceNestedInput
+  invitations?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutWorkspaceNestedInput
+  usageRecords?: Prisma.UsageRecordUncheckedUpdateManyWithoutWorkspaceNestedInput
+  operationalEvents?: Prisma.OperationalEventUncheckedUpdateManyWithoutWorkspaceNestedInput
+  events?: Prisma.AnalyticsEventUncheckedUpdateManyWithoutWorkspaceNestedInput
+  testCases?: Prisma.AITestCaseUncheckedUpdateManyWithoutWorkspaceNestedInput
+  knowledgeGaps?: Prisma.KnowledgeGapUncheckedUpdateManyWithoutWorkspaceNestedInput
+  insights?: Prisma.AIInsightUncheckedUpdateManyWithoutWorkspaceNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutWorkspaceNestedInput
+  pipelines?: Prisma.PipelineUncheckedUpdateManyWithoutWorkspaceNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutWorkspaceNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutWorkspaceNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
 
@@ -3599,6 +5454,13 @@ export type WorkspaceCountOutputType = {
   testCases: number
   knowledgeGaps: number
   insights: number
+  companies: number
+  pipelines: number
+  deals: number
+  products: number
+  crmTasks: number
+  crmActivities: number
+  crmFields: number
 }
 
 export type WorkspaceCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3622,6 +5484,13 @@ export type WorkspaceCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensi
   testCases?: boolean | WorkspaceCountOutputTypeCountTestCasesArgs
   knowledgeGaps?: boolean | WorkspaceCountOutputTypeCountKnowledgeGapsArgs
   insights?: boolean | WorkspaceCountOutputTypeCountInsightsArgs
+  companies?: boolean | WorkspaceCountOutputTypeCountCompaniesArgs
+  pipelines?: boolean | WorkspaceCountOutputTypeCountPipelinesArgs
+  deals?: boolean | WorkspaceCountOutputTypeCountDealsArgs
+  products?: boolean | WorkspaceCountOutputTypeCountProductsArgs
+  crmTasks?: boolean | WorkspaceCountOutputTypeCountCrmTasksArgs
+  crmActivities?: boolean | WorkspaceCountOutputTypeCountCrmActivitiesArgs
+  crmFields?: boolean | WorkspaceCountOutputTypeCountCrmFieldsArgs
 }
 
 /**
@@ -3774,6 +5643,55 @@ export type WorkspaceCountOutputTypeCountInsightsArgs<ExtArgs extends runtime.Ty
   where?: Prisma.AIInsightWhereInput
 }
 
+/**
+ * WorkspaceCountOutputType without action
+ */
+export type WorkspaceCountOutputTypeCountCompaniesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CompanyWhereInput
+}
+
+/**
+ * WorkspaceCountOutputType without action
+ */
+export type WorkspaceCountOutputTypeCountPipelinesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PipelineWhereInput
+}
+
+/**
+ * WorkspaceCountOutputType without action
+ */
+export type WorkspaceCountOutputTypeCountDealsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DealWhereInput
+}
+
+/**
+ * WorkspaceCountOutputType without action
+ */
+export type WorkspaceCountOutputTypeCountProductsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ProductWhereInput
+}
+
+/**
+ * WorkspaceCountOutputType without action
+ */
+export type WorkspaceCountOutputTypeCountCrmTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CrmTaskWhereInput
+}
+
+/**
+ * WorkspaceCountOutputType without action
+ */
+export type WorkspaceCountOutputTypeCountCrmActivitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CrmActivityWhereInput
+}
+
+/**
+ * WorkspaceCountOutputType without action
+ */
+export type WorkspaceCountOutputTypeCountCrmFieldsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CrmFieldDefinitionWhereInput
+}
+
 
 export type WorkspaceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -3802,6 +5720,13 @@ export type WorkspaceSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   testCases?: boolean | Prisma.Workspace$testCasesArgs<ExtArgs>
   knowledgeGaps?: boolean | Prisma.Workspace$knowledgeGapsArgs<ExtArgs>
   insights?: boolean | Prisma.Workspace$insightsArgs<ExtArgs>
+  companies?: boolean | Prisma.Workspace$companiesArgs<ExtArgs>
+  pipelines?: boolean | Prisma.Workspace$pipelinesArgs<ExtArgs>
+  deals?: boolean | Prisma.Workspace$dealsArgs<ExtArgs>
+  products?: boolean | Prisma.Workspace$productsArgs<ExtArgs>
+  crmTasks?: boolean | Prisma.Workspace$crmTasksArgs<ExtArgs>
+  crmActivities?: boolean | Prisma.Workspace$crmActivitiesArgs<ExtArgs>
+  crmFields?: boolean | Prisma.Workspace$crmFieldsArgs<ExtArgs>
   _count?: boolean | Prisma.WorkspaceCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["workspace"]>
 
@@ -3850,6 +5775,13 @@ export type WorkspaceInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
   testCases?: boolean | Prisma.Workspace$testCasesArgs<ExtArgs>
   knowledgeGaps?: boolean | Prisma.Workspace$knowledgeGapsArgs<ExtArgs>
   insights?: boolean | Prisma.Workspace$insightsArgs<ExtArgs>
+  companies?: boolean | Prisma.Workspace$companiesArgs<ExtArgs>
+  pipelines?: boolean | Prisma.Workspace$pipelinesArgs<ExtArgs>
+  deals?: boolean | Prisma.Workspace$dealsArgs<ExtArgs>
+  products?: boolean | Prisma.Workspace$productsArgs<ExtArgs>
+  crmTasks?: boolean | Prisma.Workspace$crmTasksArgs<ExtArgs>
+  crmActivities?: boolean | Prisma.Workspace$crmActivitiesArgs<ExtArgs>
+  crmFields?: boolean | Prisma.Workspace$crmFieldsArgs<ExtArgs>
   _count?: boolean | Prisma.WorkspaceCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type WorkspaceIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -3880,6 +5812,13 @@ export type $WorkspacePayload<ExtArgs extends runtime.Types.Extensions.InternalA
     testCases: Prisma.$AITestCasePayload<ExtArgs>[]
     knowledgeGaps: Prisma.$KnowledgeGapPayload<ExtArgs>[]
     insights: Prisma.$AIInsightPayload<ExtArgs>[]
+    companies: Prisma.$CompanyPayload<ExtArgs>[]
+    pipelines: Prisma.$PipelinePayload<ExtArgs>[]
+    deals: Prisma.$DealPayload<ExtArgs>[]
+    products: Prisma.$ProductPayload<ExtArgs>[]
+    crmTasks: Prisma.$CrmTaskPayload<ExtArgs>[]
+    crmActivities: Prisma.$CrmActivityPayload<ExtArgs>[]
+    crmFields: Prisma.$CrmFieldDefinitionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -4302,6 +6241,13 @@ export interface Prisma__WorkspaceClient<T, Null = never, ExtArgs extends runtim
   testCases<T extends Prisma.Workspace$testCasesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$testCasesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AITestCasePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   knowledgeGaps<T extends Prisma.Workspace$knowledgeGapsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$knowledgeGapsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KnowledgeGapPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   insights<T extends Prisma.Workspace$insightsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$insightsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AIInsightPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  companies<T extends Prisma.Workspace$companiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$companiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  pipelines<T extends Prisma.Workspace$pipelinesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$pipelinesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PipelinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  deals<T extends Prisma.Workspace$dealsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$dealsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DealPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  products<T extends Prisma.Workspace$productsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$productsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  crmTasks<T extends Prisma.Workspace$crmTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$crmTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CrmTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  crmActivities<T extends Prisma.Workspace$crmActivitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$crmActivitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CrmActivityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  crmFields<T extends Prisma.Workspace$crmFieldsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$crmFieldsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CrmFieldDefinitionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5238,6 +7184,174 @@ export type Workspace$insightsArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.AIInsightScalarFieldEnum | Prisma.AIInsightScalarFieldEnum[]
+}
+
+/**
+ * Workspace.companies
+ */
+export type Workspace$companiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Company
+   */
+  select?: Prisma.CompanySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Company
+   */
+  omit?: Prisma.CompanyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanyInclude<ExtArgs> | null
+  where?: Prisma.CompanyWhereInput
+  orderBy?: Prisma.CompanyOrderByWithRelationInput | Prisma.CompanyOrderByWithRelationInput[]
+  cursor?: Prisma.CompanyWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CompanyScalarFieldEnum | Prisma.CompanyScalarFieldEnum[]
+}
+
+/**
+ * Workspace.pipelines
+ */
+export type Workspace$pipelinesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Pipeline
+   */
+  select?: Prisma.PipelineSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Pipeline
+   */
+  omit?: Prisma.PipelineOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PipelineInclude<ExtArgs> | null
+  where?: Prisma.PipelineWhereInput
+  orderBy?: Prisma.PipelineOrderByWithRelationInput | Prisma.PipelineOrderByWithRelationInput[]
+  cursor?: Prisma.PipelineWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PipelineScalarFieldEnum | Prisma.PipelineScalarFieldEnum[]
+}
+
+/**
+ * Workspace.deals
+ */
+export type Workspace$dealsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Deal
+   */
+  select?: Prisma.DealSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Deal
+   */
+  omit?: Prisma.DealOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DealInclude<ExtArgs> | null
+  where?: Prisma.DealWhereInput
+  orderBy?: Prisma.DealOrderByWithRelationInput | Prisma.DealOrderByWithRelationInput[]
+  cursor?: Prisma.DealWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DealScalarFieldEnum | Prisma.DealScalarFieldEnum[]
+}
+
+/**
+ * Workspace.products
+ */
+export type Workspace$productsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Product
+   */
+  select?: Prisma.ProductSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Product
+   */
+  omit?: Prisma.ProductOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProductInclude<ExtArgs> | null
+  where?: Prisma.ProductWhereInput
+  orderBy?: Prisma.ProductOrderByWithRelationInput | Prisma.ProductOrderByWithRelationInput[]
+  cursor?: Prisma.ProductWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ProductScalarFieldEnum | Prisma.ProductScalarFieldEnum[]
+}
+
+/**
+ * Workspace.crmTasks
+ */
+export type Workspace$crmTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CrmTask
+   */
+  select?: Prisma.CrmTaskSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CrmTask
+   */
+  omit?: Prisma.CrmTaskOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CrmTaskInclude<ExtArgs> | null
+  where?: Prisma.CrmTaskWhereInput
+  orderBy?: Prisma.CrmTaskOrderByWithRelationInput | Prisma.CrmTaskOrderByWithRelationInput[]
+  cursor?: Prisma.CrmTaskWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CrmTaskScalarFieldEnum | Prisma.CrmTaskScalarFieldEnum[]
+}
+
+/**
+ * Workspace.crmActivities
+ */
+export type Workspace$crmActivitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CrmActivity
+   */
+  select?: Prisma.CrmActivitySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CrmActivity
+   */
+  omit?: Prisma.CrmActivityOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CrmActivityInclude<ExtArgs> | null
+  where?: Prisma.CrmActivityWhereInput
+  orderBy?: Prisma.CrmActivityOrderByWithRelationInput | Prisma.CrmActivityOrderByWithRelationInput[]
+  cursor?: Prisma.CrmActivityWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CrmActivityScalarFieldEnum | Prisma.CrmActivityScalarFieldEnum[]
+}
+
+/**
+ * Workspace.crmFields
+ */
+export type Workspace$crmFieldsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CrmFieldDefinition
+   */
+  select?: Prisma.CrmFieldDefinitionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CrmFieldDefinition
+   */
+  omit?: Prisma.CrmFieldDefinitionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CrmFieldDefinitionInclude<ExtArgs> | null
+  where?: Prisma.CrmFieldDefinitionWhereInput
+  orderBy?: Prisma.CrmFieldDefinitionOrderByWithRelationInput | Prisma.CrmFieldDefinitionOrderByWithRelationInput[]
+  cursor?: Prisma.CrmFieldDefinitionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CrmFieldDefinitionScalarFieldEnum | Prisma.CrmFieldDefinitionScalarFieldEnum[]
 }
 
 /**

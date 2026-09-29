@@ -83,7 +83,16 @@ export const ModelName = {
   OperationalEvent: 'OperationalEvent',
   AITestCase: 'AITestCase',
   KnowledgeGap: 'KnowledgeGap',
-  AIInsight: 'AIInsight'
+  AIInsight: 'AIInsight',
+  Company: 'Company',
+  Pipeline: 'Pipeline',
+  PipelineStage: 'PipelineStage',
+  Deal: 'Deal',
+  DealItem: 'DealItem',
+  Product: 'Product',
+  CrmTask: 'CrmTask',
+  CrmActivity: 'CrmActivity',
+  CrmFieldDefinition: 'CrmFieldDefinition'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -265,7 +274,17 @@ export const CustomerScalarFieldEnum = {
   name: 'name',
   phone: 'phone',
   email: 'email',
-  externalId: 'externalId'
+  externalId: 'externalId',
+  companyId: 'companyId',
+  ownerMemberId: 'ownerMemberId',
+  position: 'position',
+  source: 'source',
+  notes: 'notes',
+  tags: 'tags',
+  customFields: 'customFields',
+  lastActivityAt: 'lastActivityAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type CustomerScalarFieldEnum = (typeof CustomerScalarFieldEnum)[keyof typeof CustomerScalarFieldEnum]
@@ -571,6 +590,165 @@ export const AIInsightScalarFieldEnum = {
 } as const
 
 export type AIInsightScalarFieldEnum = (typeof AIInsightScalarFieldEnum)[keyof typeof AIInsightScalarFieldEnum]
+
+
+export const CompanyScalarFieldEnum = {
+  id: 'id',
+  workspaceId: 'workspaceId',
+  name: 'name',
+  website: 'website',
+  phone: 'phone',
+  email: 'email',
+  address: 'address',
+  industry: 'industry',
+  taxId: 'taxId',
+  notes: 'notes',
+  ownerMemberId: 'ownerMemberId',
+  tags: 'tags',
+  customFields: 'customFields',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CompanyScalarFieldEnum = (typeof CompanyScalarFieldEnum)[keyof typeof CompanyScalarFieldEnum]
+
+
+export const PipelineScalarFieldEnum = {
+  id: 'id',
+  workspaceId: 'workspaceId',
+  name: 'name',
+  isDefault: 'isDefault',
+  sort: 'sort',
+  createdAt: 'createdAt'
+} as const
+
+export type PipelineScalarFieldEnum = (typeof PipelineScalarFieldEnum)[keyof typeof PipelineScalarFieldEnum]
+
+
+export const PipelineStageScalarFieldEnum = {
+  id: 'id',
+  pipelineId: 'pipelineId',
+  name: 'name',
+  color: 'color',
+  kind: 'kind',
+  probability: 'probability',
+  sort: 'sort'
+} as const
+
+export type PipelineStageScalarFieldEnum = (typeof PipelineStageScalarFieldEnum)[keyof typeof PipelineStageScalarFieldEnum]
+
+
+export const DealScalarFieldEnum = {
+  id: 'id',
+  workspaceId: 'workspaceId',
+  pipelineId: 'pipelineId',
+  stageId: 'stageId',
+  title: 'title',
+  amount: 'amount',
+  currency: 'currency',
+  customerId: 'customerId',
+  companyId: 'companyId',
+  ownerMemberId: 'ownerMemberId',
+  leadId: 'leadId',
+  source: 'source',
+  status: 'status',
+  lostReason: 'lostReason',
+  expectedCloseAt: 'expectedCloseAt',
+  closedAt: 'closedAt',
+  stageChangedAt: 'stageChangedAt',
+  tags: 'tags',
+  customFields: 'customFields',
+  sort: 'sort',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DealScalarFieldEnum = (typeof DealScalarFieldEnum)[keyof typeof DealScalarFieldEnum]
+
+
+export const DealItemScalarFieldEnum = {
+  id: 'id',
+  dealId: 'dealId',
+  productId: 'productId',
+  name: 'name',
+  price: 'price',
+  quantity: 'quantity',
+  discount: 'discount'
+} as const
+
+export type DealItemScalarFieldEnum = (typeof DealItemScalarFieldEnum)[keyof typeof DealItemScalarFieldEnum]
+
+
+export const ProductScalarFieldEnum = {
+  id: 'id',
+  workspaceId: 'workspaceId',
+  name: 'name',
+  sku: 'sku',
+  category: 'category',
+  description: 'description',
+  price: 'price',
+  currency: 'currency',
+  durationMin: 'durationMin',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
+
+
+export const CrmTaskScalarFieldEnum = {
+  id: 'id',
+  workspaceId: 'workspaceId',
+  title: 'title',
+  description: 'description',
+  type: 'type',
+  priority: 'priority',
+  dueAt: 'dueAt',
+  completedAt: 'completedAt',
+  remindedAt: 'remindedAt',
+  assigneeMemberId: 'assigneeMemberId',
+  createdByUserId: 'createdByUserId',
+  customerId: 'customerId',
+  companyId: 'companyId',
+  dealId: 'dealId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CrmTaskScalarFieldEnum = (typeof CrmTaskScalarFieldEnum)[keyof typeof CrmTaskScalarFieldEnum]
+
+
+export const CrmActivityScalarFieldEnum = {
+  id: 'id',
+  workspaceId: 'workspaceId',
+  type: 'type',
+  body: 'body',
+  meta: 'meta',
+  authorUserId: 'authorUserId',
+  authorName: 'authorName',
+  customerId: 'customerId',
+  companyId: 'companyId',
+  dealId: 'dealId',
+  createdAt: 'createdAt'
+} as const
+
+export type CrmActivityScalarFieldEnum = (typeof CrmActivityScalarFieldEnum)[keyof typeof CrmActivityScalarFieldEnum]
+
+
+export const CrmFieldDefinitionScalarFieldEnum = {
+  id: 'id',
+  workspaceId: 'workspaceId',
+  entity: 'entity',
+  key: 'key',
+  label: 'label',
+  type: 'type',
+  options: 'options',
+  sort: 'sort',
+  createdAt: 'createdAt'
+} as const
+
+export type CrmFieldDefinitionScalarFieldEnum = (typeof CrmFieldDefinitionScalarFieldEnum)[keyof typeof CrmFieldDefinitionScalarFieldEnum]
 
 
 export const SortOrder = {

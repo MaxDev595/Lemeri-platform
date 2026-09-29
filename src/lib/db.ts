@@ -1,6 +1,7 @@
 import "@/lib/neon-local";
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaNeon, PrismaNeonHTTP } from "@prisma/adapter-neon";
+import { applyCrmSchema } from "@/lib/crm/schema";
 
 // Turbopack's WASM loader uses compileStreaming, while workerd currently only
 // exposes compile. Install the equivalent fallback before Prisma compiles its
@@ -65,6 +66,14 @@ const developmentClient =
 // right after the operation, so no socket outlives the request that opened it.
 const readOperations = new Set(["findUnique", "findUniqueOrThrow", "findFirst", "findFirstOrThrow", "findMany", "count", "aggregate", "groupBy"]);
 
+// New columns/tables (CRM) must exist before Prisma selects them, so the first
+// database operation of each isolate makes sure the additive schema is applied.
+let schemaReady: Promise<unknown> | undefined;
+function ensureSchema() {
+  schemaReady ??= applyCrmSchema(createHttpClient()).catch(error => { schemaReady = undefined; console.error("Schema update failed", error instanceof Error ? error.message : error); });
+  return schemaReady;
+}
+
 async function withTransactionClient<T>(run: (client: PrismaClient) => Promise<T>) {
   const client = createTransactionClient();
   try {
@@ -82,12 +91,12 @@ function modelDelegate(model: string) {
         const client = createHttpClient();
         const delegate = Reflect.get(client, model) as Record<string, unknown>;
         const value = delegate[operation];
-        return typeof value === "function" ? value.bind(delegate) : value;
+        return typeof value === "function" ? (...args: unknown[]) => ensureSchema().then(() => (value as (...input: unknown[]) => unknown).apply(delegate, args)) : value;
       }
-      return (...args: unknown[]) => withTransactionClient(client => {
+      return (...args: unknown[]) => ensureSchema().then(() => withTransactionClient(client => {
         const delegate = Reflect.get(client, model) as Record<string, (...input: unknown[]) => Promise<unknown>>;
         return delegate[operation](...args);
-      });
+      }));
     },
   });
 }
@@ -99,7 +108,7 @@ const productionClient = new Proxy({} as PrismaClient, {
         // Array form: the operations were already started through this proxy
         // (each on its own connection), so wait for all of them.
         if (Array.isArray(input)) return Promise.all(input);
-        return withTransactionClient(client => (client.$transaction as (fn: unknown, options?: unknown) => Promise<unknown>)(input, options));
+        return ensureSchema().then(() => withTransactionClient(client => (client.$transaction as (fn: unknown, options?: unknown) => Promise<unknown>)(input, options)));
       };
     }
     if (typeof property === "string" && !property.startsWith("$") && property !== "then") return modelDelegate(property);
@@ -109,5 +118,7 @@ const productionClient = new Proxy({} as PrismaClient, {
     return typeof value === "function" ? value.bind(client) : value;
   },
 });
+
+if (developmentClient) void applyCrmSchema(developmentClient).catch(error => console.error("Schema update failed", error instanceof Error ? error.message : error));
 
 export const db: PrismaClient = developmentClient ?? productionClient;

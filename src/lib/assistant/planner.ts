@@ -91,7 +91,20 @@ export async function planWithoutModel(ctx: AssistantContext, history: ChatTurn[
     lines.push(t(ctx, `Очередь событий: ${data.queue.pending} в работе, ${data.queue.failed} с ошибкой.`, `Event queue: ${data.queue.pending} pending, ${data.queue.failed} failed.`));
     return { reply: lines.join("\n"), sections: ["integrations"], proposals: [] };
   }
-  if (has(text, /лид|lead|заявк|сделк/)) {
+  if (has(text, /сдел(?:к|ок)|воронк|deal|pipeline|продаж/)) {
+    const data = (await runTool(ctx, "crm_pipeline", {})).data as { pipelines: Array<{ name: string; stages: Array<{ name: string; deals: number; amount: number; kind: string }> }>; openTotal: number; forecast: number; thisMonth: { won: number; wonAmount: number; lost: number }; staleDeals: Array<Row & { stage: Row }> };
+    const fmt = (v: number) => new Intl.NumberFormat(ctx.locale === "ru" ? "ru-RU" : "en-US", { maximumFractionDigits: 0 }).format(v);
+    const lines = data.pipelines.flatMap(p => [`**${p.name}**`, ...p.stages.map(st => `- ${st.name}: ${st.deals} · ${fmt(st.amount)} ₽`)]);
+    lines.push(t(ctx, `В работе: **${fmt(data.openTotal)} ₽**, прогноз **${fmt(data.forecast)} ₽**. В этом месяце выиграно ${data.thisMonth.won} (${fmt(data.thisMonth.wonAmount)} ₽), проиграно ${data.thisMonth.lost}.`, `Open: **${fmt(data.openTotal)}**, forecast **${fmt(data.forecast)}**. This month won ${data.thisMonth.won} (${fmt(data.thisMonth.wonAmount)}), lost ${data.thisMonth.lost}.`));
+    if (data.staleDeals.length) lines.push(t(ctx, "Давно без движения:", "Stale deals:"), ...data.staleDeals.slice(0, 5).map(d => `- ${d.title} (${d.stage.name})`));
+    return { reply: lines.join("\n"), sections: ["deals", "reports"], proposals: [] };
+  }
+  if (has(text, /задач|task|просроч|overdue|напомин/)) {
+    const rows = (await runTool(ctx, "list_crm_tasks", { onlyOverdue: has(text, /просроч|overdue/) })).data as Array<Row & { customer: Row | null; deal: Row | null }>;
+    if (!rows.length) return { reply: t(ctx, "Открытых задач нет.", "No open tasks."), sections: ["tasks"], proposals: [] };
+    return { reply: [t(ctx, "**Задачи:**", "**Tasks:**"), ...rows.map(r => `- ${r.overdue ? "⚠ " : ""}${r.title}${r.dueAt ? ` · ${when(ctx, r.dueAt)}` : ""}${r.customer ? ` · ${r.customer.name}` : r.deal ? ` · ${r.deal.title}` : ""}`)].join("\n"), sections: ["tasks"], proposals: [] };
+  }
+  if (has(text, /лид|lead|заяв(?:к|ок)/)) {
     const stage = has(text, /нов|new/) ? "NEW" : has(text, /квалиф|qualif/) ? "QUALIFIED" : has(text, /выигр|сделк|won/) ? "WON" : has(text, /потер|lost/) ? "LOST" : undefined;
     const rows = (await runTool(ctx, "list_leads", { stage, limit: 10 })).data as Array<Row & { customer: Row }>;
     if (!rows.length) return { reply: t(ctx, "Лидов пока нет. Их создаёт ИИ-сотрудник, когда клиент проявляет интерес — проверьте, что действие «Создавать лиды» разрешено.", "No leads yet. The AI employee creates them when a customer shows interest — make sure “Create leads” is enabled."), sections: ["leads", "actions"], proposals: [] };

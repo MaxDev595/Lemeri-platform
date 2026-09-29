@@ -1,0 +1,108 @@
+/* Website chat: builder, install wizard, hosted link (cabinet) */
+.siteInstall{margin-top:18px;padding:18px;border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface)}
+.siTabs{display:flex;gap:4px;padding:4px;margin-bottom:18px;border-radius:var(--r-md);background:var(--surface-2);width:fit-content;max-width:100%;overflow-x:auto}
+.siTabs button{padding:7px 14px;border:0;border-radius:calc(var(--r-md) - 2px);background:transparent;color:var(--text-3);font-size:var(--fs-13);font-weight:560;white-space:nowrap;cursor:pointer}
+.siTabs button.on{background:var(--surface);color:var(--text);box-shadow:var(--e-1)}
+.siMuted{margin:2px 0 12px;color:var(--text-3);font-size:var(--fs-13)}
+.siteInstall h3{margin:18px 0 2px;font-size:var(--fs-14)}
+.siBtn{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface);color:var(--text);font-size:var(--fs-13);font-weight:560;text-decoration:none;cursor:pointer}
+.siBtn.primary{border-color:transparent;background:var(--accent);color:var(--text-on-accent,#fff)}
+.siBtn:hover{background:var(--surface-hover)}.siBtn.primary:hover{filter:brightness(1.06);background:var(--accent)}
+
+.siCode{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface-2)}
+.siCode>div{display:grid;gap:4px;flex:1;min-width:0}
+.siCode b{font-size:var(--fs-12);color:var(--text-3);font-weight:560}
+.siCode code{overflow-x:auto;font-size:var(--fs-12);white-space:nowrap}
+.siCode>button{display:inline-flex;flex:none;align-items:center;gap:6px;padding:7px 11px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface);color:var(--text);font-size:var(--fs-13);cursor:pointer}
+
+.siPlatforms{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.siPlatforms button{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface);color:var(--text);font-size:var(--fs-13);text-align:left;cursor:pointer}
+.siPlatforms button.on{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-softer)}
+.siPlatforms em{flex:none;padding:2px 7px;border-radius:var(--r-full);background:var(--ok-soft);color:var(--ok);font-size:var(--fs-11);font-style:normal;font-weight:600}
+.siGuide{margin-top:12px;padding:14px 16px;border-radius:var(--r-md);background:var(--surface-2)}
+.siGuide ol{display:grid;gap:8px;margin:0 0 14px;padding-left:20px;font-size:var(--fs-13);line-height:1.5}
+.siGuideActions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+
+.siCheck,.siSites{margin-top:16px;padding:14px 16px;border:1px solid var(--line);border-radius:var(--r-md)}
+.siCheckHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.siCheckHead>div,.siSites{display:grid;gap:3px}
+.siCheckHead small,.siSites small{color:var(--text-3);font-size:var(--fs-12)}
+.siCheckHead button{display:inline-flex;flex:none;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface);color:var(--text);font-size:var(--fs-12);cursor:pointer}
+.siCheck ul{display:grid;gap:6px;margin:12px 0 0;padding:0;list-style:none;font-size:var(--fs-13)}
+.siCheck li{display:flex;align-items:center;gap:8px}
+.siCheck li a{color:var(--accent-text,var(--accent));font-weight:560}
+.siCheck time{margin-left:auto;color:var(--text-3);font-size:var(--fs-12)}
+.siCheck .siMuted{margin:10px 0 0}
+.siOk{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--ok-soft);color:var(--ok)}
+.spin{animation:siSpin .8s linear infinite}@keyframes siSpin{to{transform:rotate(360deg)}}
+.siTags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.siTags span{display:inline-flex;align-items:center;gap:4px;padding:3px 4px 3px 10px;border-radius:var(--r-full);background:var(--surface-2);font-size:var(--fs-12)}
+.siTags button{width:20px;height:20px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--text-3);cursor:pointer}
+.siTags button:hover{background:var(--surface-hover);color:var(--bad)}
+.siAdd{display:flex;flex-wrap:wrap;gap:8px}
+.siAdd input{flex:1;min-width:160px}
+.siAdd button{padding:7px 12px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface);color:var(--text);font-size:var(--fs-13);cursor:pointer}
+.siAdd button.primary{border-color:transparent;background:var(--accent);color:var(--text-on-accent,#fff)}
+.siAdd button:disabled{opacity:.5;cursor:default}
+.siApi{margin-top:14px;font-size:var(--fs-13)}
+.siApi summary{color:var(--text-3);cursor:pointer}
+.siApi p{color:var(--text-2)}
+.siApi code{display:block;overflow-x:auto;padding:10px;border-radius:var(--r-md);background:var(--surface-2);font-size:var(--fs-12);white-space:nowrap}
+
+.siLook{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start}
+.siForm{display:grid;gap:12px}
+.siForm label,.siForm fieldset{display:grid;gap:5px;margin:0;padding:0;border:0;font-size:var(--fs-13);font-weight:560}
+.siForm legend{margin-bottom:5px;padding:0}
+.siForm label small{color:var(--text-3);font-weight:400}
+.siForm textarea{resize:vertical}
+.siForm>.primary{justify-self:start}
+.siRow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.siSwatches{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.siSwatches>button{width:28px;height:28px;padding:0;border:2px solid var(--surface);border-radius:50%;box-shadow:0 0 0 1px var(--line);cursor:pointer}
+.siSwatches>button.on{box-shadow:0 0 0 2px var(--text)}
+.siCustomColor input{width:34px;height:30px;padding:0;border:1px solid var(--line);border-radius:8px;background:none;cursor:pointer}
+.siSeg{display:flex;flex-wrap:wrap;gap:4px}
+.siSeg button{padding:6px 11px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface);color:var(--text-2);font-size:var(--fs-12);cursor:pointer}
+.siSeg button.on{border-color:var(--accent);background:var(--accent-softer);color:var(--text)}
+
+.siPreview{position:sticky;top:12px;display:grid;gap:8px}
+.siPreview>small{color:var(--text-3);font-size:var(--fs-12)}
+.siStage{--p-bg:#fff;--p-bg2:#f6f6f9;--p-text:#17191f;--p-text3:#6b7080;--p-line:#e6e7ec;position:relative;display:grid;justify-items:end;gap:12px;padding:18px;border-radius:var(--r-lg);background:repeating-linear-gradient(45deg,var(--surface-2),var(--surface-2) 10px,var(--surface) 10px,var(--surface) 20px)}
+.siPreview.dark .siStage{--p-bg:#15171c;--p-bg2:#1a1c22;--p-text:#eceef3;--p-text3:#9398a6;--p-line:#2a2d36}
+.siStage[data-position=left]{justify-items:start}
+.siCard{display:flex;flex-direction:column;width:100%;max-width:300px;height:380px;overflow:hidden;border:1px solid var(--p-line);border-radius:16px;background:var(--p-bg);color:var(--p-text);box-shadow:0 20px 50px -18px rgba(20,20,40,.35)}
+.siCard header{display:flex;align-items:center;gap:9px;padding:11px 12px;border-bottom:1px solid var(--p-line);background:radial-gradient(120% 140% at 0 0,color-mix(in srgb,var(--si-accent) 16%,transparent),transparent 60%)}
+.siCard header div{display:grid;min-width:0;line-height:1.25}
+.siCard header b{overflow:hidden;font-size:13px;text-overflow:ellipsis;white-space:nowrap}
+.siCard header small{overflow:hidden;color:var(--p-text3);font-size:11px;text-overflow:ellipsis;white-space:nowrap}
+.siAvatar{display:grid;flex:none;place-items:center;width:30px;height:30px;border-radius:10px;background:var(--si-accent);color:#fff;font-size:13px;font-weight:600}
+.siBody{display:grid;flex:1;align-content:center;justify-items:center;gap:6px;padding:14px;background:var(--p-bg2);text-align:center}
+.siBody h4{margin:4px 0 0;font-size:15px}
+.siBody p{margin:0;color:var(--p-text3);font-size:12px}
+.siGlyph{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:color-mix(in srgb,var(--si-accent) 14%,transparent);color:var(--si-accent)}
+.siChips{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin-top:8px}
+.siChips span{padding:5px 9px;border:1px solid var(--p-line);border-radius:999px;background:var(--p-bg);font-size:11px}
+.siCard footer{display:flex;align-items:center;gap:8px;padding:9px 10px;border-top:1px solid var(--p-line);color:var(--p-text3);font-size:12px}
+.siCard footer span{flex:1}
+.siCard footer i{width:28px;height:28px;border-radius:9px;background:var(--si-accent)}
+.siLauncher{width:48px;height:48px;border-radius:16px;background:var(--si-accent);box-shadow:0 10px 24px -8px color-mix(in srgb,var(--si-accent) 70%,transparent)}
+
+.siLink{display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;align-items:start}
+.siLink h3{margin-top:0}
+.siQr{padding:10px;border:1px solid var(--line);border-radius:var(--r-lg);background:#fff}
+.siQr svg{display:block;width:100%;height:auto}
+.siToggle{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:var(--fs-13)}
+
+/* WordPress / plugin connect page */
+.connectSite{display:grid;gap:14px}
+.connectWorkspace{margin:0;color:var(--text-3);font-size:var(--fs-13)}
+.connectEmployees{display:grid;gap:8px;margin:0;padding:0;border:0}
+.connectEmployees legend{margin-bottom:8px;font-size:var(--fs-13);font-weight:560}
+.connectEmployees label{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-md);cursor:pointer}
+.connectEmployees label.on{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-softer)}
+.connectEmployees span{display:grid}
+.connectEmployees small{color:var(--text-3);font-size:var(--fs-12)}
+
+@media (max-width:900px){.siLook,.siLink{grid-template-columns:1fr}.siPreview{position:static}.siLink .siQr{max-width:220px}}
+@media (max-width:560px){.siRow{grid-template-columns:1fr}.siCode{flex-direction:column;align-items:stretch}.siteInstall{padding:14px}}
+.siCardHint{margin:6px 0 0;color:var(--accent-text,var(--accent));font-size:var(--fs-12)}

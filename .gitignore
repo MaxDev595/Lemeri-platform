@@ -13,3 +13,6 @@ outputs/
 Claude outputs/
 env-local-dev.txt
 public/vendor/pdfjs/
+
+# local dev database (scripts/local-db.mjs)
+/.local-db

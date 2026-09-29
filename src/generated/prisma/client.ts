@@ -213,3 +213,48 @@ export type KnowledgeGap = Prisma.KnowledgeGapModel
  * 
  */
 export type AIInsight = Prisma.AIInsightModel
+/**
+ * Model Company
+ * 
+ */
+export type Company = Prisma.CompanyModel
+/**
+ * Model Pipeline
+ * 
+ */
+export type Pipeline = Prisma.PipelineModel
+/**
+ * Model PipelineStage
+ * 
+ */
+export type PipelineStage = Prisma.PipelineStageModel
+/**
+ * Model Deal
+ * 
+ */
+export type Deal = Prisma.DealModel
+/**
+ * Model DealItem
+ * 
+ */
+export type DealItem = Prisma.DealItemModel
+/**
+ * Model Product
+ * 
+ */
+export type Product = Prisma.ProductModel
+/**
+ * Model CrmTask
+ * 
+ */
+export type CrmTask = Prisma.CrmTaskModel
+/**
+ * Model CrmActivity
+ * 
+ */
+export type CrmActivity = Prisma.CrmActivityModel
+/**
+ * Model CrmFieldDefinition
+ * 
+ */
+export type CrmFieldDefinition = Prisma.CrmFieldDefinitionModel

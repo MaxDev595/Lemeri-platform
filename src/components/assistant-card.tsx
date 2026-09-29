@@ -5,7 +5,7 @@ import { ArrowUp, Check, Maximize2, Minimize2, Minus, Pin, PinOff, RotateCcw, Sp
 import { floatingCardRuntime, type CardController } from "@/lib/floating-card/runtime";
 import { LemiriGlyph } from "./logo";
 
-type Section = "overview" | "employees" | "conversations" | "leads" | "appointments" | "knowledge" | "actions" | "rules" | "channels" | "integrations" | "analytics" | "team" | "billing" | "settings" | "notifications" | "testing";
+type Section = "overview" | "employees" | "conversations" | "leads" | "appointments" | "knowledge" | "actions" | "rules" | "channels" | "integrations" | "analytics" | "team" | "billing" | "settings" | "notifications" | "testing" | "deals" | "contacts" | "companies" | "tasks" | "products" | "reports" | "crmSettings";
 type Proposal = {
   id: string; kind: string; title: string; details: string[]; danger?: boolean;
   request: { method: string; path: string; body?: unknown };
@@ -21,7 +21,7 @@ const copy = {
     placeholder: "Спросите что угодно…", send: "Отправить", thinking: "Думаю", failed: "Не получилось ответить. Попробуйте ещё раз.", rateLimited: "Слишком много запросов, подождите минуту.",
     confirm: "Подтвердить", cancel: "Отмена", done: "Выполнено", cancelled: "Отменено", running: "Выполняю…", actionFailed: "Не удалось выполнить", openSection: "Открыть", hint: "Enter — отправить · Shift+Enter — новая строка",
     pinnedNote: "Положение закреплено", resized: "Тяните за края, чтобы изменить размер",
-    sections: { overview: "Обзор", employees: "Сотрудники", conversations: "Диалоги", leads: "Лиды", appointments: "Записи", knowledge: "Знания", actions: "Действия", rules: "Правила", channels: "Каналы", integrations: "Интеграции", analytics: "Аналитика", team: "Команда", billing: "Тариф", settings: "Настройки", notifications: "Уведомления", testing: "Тестирование" },
+    sections: { overview: "Обзор", employees: "Сотрудники", conversations: "Диалоги", leads: "Лиды", appointments: "Записи", knowledge: "Знания", actions: "Действия", rules: "Правила", channels: "Каналы", integrations: "Интеграции", analytics: "Аналитика", team: "Команда", billing: "Тариф", settings: "Настройки", notifications: "Уведомления", testing: "Тестирование", deals: "Сделки", contacts: "Контакты", companies: "Компании", tasks: "Задачи", products: "Товары", reports: "Отчёты", crmSettings: "Настройки CRM" },
   },
   en: {
     title: "Lemiri Assistant", status: "Sees your workspace data", open: "Open assistant (Ctrl+J)", collapse: "Collapse", pin: "Lock position", unpin: "Unlock", maximize: "Maximize", restore: "Restore size", reset: "New chat",
@@ -29,7 +29,7 @@ const copy = {
     placeholder: "Ask anything…", send: "Send", thinking: "Thinking", failed: "Could not answer. Please try again.", rateLimited: "Too many requests, wait a minute.",
     confirm: "Confirm", cancel: "Cancel", done: "Done", cancelled: "Cancelled", running: "Running…", actionFailed: "Failed", openSection: "Open", hint: "Enter to send · Shift+Enter for a new line",
     pinnedNote: "Position locked", resized: "Drag the edges to resize",
-    sections: { overview: "Overview", employees: "Employees", conversations: "Conversations", leads: "Leads", appointments: "Appointments", knowledge: "Knowledge", actions: "Actions", rules: "Rules", channels: "Channels", integrations: "Integrations", analytics: "Analytics", team: "Team", billing: "Plan", settings: "Settings", notifications: "Notifications", testing: "Testing" },
+    sections: { overview: "Overview", employees: "Employees", conversations: "Conversations", leads: "Leads", appointments: "Appointments", knowledge: "Knowledge", actions: "Actions", rules: "Rules", channels: "Channels", integrations: "Integrations", analytics: "Analytics", team: "Team", billing: "Plan", settings: "Settings", notifications: "Notifications", testing: "Testing", deals: "Deals", contacts: "Contacts", companies: "Companies", tasks: "Tasks", products: "Products", reports: "Reports", crmSettings: "CRM settings" },
   },
 } as const;
 
@@ -45,6 +45,10 @@ const suggestions: Record<"ru" | "en", Partial<Record<Section, string[]>> & { de
     settings: ["Включи тёмную тему", "Что есть в настройках?"],
     employees: ["Как настроить сотрудника?", "Сводка по пространству"],
     actions: ["Что может делать ИИ-сотрудник?", "Как разрешить записи?"],
+    deals: ["Какие сделки зависли?", "Сумма сделок в работе", "Как настроить воронку?"],
+    contacts: ["Найди клиента", "Как импортировать контакты?"],
+    tasks: ["Какие задачи просрочены?", "Поставь задачу позвонить клиенту"],
+    reports: ["Какая конверсия за месяц?", "Кто из менеджеров лучше продаёт?"],
   },
   en: {
     default: ["Workspace summary", "What's new in Telegram?", "Show new leads", "What can the platform do?"],
@@ -57,6 +61,10 @@ const suggestions: Record<"ru" | "en", Partial<Record<Section, string[]>> & { de
     settings: ["Switch to dark theme", "What's in settings?"],
     employees: ["How do I set up an employee?", "Workspace summary"],
     actions: ["What can the AI employee do?", "How do I allow bookings?"],
+    deals: ["Which deals are stuck?", "Open pipeline total", "How do I set up a pipeline?"],
+    contacts: ["Find a customer", "How do I import contacts?"],
+    tasks: ["Which tasks are overdue?", "Create a task to call a customer"],
+    reports: ["What's the win rate this month?", "Which manager sells best?"],
   },
 };
 

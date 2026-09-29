@@ -10,6 +10,8 @@ export type WidgetBootConfig = {
   base: string; employeeId: string; frameUrl: string; tokenUrl: string; token: string;
   name: string; status: string; locale: "ru" | "en";
   labels: { open: string; collapse: string; pin: string; unpin: string; maximize: string; restore: string };
+  /** Look configured in the Lemiri cabinet; data-* attributes on the script tag override it. */
+  accent?: string; theme?: "auto" | "light" | "dark"; position?: "left" | "right"; autoOpenSeconds?: number;
 };
 
 export function lemiriWidgetBootstrap(runtimeFactory: typeof floatingCardRuntime, cfg: WidgetBootConfig) {
@@ -17,10 +19,12 @@ export function lemiriWidgetBootstrap(runtimeFactory: typeof floatingCardRuntime
   if (d.getElementById("lemiri-widget-root")) return;
   const script = d.currentScript as HTMLScriptElement | null;
   const themeAttr = script?.dataset.theme;
-  const theme = themeAttr === "light" || themeAttr === "dark" ? themeAttr : "auto";
-  const accentAttr = script?.dataset.accent ?? "";
+  const theme = themeAttr === "light" || themeAttr === "dark" || themeAttr === "auto" ? themeAttr : cfg.theme ?? "auto";
+  const accentAttr = script?.dataset.accent || cfg.accent || "";
   const accent = /^#[0-9a-f]{3,8}$/i.test(accentAttr) ? accentAttr : "";
   const startOpen = script?.dataset.open === "true";
+  const posAttr = script?.dataset.position;
+  const position = posAttr === "left" || posAttr === "right" ? posAttr : cfg.position ?? "right";
   if (!d.body) { d.addEventListener("DOMContentLoaded", build, { once: true }); return; }
   build();
   function build() {
@@ -113,7 +117,7 @@ export function lemiriWidgetBootstrap(runtimeFactory: typeof floatingCardRuntime
 
   const rt = runtimeFactory();
   const ctl = rt.mount({ root, card, launcher, dragHandle: head, storageKey: `lemiri-widget:${cfg.employeeId}:layout`, classPrefix: P,
-    initial: startOpen ? { open: true } : undefined,
+    initial: { ...(startOpen ? { open: true } : {}), ...(position === "left" ? { dockX: "left" as const, launcherEdge: "left" as const } : {}) },
     onChange: s => {
       pinBtn.setAttribute("aria-pressed", String(s.pinned)); const pinLabel = s.pinned ? cfg.labels.unpin : cfg.labels.pin; pinBtn.setAttribute("aria-label", pinLabel); pinBtn.title = pinLabel;
       maxBtn.innerHTML = s.maximized ? icons.min : icons.max; const maxLabel = s.maximized ? cfg.labels.restore : cfg.labels.maximize; maxBtn.setAttribute("aria-label", maxLabel); maxBtn.title = maxLabel;
@@ -133,6 +137,12 @@ export function lemiriWidgetBootstrap(runtimeFactory: typeof floatingCardRuntime
     else if (type === "lemiri:close") { ctl.close(); launcher.focus(); }
     else if (type === "lemiri:message" && !ctl.getState().open) setUnread(unread + 1);
   });
+  // Optional gentle auto-open, once per visitor session.
+  const autoKey = `lemiri-widget:${cfg.employeeId}:auto`;
+  if (!startOpen && (cfg.autoOpenSeconds ?? 0) > 0) {
+    let already = false; try { already = sessionStorage.getItem(autoKey) === "1"; } catch { /* storage unavailable */ }
+    if (!already) window.setTimeout(() => { try { sessionStorage.setItem(autoKey, "1"); } catch { /* storage unavailable */ } if (!ctl.getState().open) ctl.open(); }, (cfg.autoOpenSeconds ?? 0) * 1000);
+  }
   // Public API for site owners: window.LemiriWidget.open() / .close() / .toggle()
   (window as unknown as { LemiriWidget?: unknown }).LemiriWidget = { open: () => ctl.open(), close: () => ctl.close(), toggle: () => ctl.toggle() };
   }

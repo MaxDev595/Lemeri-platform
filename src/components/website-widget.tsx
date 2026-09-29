@@ -38,8 +38,12 @@ const widgetCopy = {
   },
 } as const;
 
-export function WebsiteWidget({ locale, employeeId, employeeName, embedded = false, theme = "auto" }: { locale: Locale; employeeId: string; employeeName: string; embedded?: boolean; theme?: "light" | "dark" | "auto" }) {
-  const copy = widgetCopy[locale];
+export type WidgetLook = { title?: string; status?: string; greeting?: string; help?: string; suggestions?: string[]; accent?: string };
+
+export function WebsiteWidget({ locale, employeeId, employeeName, embedded = false, theme = "auto", look = {} }: { locale: Locale; employeeId: string; employeeName: string; embedded?: boolean; theme?: "light" | "dark" | "auto"; look?: WidgetLook }) {
+  const base = widgetCopy[locale];
+  const copy = { ...base, hello: look.greeting || base.hello, help: look.help || base.help, status: look.status || base.status, suggestions: look.suggestions?.length ? look.suggestions : base.suggestions };
+  const title = look.title || employeeName;
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversationId, setConversationId] = useState<string>();
   const [busy, setBusy] = useState(false);
@@ -75,7 +79,19 @@ export function WebsiteWidget({ locale, employeeId, employeeName, embedded = fal
     localStorage.setItem(key, created);
     setVisitorId(created);
   }, [employeeId]);
+  // Hosted chat page (a direct link, no website): Lemiri's own origin issues the token.
+  const hostedToken = async () => {
+    try { const response = await fetch(`/api/widget/${employeeId}/token`, { method: "POST" }); const body = await response.json() as { token?: string }; if (!body.token) return undefined; const next = { token: body.token, origin: window.location.origin }; authRef.current = next; setEmbedAuth(next); return next; } catch { return undefined; }
+  };
   useEffect(() => {
+    if (embedded) return;
+    void hostedToken();
+    const renew = window.setInterval(() => void hostedToken(), 8 * 60_000);
+    return () => window.clearInterval(renew);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [embedded, employeeId]);
+  useEffect(() => {
+    if (!embedded) return;
     const receive = (event: MessageEvent) => {
       if (event.source !== window.parent || event.data?.type !== "lemiri:configure" || typeof event.data.token !== "string") return;
       const next = { token: event.data.token, origin: event.origin };
@@ -88,8 +104,8 @@ export function WebsiteWidget({ locale, employeeId, employeeName, embedded = fal
     // Tokens expire after 10 minutes; renew them ahead of time while the page stays open.
     const renew = window.setInterval(() => window.parent.postMessage({ type: "lemiri:refresh" }, "*"), 8 * 60_000);
     return () => { removeEventListener("message", receive); window.clearInterval(renew); };
-  }, []);
-  const refreshAuth = () => new Promise<{ token: string; origin: string } | undefined>((resolve) => {
+  }, [embedded]);
+  const refreshAuth = () => !embedded ? hostedToken() : new Promise<{ token: string; origin: string } | undefined>((resolve) => {
     const timer = window.setTimeout(() => resolve(undefined), 5000);
     authWaiters.current.push((value) => { window.clearTimeout(timer); resolve(value); });
     window.parent.postMessage({ type: "lemiri:refresh" }, "*");
@@ -134,5 +150,5 @@ export function WebsiteWidget({ locale, employeeId, employeeName, embedded = fal
     } finally { setBusy(false); }
   }
 
-  return <main className={embedded ? "publicWidget embedded" : "publicWidget"}>{!embedded && <header><span className="widgetAvatar"><LemiriGlyph size={22}/></span><div><b>{employeeName}</b><small>{copy.status}</small></div></header>}<section aria-live="polite" ref={streamRef}>{messages.length === 0 && <div className="widgetWelcome"><span><LemiriGlyph size={26}/></span><h1>{copy.hello}</h1><p>{copy.help}</p><div className="widgetSuggestions">{copy.suggestions.map(item=><button type="button" key={item} disabled={busy||!visitorId||!embedAuth} onClick={()=>void send(item)}>{item}</button>)}</div></div>}{messages.map((message, index) => <div className={`widgetBubble ${message.role}`} key={index}>{message.text}</div>)}{busy && <div className="widgetBubble assistant typing" aria-label="…"><i/><i/><i/></div>}</section><form onSubmit={submit}><input ref={inputRef} name="message" required maxLength={4000} autoComplete="off" placeholder={embedAuth ? copy.message : copy.connecting} aria-label={copy.messageLabel}/><button disabled={busy || !visitorId || !embedAuth} aria-label={copy.send}><ArrowUp size={18}/></button></form><footer>{copy.powered}</footer></main>;
+  return <main className={embedded ? "publicWidget embedded" : "publicWidget"} style={look.accent ? { ["--accent" as string]: look.accent } : undefined}>{!embedded && <header><span className="widgetAvatar"><LemiriGlyph size={22}/></span><div><b>{title}</b><small>{copy.status}</small></div></header>}<section aria-live="polite" ref={streamRef}>{messages.length === 0 && <div className="widgetWelcome"><span><LemiriGlyph size={26}/></span><h1>{copy.hello}</h1><p>{copy.help}</p><div className="widgetSuggestions">{copy.suggestions.map(item=><button type="button" key={item} disabled={busy||!visitorId||!embedAuth} onClick={()=>void send(item)}>{item}</button>)}</div></div>}{messages.map((message, index) => <div className={`widgetBubble ${message.role}`} key={index}>{message.text}</div>)}{busy && <div className="widgetBubble assistant typing" aria-label="…"><i/><i/><i/></div>}</section><form onSubmit={submit}><input ref={inputRef} name="message" required maxLength={4000} autoComplete="off" placeholder={embedAuth ? copy.message : copy.connecting} aria-label={copy.messageLabel}/><button disabled={busy || !visitorId || !embedAuth} aria-label={copy.send}><ArrowUp size={18}/></button></form><footer>{copy.powered}</footer></main>;
 }

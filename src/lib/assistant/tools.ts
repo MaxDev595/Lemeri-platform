@@ -194,6 +194,89 @@ export const TOOLS: ToolDef[] = [
       return { navigate: "knowledge", data: { sources: sources.map(s => ({ ...s, createdAt: iso(s.createdAt) })), gaps: gaps.map(g => ({ ...g, lastSeenAt: iso(g.lastSeenAt) })) } };
     },
   },
+  {
+    name: "crm_pipeline",
+    description: "CRM sales pipeline: deals per stage with counts and amounts, open pipeline total, weighted forecast, won/lost this month, stale deals (no stage change for N days) and deals without owner.",
+    parameters: obj({ staleDays: int("Days without stage change to count as stale (default 14)") }),
+    async run(ctx, args) {
+      const w = ctx.workspaceId, staleDays = limitOf(args.staleDays, 14), monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0, 0, 0, 0);
+      const pipelines = await db.pipeline.findMany({ where: { workspaceId: w }, include: { stages: { orderBy: { sort: "asc" } } } });
+      const [byStage, won, lost, stale] = await Promise.all([
+        db.deal.groupBy({ by: ["stageId"], where: { workspaceId: w }, _count: { _all: true }, _sum: { amount: true } }),
+        db.deal.aggregate({ where: { workspaceId: w, status: "WON", closedAt: { gte: monthStart } }, _count: { _all: true }, _sum: { amount: true } }),
+        db.deal.aggregate({ where: { workspaceId: w, status: "LOST", closedAt: { gte: monthStart } }, _count: { _all: true }, _sum: { amount: true } }),
+        db.deal.findMany({ where: { workspaceId: w, status: "OPEN", stageChangedAt: { lt: new Date(Date.now() - staleDays * 86_400_000) } }, take: 10, orderBy: { stageChangedAt: "asc" }, select: { id: true, title: true, amount: true, stageChangedAt: true, stage: { select: { name: true } }, customer: { select: { name: true } } } }),
+      ]);
+      const map = new Map(byStage.map(b => [b.stageId, b]));
+      return { navigate: "deals", data: {
+        pipelines: pipelines.map(p => ({ id: p.id, name: p.name, stages: p.stages.map(st => ({ id: st.id, name: st.name, kind: st.kind, probability: st.probability, deals: map.get(st.id)?._count._all ?? 0, amount: map.get(st.id)?._sum.amount ?? 0 })) })),
+        openTotal: pipelines.flatMap(p => p.stages).filter(st => st.kind === "OPEN").reduce((sum, st) => sum + (map.get(st.id)?._sum.amount ?? 0), 0),
+        forecast: pipelines.flatMap(p => p.stages).filter(st => st.kind === "OPEN").reduce((sum, st) => sum + (map.get(st.id)?._sum.amount ?? 0) * st.probability / 100, 0),
+        thisMonth: { won: won._count._all, wonAmount: won._sum.amount ?? 0, lost: lost._count._all, lostAmount: lost._sum.amount ?? 0 },
+        staleDeals: stale.map(d => ({ ...d, stageChangedAt: iso(d.stageChangedAt) })),
+      } };
+    },
+  },
+  {
+    name: "list_deals",
+    description: "Find CRM deals by text (title, customer, company) and/or status OPEN/WON/LOST.",
+    parameters: obj({ query: str("Search text, may be empty"), status: str("Status", { enum: ["OPEN", "WON", "LOST"] }), limit: int("Max rows (default 15)") }),
+    async run(ctx, args) {
+      const q = String(args.query ?? "").trim(), status = typeof args.status === "string" && ["OPEN", "WON", "LOST"].includes(args.status) ? args.status : undefined;
+      const rows = await db.deal.findMany({ where: { workspaceId: ctx.workspaceId, ...(status ? { status } : {}), ...(q ? { OR: [{ title: { contains: q, mode: "insensitive" } }, { customer: { name: { contains: q, mode: "insensitive" } } }, { company: { name: { contains: q, mode: "insensitive" } } }] } : {}) }, orderBy: { updatedAt: "desc" }, take: limitOf(args.limit, 15), select: { id: true, title: true, amount: true, currency: true, status: true, updatedAt: true, stage: { select: { id: true, name: true } }, customer: { select: { id: true, name: true } }, company: { select: { name: true } } } });
+      return { navigate: "deals", data: rows.map(d => ({ ...d, updatedAt: iso(d.updatedAt) })) };
+    },
+  },
+  {
+    name: "list_crm_tasks",
+    description: "CRM tasks (calls, meetings, to-dos) that are open: overdue first; optional only mine.",
+    parameters: obj({ onlyOverdue: { type: "boolean" }, limit: int("Max rows (default 15)") }),
+    async run(ctx, args) {
+      const rows = await db.crmTask.findMany({ where: { workspaceId: ctx.workspaceId, completedAt: null, ...(args.onlyOverdue ? { dueAt: { lt: new Date() } } : {}) }, orderBy: { dueAt: { sort: "asc", nulls: "last" } }, take: limitOf(args.limit, 15), select: { id: true, title: true, type: true, dueAt: true, priority: true, customer: { select: { name: true } }, deal: { select: { title: true } }, assignee: { select: { user: { select: { name: true } } } } } });
+      return { navigate: "tasks", data: rows.map(t => ({ ...t, dueAt: iso(t.dueAt), overdue: !!t.dueAt && t.dueAt < new Date() })) };
+    },
+  },
+  {
+    name: "propose_create_task",
+    description: "Prepare a CRM task (call, meeting, email or to-do) with optional due date (ISO 8601 with offset), linked to a customer and/or deal. Requires confirmation.",
+    parameters: obj({ title: str("Task title"), type: str("Type", { enum: ["TODO", "CALL", "MEETING", "EMAIL"] }), dueAt: str("ISO 8601 date-time"), customerId: str("Customer id (optional)"), dealId: str("Deal id (optional)") }, ["title"]),
+    async run(ctx, args) {
+      if (!canWorkspace(ctx.role, "OPERATE_CRM")) deny(ctx);
+      const title = z.string().trim().min(1).max(200).parse(args.title), type = z.enum(["TODO", "CALL", "MEETING", "EMAIL"]).catch("TODO").parse(args.type);
+      const due = typeof args.dueAt === "string" && !Number.isNaN(Date.parse(args.dueAt)) ? new Date(args.dueAt).toISOString() : null;
+      const customerId = typeof args.customerId === "string" && args.customerId ? idSchema.parse(args.customerId) : null, dealId = typeof args.dealId === "string" && args.dealId ? idSchema.parse(args.dealId) : null;
+      const details = [due ? new Date(due).toLocaleString(ctx.locale === "ru" ? "ru-RU" : "en-GB", { timeZone: ctx.timezone, dateStyle: "medium", timeStyle: "short" }) : tr(ctx, "Без срока", "No due date")];
+      if (customerId) details.push(await customerName(ctx.workspaceId, customerId));
+      if (dealId) { const deal = await db.deal.findFirst({ where: { id: dealId, workspaceId: ctx.workspaceId }, select: { title: true } }); if (!deal) throw new ToolError(tr(ctx, "Сделка не найдена.", "Deal not found.")); details.push(deal.title); }
+      return proposal(ctx, { kind: "crm.task", title: tr(ctx, `Поставить задачу: ${title}`, `Create task: ${title}`), details, request: { method: "POST", path: "/api/crm/tasks", body: { title, type, dueAt: due, customerId, dealId } }, effect: { navigate: "tasks" } });
+    },
+  },
+  {
+    name: "propose_move_deal",
+    description: "Prepare moving a CRM deal to another stage (use crm_pipeline for stage ids; a LOST stage may include a reason). Requires confirmation.",
+    parameters: obj({ dealId: str("Deal id"), stageId: str("Target stage id"), lostReason: str("Reason if moving to a lost stage") }, ["dealId", "stageId"]),
+    async run(ctx, args) {
+      if (!canWorkspace(ctx.role, "OPERATE_CRM")) deny(ctx);
+      const dealId = idSchema.parse(args.dealId), stageId = idSchema.parse(args.stageId);
+      const [deal, stage] = await Promise.all([db.deal.findFirst({ where: { id: dealId, workspaceId: ctx.workspaceId }, select: { title: true, stage: { select: { name: true } } } }), db.pipelineStage.findFirst({ where: { id: stageId, pipeline: { workspaceId: ctx.workspaceId } }, select: { name: true, kind: true } })]);
+      if (!deal || !stage) throw new ToolError(tr(ctx, "Сделка или этап не найдены.", "Deal or stage not found."));
+      const lostReason = stage.kind === "LOST" && typeof args.lostReason === "string" ? args.lostReason.slice(0, 300) : undefined;
+      return proposal(ctx, { kind: "crm.deal.move", danger: stage.kind === "LOST", title: tr(ctx, `Сделка «${deal.title}»: ${deal.stage.name} → ${stage.name}`, `Deal “${deal.title}”: ${deal.stage.name} → ${stage.name}`), details: lostReason ? [lostReason] : [], request: { method: "POST", path: `/api/crm/deals/${dealId}/move`, body: { stageId, ...(lostReason ? { lostReason } : {}) } }, effect: { navigate: "deals" } });
+    },
+  },
+  {
+    name: "propose_create_deal",
+    description: "Prepare a new CRM deal in the default pipeline, optionally for an existing customer. Requires confirmation.",
+    parameters: obj({ title: str("Deal title"), amount: { type: "number", minimum: 0 }, customerId: str("Customer id (optional)") }, ["title"]),
+    async run(ctx, args) {
+      if (!canWorkspace(ctx.role, "OPERATE_CRM")) deny(ctx);
+      const title = z.string().trim().min(1).max(200).parse(args.title), amount = z.coerce.number().min(0).max(1e12).catch(0).parse(args.amount ?? 0);
+      const customerId = typeof args.customerId === "string" && args.customerId ? idSchema.parse(args.customerId) : null;
+      const details = [new Intl.NumberFormat(ctx.locale === "ru" ? "ru-RU" : "en-US", { style: "currency", currency: "RUB", maximumFractionDigits: 0 }).format(amount)];
+      if (customerId) details.push(await customerName(ctx.workspaceId, customerId));
+      return proposal(ctx, { kind: "crm.deal.create", title: tr(ctx, `Создать сделку «${title}»`, `Create deal “${title}”`), details, request: { method: "POST", path: "/api/crm/deals", body: { title, amount, customerId } }, effect: { navigate: "deals" } });
+    },
+  },
   // ---- Changes: each returns a proposal the user must confirm in the card. ----
   {
     name: "propose_set_lead_stage",

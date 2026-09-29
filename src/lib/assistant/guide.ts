@@ -1,8 +1,8 @@
 // What the in-app assistant knows about the Lemiri platform itself. Every entry
 // maps to a section of the dashboard so answers can offer "open this section".
 
-export type SectionId = "overview" | "employees" | "conversations" | "leads" | "appointments" | "knowledge" | "actions" | "rules" | "channels" | "integrations" | "analytics" | "team" | "billing" | "settings" | "notifications" | "testing";
-export const SECTION_IDS: SectionId[] = ["overview", "employees", "conversations", "leads", "appointments", "knowledge", "actions", "rules", "channels", "integrations", "analytics", "team", "billing", "settings", "notifications", "testing"];
+export type SectionId = "overview" | "employees" | "conversations" | "leads" | "appointments" | "knowledge" | "actions" | "rules" | "channels" | "integrations" | "analytics" | "team" | "billing" | "settings" | "notifications" | "testing" | "deals" | "contacts" | "companies" | "tasks" | "products" | "reports" | "crmSettings";
+export const SECTION_IDS: SectionId[] = ["overview", "employees", "conversations", "leads", "appointments", "knowledge", "actions", "rules", "channels", "integrations", "analytics", "team", "billing", "settings", "notifications", "testing", "deals", "contacts", "companies", "tasks", "products", "reports", "crmSettings"];
 
 type Entry = { id: string; section: SectionId; keywords: string[]; ru: string; en: string };
 
@@ -13,9 +13,23 @@ export const SECTION_TITLES: Record<SectionId, { ru: string; en: string }> = {
   integrations: { ru: "Интеграции", en: "Integrations" }, analytics: { ru: "Аналитика", en: "Analytics" }, team: { ru: "Команда", en: "Team" },
   billing: { ru: "Тариф и использование", en: "Plan & usage" }, settings: { ru: "Настройки", en: "Settings" },
   notifications: { ru: "Уведомления", en: "Notifications" }, testing: { ru: "Тестирование", en: "Testing" },
+  deals: { ru: "Сделки", en: "Deals" }, contacts: { ru: "Контакты", en: "Contacts" }, companies: { ru: "Компании", en: "Companies" }, tasks: { ru: "Задачи", en: "Tasks" },
+  products: { ru: "Товары и услуги", en: "Products & services" }, reports: { ru: "Отчёты", en: "Reports" }, crmSettings: { ru: "Настройки CRM", en: "CRM settings" },
 };
 
 export const GUIDE: Entry[] = [
+  { id: "crm-deals", section: "deals", keywords: ["сделк", "сделок", "воронк", "канбан", "этап", "продаж", "deal", "pipeline", "kanban", "stage"],
+    ru: "Сделки — канбан по этапам воронки: перетаскивайте карточки между этапами, открывайте сделку кликом. В сделке: сумма, контакт и компания, ответственный, теги, свои поля, товары и услуги (сумма считается автоматически), задачи и история. Кнопки «Выиграна» / «Проиграна» закрывают сделку, при проигрыше указывается причина. Заявки ИИ-сотрудника автоматически появляются на первом этапе. Воронки и этапы настраиваются в «Настройках CRM» (шестерёнка).",
+    en: "Deals is a pipeline board: drag cards between stages and click a card to open it. A deal has amount, contact and company, owner, tags, custom fields, products (amount is calculated), tasks and a timeline. “Won” / “Lost” close the deal; a lost deal asks for a reason. Leads from the AI employee land on the first stage automatically. Pipelines and stages are configured in CRM settings (gear icon)." },
+  { id: "crm-contacts", section: "contacts", keywords: ["контакт", "клиент", "импорт", "экспорт", "csv", "дубл", "объедин", "contact", "import", "export", "duplicate", "merge"],
+    ru: "Контакты — все клиенты из всех каналов и добавленные вручную. Поиск, фильтры (тег, ответственный, канал, наличие сделок), массовые действия (теги, назначение, удаление), импорт и экспорт CSV (колонки: name, phone, email, company, position, tags, notes), поиск и объединение дублей. В карточке — история, сделки, задачи, диалоги из Telegram, WhatsApp, Email и сайта.",
+    en: "Contacts holds every customer from all channels plus manual ones. Search, filters (tag, owner, channel, deals), bulk actions (tags, assign, delete), CSV import/export (columns: name, phone, email, company, position, tags, notes), duplicate detection and merge. The contact card shows the timeline, deals, tasks and conversations." },
+  { id: "crm-tasks", section: "tasks", keywords: ["задач", "напомин", "задания", "звонок", "встреч", "task", "remind", "call", "meeting"],
+    ru: "Задачи — звонки, встречи, письма и дела по клиентам и сделкам со сроком и исполнителем. Группы: просроченные, сегодня, завтра, позже. За 15 минут до срока приходит уведомление.",
+    en: "Tasks are calls, meetings, emails and to-dos linked to contacts and deals, with due date and assignee. Groups: overdue, today, tomorrow, later. A notification arrives 15 minutes before the due time." },
+  { id: "crm-reports", section: "reports", keywords: ["отчёт", "отчет", "конверс", "выручк", "прогноз", "report", "conversion", "revenue", "forecast", "win rate"],
+    ru: "Отчёты CRM: выручка, конверсия в успех, средний чек, длительность цикла сделки, прогноз по воронке (сумма × вероятность этапа), воронка по этапам, выручка по месяцам, сделки по источникам и менеджерам, причины отказов.",
+    en: "CRM reports: revenue, win rate, average deal, sales cycle, pipeline forecast (amount × stage probability), funnel by stage, revenue by month, deals by source and owner, lost reasons." },
   { id: "platform", section: "overview", keywords: ["платформ", "что умеет", "возможност", "lemiri", "функционал", "platform", "features", "what can"],
     ru: "Lemiri — платформа ИИ-сотрудников. ИИ-сотрудник отвечает клиентам 24/7 в чате на сайте, Telegram, WhatsApp и Email, опирается на вашу базу знаний, создаёт лиды и записи, передаёт сложные вопросы менеджеру и отправляет события в CRM. Раздел «Обзор» показывает ключевые метрики и статус сотрудника (запуск/пауза).",
     en: "Lemiri is an AI-employee platform. An AI employee answers customers 24/7 in the website chat, Telegram, WhatsApp and Email, relies on your knowledge base, creates leads and appointments, hands complex questions to a manager and sends events to your CRM. Overview shows key metrics and lets you start or pause the employee." },

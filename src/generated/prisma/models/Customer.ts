@@ -31,6 +31,14 @@ export type CustomerMinAggregateOutputType = {
   phone: string | null
   email: string | null
   externalId: string | null
+  companyId: string | null
+  ownerMemberId: string | null
+  position: string | null
+  source: string | null
+  notes: string | null
+  lastActivityAt: Date | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type CustomerMaxAggregateOutputType = {
@@ -40,6 +48,14 @@ export type CustomerMaxAggregateOutputType = {
   phone: string | null
   email: string | null
   externalId: string | null
+  companyId: string | null
+  ownerMemberId: string | null
+  position: string | null
+  source: string | null
+  notes: string | null
+  lastActivityAt: Date | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type CustomerCountAggregateOutputType = {
@@ -49,6 +65,16 @@ export type CustomerCountAggregateOutputType = {
   phone: number
   email: number
   externalId: number
+  companyId: number
+  ownerMemberId: number
+  position: number
+  source: number
+  notes: number
+  tags: number
+  customFields: number
+  lastActivityAt: number
+  createdAt: number
+  updatedAt: number
   _all: number
 }
 
@@ -60,6 +86,14 @@ export type CustomerMinAggregateInputType = {
   phone?: true
   email?: true
   externalId?: true
+  companyId?: true
+  ownerMemberId?: true
+  position?: true
+  source?: true
+  notes?: true
+  lastActivityAt?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type CustomerMaxAggregateInputType = {
@@ -69,6 +103,14 @@ export type CustomerMaxAggregateInputType = {
   phone?: true
   email?: true
   externalId?: true
+  companyId?: true
+  ownerMemberId?: true
+  position?: true
+  source?: true
+  notes?: true
+  lastActivityAt?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type CustomerCountAggregateInputType = {
@@ -78,6 +120,16 @@ export type CustomerCountAggregateInputType = {
   phone?: true
   email?: true
   externalId?: true
+  companyId?: true
+  ownerMemberId?: true
+  position?: true
+  source?: true
+  notes?: true
+  tags?: true
+  customFields?: true
+  lastActivityAt?: true
+  createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -160,6 +212,16 @@ export type CustomerGroupByOutputType = {
   phone: string | null
   email: string | null
   externalId: string | null
+  companyId: string | null
+  ownerMemberId: string | null
+  position: string | null
+  source: string | null
+  notes: string | null
+  tags: string[]
+  customFields: runtime.JsonValue | null
+  lastActivityAt: Date | null
+  createdAt: Date
+  updatedAt: Date
   _count: CustomerCountAggregateOutputType | null
   _min: CustomerMinAggregateOutputType | null
   _max: CustomerMaxAggregateOutputType | null
@@ -190,10 +252,25 @@ export type CustomerWhereInput = {
   phone?: Prisma.StringNullableFilter<"Customer"> | string | null
   email?: Prisma.StringNullableFilter<"Customer"> | string | null
   externalId?: Prisma.StringNullableFilter<"Customer"> | string | null
+  companyId?: Prisma.StringNullableFilter<"Customer"> | string | null
+  ownerMemberId?: Prisma.StringNullableFilter<"Customer"> | string | null
+  position?: Prisma.StringNullableFilter<"Customer"> | string | null
+  source?: Prisma.StringNullableFilter<"Customer"> | string | null
+  notes?: Prisma.StringNullableFilter<"Customer"> | string | null
+  tags?: Prisma.StringNullableListFilter<"Customer">
+  customFields?: Prisma.JsonNullableFilter<"Customer">
+  lastActivityAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
+  createdAt?: Prisma.DateTimeFilter<"Customer"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Customer"> | Date | string
   workspace?: Prisma.XOR<Prisma.WorkspaceScalarRelationFilter, Prisma.WorkspaceWhereInput>
+  company?: Prisma.XOR<Prisma.CompanyNullableScalarRelationFilter, Prisma.CompanyWhereInput> | null
+  owner?: Prisma.XOR<Prisma.WorkspaceMemberNullableScalarRelationFilter, Prisma.WorkspaceMemberWhereInput> | null
   conversations?: Prisma.ConversationListRelationFilter
   leads?: Prisma.LeadListRelationFilter
   appointments?: Prisma.AppointmentListRelationFilter
+  deals?: Prisma.DealListRelationFilter
+  crmTasks?: Prisma.CrmTaskListRelationFilter
+  crmActivities?: Prisma.CrmActivityListRelationFilter
 }
 
 export type CustomerOrderByWithRelationInput = {
@@ -203,10 +280,25 @@ export type CustomerOrderByWithRelationInput = {
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   externalId?: Prisma.SortOrderInput | Prisma.SortOrder
+  companyId?: Prisma.SortOrderInput | Prisma.SortOrder
+  ownerMemberId?: Prisma.SortOrderInput | Prisma.SortOrder
+  position?: Prisma.SortOrderInput | Prisma.SortOrder
+  source?: Prisma.SortOrderInput | Prisma.SortOrder
+  notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  tags?: Prisma.SortOrder
+  customFields?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastActivityAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   workspace?: Prisma.WorkspaceOrderByWithRelationInput
+  company?: Prisma.CompanyOrderByWithRelationInput
+  owner?: Prisma.WorkspaceMemberOrderByWithRelationInput
   conversations?: Prisma.ConversationOrderByRelationAggregateInput
   leads?: Prisma.LeadOrderByRelationAggregateInput
   appointments?: Prisma.AppointmentOrderByRelationAggregateInput
+  deals?: Prisma.DealOrderByRelationAggregateInput
+  crmTasks?: Prisma.CrmTaskOrderByRelationAggregateInput
+  crmActivities?: Prisma.CrmActivityOrderByRelationAggregateInput
 }
 
 export type CustomerWhereUniqueInput = Prisma.AtLeast<{
@@ -220,10 +312,25 @@ export type CustomerWhereUniqueInput = Prisma.AtLeast<{
   phone?: Prisma.StringNullableFilter<"Customer"> | string | null
   email?: Prisma.StringNullableFilter<"Customer"> | string | null
   externalId?: Prisma.StringNullableFilter<"Customer"> | string | null
+  companyId?: Prisma.StringNullableFilter<"Customer"> | string | null
+  ownerMemberId?: Prisma.StringNullableFilter<"Customer"> | string | null
+  position?: Prisma.StringNullableFilter<"Customer"> | string | null
+  source?: Prisma.StringNullableFilter<"Customer"> | string | null
+  notes?: Prisma.StringNullableFilter<"Customer"> | string | null
+  tags?: Prisma.StringNullableListFilter<"Customer">
+  customFields?: Prisma.JsonNullableFilter<"Customer">
+  lastActivityAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
+  createdAt?: Prisma.DateTimeFilter<"Customer"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Customer"> | Date | string
   workspace?: Prisma.XOR<Prisma.WorkspaceScalarRelationFilter, Prisma.WorkspaceWhereInput>
+  company?: Prisma.XOR<Prisma.CompanyNullableScalarRelationFilter, Prisma.CompanyWhereInput> | null
+  owner?: Prisma.XOR<Prisma.WorkspaceMemberNullableScalarRelationFilter, Prisma.WorkspaceMemberWhereInput> | null
   conversations?: Prisma.ConversationListRelationFilter
   leads?: Prisma.LeadListRelationFilter
   appointments?: Prisma.AppointmentListRelationFilter
+  deals?: Prisma.DealListRelationFilter
+  crmTasks?: Prisma.CrmTaskListRelationFilter
+  crmActivities?: Prisma.CrmActivityListRelationFilter
 }, "id" | "workspaceId_externalId">
 
 export type CustomerOrderByWithAggregationInput = {
@@ -233,6 +340,16 @@ export type CustomerOrderByWithAggregationInput = {
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   externalId?: Prisma.SortOrderInput | Prisma.SortOrder
+  companyId?: Prisma.SortOrderInput | Prisma.SortOrder
+  ownerMemberId?: Prisma.SortOrderInput | Prisma.SortOrder
+  position?: Prisma.SortOrderInput | Prisma.SortOrder
+  source?: Prisma.SortOrderInput | Prisma.SortOrder
+  notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  tags?: Prisma.SortOrder
+  customFields?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastActivityAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.CustomerCountOrderByAggregateInput
   _max?: Prisma.CustomerMaxOrderByAggregateInput
   _min?: Prisma.CustomerMinOrderByAggregateInput
@@ -248,6 +365,16 @@ export type CustomerScalarWhereWithAggregatesInput = {
   phone?: Prisma.StringNullableWithAggregatesFilter<"Customer"> | string | null
   email?: Prisma.StringNullableWithAggregatesFilter<"Customer"> | string | null
   externalId?: Prisma.StringNullableWithAggregatesFilter<"Customer"> | string | null
+  companyId?: Prisma.StringNullableWithAggregatesFilter<"Customer"> | string | null
+  ownerMemberId?: Prisma.StringNullableWithAggregatesFilter<"Customer"> | string | null
+  position?: Prisma.StringNullableWithAggregatesFilter<"Customer"> | string | null
+  source?: Prisma.StringNullableWithAggregatesFilter<"Customer"> | string | null
+  notes?: Prisma.StringNullableWithAggregatesFilter<"Customer"> | string | null
+  tags?: Prisma.StringNullableListFilter<"Customer">
+  customFields?: Prisma.JsonNullableWithAggregatesFilter<"Customer">
+  lastActivityAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Customer"> | Date | string | null
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"Customer"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Customer"> | Date | string
 }
 
 export type CustomerCreateInput = {
@@ -256,10 +383,23 @@ export type CustomerCreateInput = {
   phone?: string | null
   email?: string | null
   externalId?: string | null
+  position?: string | null
+  source?: string | null
+  notes?: string | null
+  tags?: Prisma.CustomerCreatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   workspace: Prisma.WorkspaceCreateNestedOneWithoutCustomersInput
+  company?: Prisma.CompanyCreateNestedOneWithoutContactsInput
+  owner?: Prisma.WorkspaceMemberCreateNestedOneWithoutOwnedCustomersInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutCustomerInput
   leads?: Prisma.LeadCreateNestedManyWithoutCustomerInput
   appointments?: Prisma.AppointmentCreateNestedManyWithoutCustomerInput
+  deals?: Prisma.DealCreateNestedManyWithoutCustomerInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutCustomerInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerUncheckedCreateInput = {
@@ -269,9 +409,22 @@ export type CustomerUncheckedCreateInput = {
   phone?: string | null
   email?: string | null
   externalId?: string | null
+  companyId?: string | null
+  ownerMemberId?: string | null
+  position?: string | null
+  source?: string | null
+  notes?: string | null
+  tags?: Prisma.CustomerCreatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutCustomerInput
   leads?: Prisma.LeadUncheckedCreateNestedManyWithoutCustomerInput
   appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCustomerInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutCustomerInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutCustomerInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerUpdateInput = {
@@ -280,10 +433,23 @@ export type CustomerUpdateInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   workspace?: Prisma.WorkspaceUpdateOneRequiredWithoutCustomersNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutContactsNestedInput
+  owner?: Prisma.WorkspaceMemberUpdateOneWithoutOwnedCustomersNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutCustomerNestedInput
   leads?: Prisma.LeadUpdateManyWithoutCustomerNestedInput
   appointments?: Prisma.AppointmentUpdateManyWithoutCustomerNestedInput
+  deals?: Prisma.DealUpdateManyWithoutCustomerNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutCustomerNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerUncheckedUpdateInput = {
@@ -293,9 +459,22 @@ export type CustomerUncheckedUpdateInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerMemberId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutCustomerNestedInput
   leads?: Prisma.LeadUncheckedUpdateManyWithoutCustomerNestedInput
   appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCustomerNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutCustomerNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutCustomerNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerCreateManyInput = {
@@ -305,6 +484,16 @@ export type CustomerCreateManyInput = {
   phone?: string | null
   email?: string | null
   externalId?: string | null
+  companyId?: string | null
+  ownerMemberId?: string | null
+  position?: string | null
+  source?: string | null
+  notes?: string | null
+  tags?: Prisma.CustomerCreatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type CustomerUpdateManyMutationInput = {
@@ -313,6 +502,14 @@ export type CustomerUpdateManyMutationInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type CustomerUncheckedUpdateManyInput = {
@@ -322,6 +519,16 @@ export type CustomerUncheckedUpdateManyInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerMemberId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type CustomerListRelationFilter = {
@@ -332,6 +539,14 @@ export type CustomerListRelationFilter = {
 
 export type CustomerOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type StringNullableListFilter<$PrismaModel = never> = {
+  equals?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel> | null
+  has?: string | Prisma.StringFieldRefInput<$PrismaModel> | null
+  hasEvery?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  hasSome?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  isEmpty?: boolean
 }
 
 export type CustomerWorkspaceIdExternalIdCompoundUniqueInput = {
@@ -346,6 +561,16 @@ export type CustomerCountOrderByAggregateInput = {
   phone?: Prisma.SortOrder
   email?: Prisma.SortOrder
   externalId?: Prisma.SortOrder
+  companyId?: Prisma.SortOrder
+  ownerMemberId?: Prisma.SortOrder
+  position?: Prisma.SortOrder
+  source?: Prisma.SortOrder
+  notes?: Prisma.SortOrder
+  tags?: Prisma.SortOrder
+  customFields?: Prisma.SortOrder
+  lastActivityAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type CustomerMaxOrderByAggregateInput = {
@@ -355,6 +580,14 @@ export type CustomerMaxOrderByAggregateInput = {
   phone?: Prisma.SortOrder
   email?: Prisma.SortOrder
   externalId?: Prisma.SortOrder
+  companyId?: Prisma.SortOrder
+  ownerMemberId?: Prisma.SortOrder
+  position?: Prisma.SortOrder
+  source?: Prisma.SortOrder
+  notes?: Prisma.SortOrder
+  lastActivityAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type CustomerMinOrderByAggregateInput = {
@@ -364,11 +597,24 @@ export type CustomerMinOrderByAggregateInput = {
   phone?: Prisma.SortOrder
   email?: Prisma.SortOrder
   externalId?: Prisma.SortOrder
+  companyId?: Prisma.SortOrder
+  ownerMemberId?: Prisma.SortOrder
+  position?: Prisma.SortOrder
+  source?: Prisma.SortOrder
+  notes?: Prisma.SortOrder
+  lastActivityAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type CustomerScalarRelationFilter = {
   is?: Prisma.CustomerWhereInput
   isNot?: Prisma.CustomerWhereInput
+}
+
+export type CustomerNullableScalarRelationFilter = {
+  is?: Prisma.CustomerWhereInput | null
+  isNot?: Prisma.CustomerWhereInput | null
 }
 
 export type CustomerCreateNestedManyWithoutWorkspaceInput = {
@@ -413,6 +659,57 @@ export type CustomerUncheckedUpdateManyWithoutWorkspaceNestedInput = {
   deleteMany?: Prisma.CustomerScalarWhereInput | Prisma.CustomerScalarWhereInput[]
 }
 
+export type CustomerCreateNestedManyWithoutOwnerInput = {
+  create?: Prisma.XOR<Prisma.CustomerCreateWithoutOwnerInput, Prisma.CustomerUncheckedCreateWithoutOwnerInput> | Prisma.CustomerCreateWithoutOwnerInput[] | Prisma.CustomerUncheckedCreateWithoutOwnerInput[]
+  connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutOwnerInput | Prisma.CustomerCreateOrConnectWithoutOwnerInput[]
+  createMany?: Prisma.CustomerCreateManyOwnerInputEnvelope
+  connect?: Prisma.CustomerWhereUniqueInput | Prisma.CustomerWhereUniqueInput[]
+}
+
+export type CustomerUncheckedCreateNestedManyWithoutOwnerInput = {
+  create?: Prisma.XOR<Prisma.CustomerCreateWithoutOwnerInput, Prisma.CustomerUncheckedCreateWithoutOwnerInput> | Prisma.CustomerCreateWithoutOwnerInput[] | Prisma.CustomerUncheckedCreateWithoutOwnerInput[]
+  connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutOwnerInput | Prisma.CustomerCreateOrConnectWithoutOwnerInput[]
+  createMany?: Prisma.CustomerCreateManyOwnerInputEnvelope
+  connect?: Prisma.CustomerWhereUniqueInput | Prisma.CustomerWhereUniqueInput[]
+}
+
+export type CustomerUpdateManyWithoutOwnerNestedInput = {
+  create?: Prisma.XOR<Prisma.CustomerCreateWithoutOwnerInput, Prisma.CustomerUncheckedCreateWithoutOwnerInput> | Prisma.CustomerCreateWithoutOwnerInput[] | Prisma.CustomerUncheckedCreateWithoutOwnerInput[]
+  connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutOwnerInput | Prisma.CustomerCreateOrConnectWithoutOwnerInput[]
+  upsert?: Prisma.CustomerUpsertWithWhereUniqueWithoutOwnerInput | Prisma.CustomerUpsertWithWhereUniqueWithoutOwnerInput[]
+  createMany?: Prisma.CustomerCreateManyOwnerInputEnvelope
+  set?: Prisma.CustomerWhereUniqueInput | Prisma.CustomerWhereUniqueInput[]
+  disconnect?: Prisma.CustomerWhereUniqueInput | Prisma.CustomerWhereUniqueInput[]
+  delete?: Prisma.CustomerWhereUniqueInput | Prisma.CustomerWhereUniqueInput[]
+  connect?: Prisma.CustomerWhereUniqueInput | Prisma.CustomerWhereUniqueInput[]
+  update?: Prisma.CustomerUpdateWithWhereUniqueWithoutOwnerInput | Prisma.CustomerUpdateWithWhereUniqueWithoutOwnerInput[]
+  updateMany?: Prisma.CustomerUpdateManyWithWhereWithoutOwnerInput | Prisma.CustomerUpdateManyWithWhereWithoutOwnerInput[]
+  deleteMany?: Prisma.CustomerScalarWhereInput | Prisma.CustomerScalarWhereInput[]
+}
+
+export type CustomerUncheckedUpdateManyWithoutOwnerNestedInput = {
+  create?: Prisma.XOR<Prisma.CustomerCreateWithoutOwnerInput, Prisma.CustomerUncheckedCreateWithoutOwnerInput> | Prisma.CustomerCreateWithoutOwnerInput[] | Prisma.CustomerUncheckedCreateWithoutOwnerInput[]
+  connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutOwnerInput | Prisma.CustomerCreateOrConnectWithoutOwnerInput[]
+  upsert?: Prisma.CustomerUpsertWithWhereUniqueWithoutOwnerInput | Prisma.CustomerUpsertWithWhereUniqueWithoutOwnerInput[]
+  createMany?: Prisma.CustomerCreateManyOwnerInputEnvelope
+  set?: Prisma.CustomerWhereUniqueInput | Prisma.CustomerWhereUniqueInput[]
+  disconnect?: Prisma.CustomerWhereUniqueInput | Prisma.CustomerWhereUniqueInput[]
+  delete?: Prisma.CustomerWhereUniqueInput | Prisma.CustomerWhereUniqueInput[]
+  connect?: Prisma.CustomerWhereUniqueInput | Prisma.CustomerWhereUniqueInput[]
+  update?: Prisma.CustomerUpdateWithWhereUniqueWithoutOwnerInput | Prisma.CustomerUpdateWithWhereUniqueWithoutOwnerInput[]
+  updateMany?: Prisma.CustomerUpdateManyWithWhereWithoutOwnerInput | Prisma.CustomerUpdateManyWithWhereWithoutOwnerInput[]
+  deleteMany?: Prisma.CustomerScalarWhereInput | Prisma.CustomerScalarWhereInput[]
+}
+
+export type CustomerCreatetagsInput = {
+  set: string[]
+}
+
+export type CustomerUpdatetagsInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
 export type CustomerCreateNestedOneWithoutConversationsInput = {
   create?: Prisma.XOR<Prisma.CustomerCreateWithoutConversationsInput, Prisma.CustomerUncheckedCreateWithoutConversationsInput>
   connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutConversationsInput
@@ -455,15 +752,118 @@ export type CustomerUpdateOneRequiredWithoutAppointmentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CustomerUpdateToOneWithWhereWithoutAppointmentsInput, Prisma.CustomerUpdateWithoutAppointmentsInput>, Prisma.CustomerUncheckedUpdateWithoutAppointmentsInput>
 }
 
+export type CustomerCreateNestedManyWithoutCompanyInput = {
+  create?: Prisma.XOR<Prisma.CustomerCreateWithoutCompanyInput, Prisma.CustomerUncheckedCreateWithoutCompanyInput> | Prisma.CustomerCreateWithoutCompanyInput[] | Prisma.CustomerUncheckedCreateWithoutCompanyInput[]
+  connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutCompanyInput | Prisma.CustomerCreateOrConnectWithoutCompanyInput[]
+  createMany?: Prisma.CustomerCreateManyCompanyInputEnvelope
+  connect?: Prisma.CustomerWhereUniqueInput | Prisma.CustomerWhereUniqueInput[]
+}
+
+export type CustomerUncheckedCreateNestedManyWithoutCompanyInput = {
+  create?: Prisma.XOR<Prisma.CustomerCreateWithoutCompanyInput, Prisma.CustomerUncheckedCreateWithoutCompanyInput> | Prisma.CustomerCreateWithoutCompanyInput[] | Prisma.CustomerUncheckedCreateWithoutCompanyInput[]
+  connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutCompanyInput | Prisma.CustomerCreateOrConnectWithoutCompanyInput[]
+  createMany?: Prisma.CustomerCreateManyCompanyInputEnvelope
+  connect?: Prisma.CustomerWhereUniqueInput | Prisma.CustomerWhereUniqueInput[]
+}
+
+export type CustomerUpdateManyWithoutCompanyNestedInput = {
+  create?: Prisma.XOR<Prisma.CustomerCreateWithoutCompanyInput, Prisma.CustomerUncheckedCreateWithoutCompanyInput> | Prisma.CustomerCreateWithoutCompanyInput[] | Prisma.CustomerUncheckedCreateWithoutCompanyInput[]
+  connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutCompanyInput | Prisma.CustomerCreateOrConnectWithoutCompanyInput[]
+  upsert?: Prisma.CustomerUpsertWithWhereUniqueWithoutCompanyInput | Prisma.CustomerUpsertWithWhereUniqueWithoutCompanyInput[]
+  createMany?: Prisma.CustomerCreateManyCompanyInputEnvelope
+  set?: Prisma.CustomerWhereUniqueInput | Prisma.CustomerWhereUniqueInput[]
+  disconnect?: Prisma.CustomerWhereUniqueInput | Prisma.CustomerWhereUniqueInput[]
+  delete?: Prisma.CustomerWhereUniqueInput | Prisma.CustomerWhereUniqueInput[]
+  connect?: Prisma.CustomerWhereUniqueInput | Prisma.CustomerWhereUniqueInput[]
+  update?: Prisma.CustomerUpdateWithWhereUniqueWithoutCompanyInput | Prisma.CustomerUpdateWithWhereUniqueWithoutCompanyInput[]
+  updateMany?: Prisma.CustomerUpdateManyWithWhereWithoutCompanyInput | Prisma.CustomerUpdateManyWithWhereWithoutCompanyInput[]
+  deleteMany?: Prisma.CustomerScalarWhereInput | Prisma.CustomerScalarWhereInput[]
+}
+
+export type CustomerUncheckedUpdateManyWithoutCompanyNestedInput = {
+  create?: Prisma.XOR<Prisma.CustomerCreateWithoutCompanyInput, Prisma.CustomerUncheckedCreateWithoutCompanyInput> | Prisma.CustomerCreateWithoutCompanyInput[] | Prisma.CustomerUncheckedCreateWithoutCompanyInput[]
+  connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutCompanyInput | Prisma.CustomerCreateOrConnectWithoutCompanyInput[]
+  upsert?: Prisma.CustomerUpsertWithWhereUniqueWithoutCompanyInput | Prisma.CustomerUpsertWithWhereUniqueWithoutCompanyInput[]
+  createMany?: Prisma.CustomerCreateManyCompanyInputEnvelope
+  set?: Prisma.CustomerWhereUniqueInput | Prisma.CustomerWhereUniqueInput[]
+  disconnect?: Prisma.CustomerWhereUniqueInput | Prisma.CustomerWhereUniqueInput[]
+  delete?: Prisma.CustomerWhereUniqueInput | Prisma.CustomerWhereUniqueInput[]
+  connect?: Prisma.CustomerWhereUniqueInput | Prisma.CustomerWhereUniqueInput[]
+  update?: Prisma.CustomerUpdateWithWhereUniqueWithoutCompanyInput | Prisma.CustomerUpdateWithWhereUniqueWithoutCompanyInput[]
+  updateMany?: Prisma.CustomerUpdateManyWithWhereWithoutCompanyInput | Prisma.CustomerUpdateManyWithWhereWithoutCompanyInput[]
+  deleteMany?: Prisma.CustomerScalarWhereInput | Prisma.CustomerScalarWhereInput[]
+}
+
+export type CustomerCreateNestedOneWithoutDealsInput = {
+  create?: Prisma.XOR<Prisma.CustomerCreateWithoutDealsInput, Prisma.CustomerUncheckedCreateWithoutDealsInput>
+  connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutDealsInput
+  connect?: Prisma.CustomerWhereUniqueInput
+}
+
+export type CustomerUpdateOneWithoutDealsNestedInput = {
+  create?: Prisma.XOR<Prisma.CustomerCreateWithoutDealsInput, Prisma.CustomerUncheckedCreateWithoutDealsInput>
+  connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutDealsInput
+  upsert?: Prisma.CustomerUpsertWithoutDealsInput
+  disconnect?: Prisma.CustomerWhereInput | boolean
+  delete?: Prisma.CustomerWhereInput | boolean
+  connect?: Prisma.CustomerWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CustomerUpdateToOneWithWhereWithoutDealsInput, Prisma.CustomerUpdateWithoutDealsInput>, Prisma.CustomerUncheckedUpdateWithoutDealsInput>
+}
+
+export type CustomerCreateNestedOneWithoutCrmTasksInput = {
+  create?: Prisma.XOR<Prisma.CustomerCreateWithoutCrmTasksInput, Prisma.CustomerUncheckedCreateWithoutCrmTasksInput>
+  connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutCrmTasksInput
+  connect?: Prisma.CustomerWhereUniqueInput
+}
+
+export type CustomerUpdateOneWithoutCrmTasksNestedInput = {
+  create?: Prisma.XOR<Prisma.CustomerCreateWithoutCrmTasksInput, Prisma.CustomerUncheckedCreateWithoutCrmTasksInput>
+  connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutCrmTasksInput
+  upsert?: Prisma.CustomerUpsertWithoutCrmTasksInput
+  disconnect?: Prisma.CustomerWhereInput | boolean
+  delete?: Prisma.CustomerWhereInput | boolean
+  connect?: Prisma.CustomerWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CustomerUpdateToOneWithWhereWithoutCrmTasksInput, Prisma.CustomerUpdateWithoutCrmTasksInput>, Prisma.CustomerUncheckedUpdateWithoutCrmTasksInput>
+}
+
+export type CustomerCreateNestedOneWithoutCrmActivitiesInput = {
+  create?: Prisma.XOR<Prisma.CustomerCreateWithoutCrmActivitiesInput, Prisma.CustomerUncheckedCreateWithoutCrmActivitiesInput>
+  connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutCrmActivitiesInput
+  connect?: Prisma.CustomerWhereUniqueInput
+}
+
+export type CustomerUpdateOneWithoutCrmActivitiesNestedInput = {
+  create?: Prisma.XOR<Prisma.CustomerCreateWithoutCrmActivitiesInput, Prisma.CustomerUncheckedCreateWithoutCrmActivitiesInput>
+  connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutCrmActivitiesInput
+  upsert?: Prisma.CustomerUpsertWithoutCrmActivitiesInput
+  disconnect?: Prisma.CustomerWhereInput | boolean
+  delete?: Prisma.CustomerWhereInput | boolean
+  connect?: Prisma.CustomerWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CustomerUpdateToOneWithWhereWithoutCrmActivitiesInput, Prisma.CustomerUpdateWithoutCrmActivitiesInput>, Prisma.CustomerUncheckedUpdateWithoutCrmActivitiesInput>
+}
+
 export type CustomerCreateWithoutWorkspaceInput = {
   id?: string
   name: string
   phone?: string | null
   email?: string | null
   externalId?: string | null
+  position?: string | null
+  source?: string | null
+  notes?: string | null
+  tags?: Prisma.CustomerCreatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  company?: Prisma.CompanyCreateNestedOneWithoutContactsInput
+  owner?: Prisma.WorkspaceMemberCreateNestedOneWithoutOwnedCustomersInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutCustomerInput
   leads?: Prisma.LeadCreateNestedManyWithoutCustomerInput
   appointments?: Prisma.AppointmentCreateNestedManyWithoutCustomerInput
+  deals?: Prisma.DealCreateNestedManyWithoutCustomerInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutCustomerInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerUncheckedCreateWithoutWorkspaceInput = {
@@ -472,9 +872,22 @@ export type CustomerUncheckedCreateWithoutWorkspaceInput = {
   phone?: string | null
   email?: string | null
   externalId?: string | null
+  companyId?: string | null
+  ownerMemberId?: string | null
+  position?: string | null
+  source?: string | null
+  notes?: string | null
+  tags?: Prisma.CustomerCreatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutCustomerInput
   leads?: Prisma.LeadUncheckedCreateNestedManyWithoutCustomerInput
   appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCustomerInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutCustomerInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutCustomerInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerCreateOrConnectWithoutWorkspaceInput = {
@@ -513,6 +926,90 @@ export type CustomerScalarWhereInput = {
   phone?: Prisma.StringNullableFilter<"Customer"> | string | null
   email?: Prisma.StringNullableFilter<"Customer"> | string | null
   externalId?: Prisma.StringNullableFilter<"Customer"> | string | null
+  companyId?: Prisma.StringNullableFilter<"Customer"> | string | null
+  ownerMemberId?: Prisma.StringNullableFilter<"Customer"> | string | null
+  position?: Prisma.StringNullableFilter<"Customer"> | string | null
+  source?: Prisma.StringNullableFilter<"Customer"> | string | null
+  notes?: Prisma.StringNullableFilter<"Customer"> | string | null
+  tags?: Prisma.StringNullableListFilter<"Customer">
+  customFields?: Prisma.JsonNullableFilter<"Customer">
+  lastActivityAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
+  createdAt?: Prisma.DateTimeFilter<"Customer"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Customer"> | Date | string
+}
+
+export type CustomerCreateWithoutOwnerInput = {
+  id?: string
+  name: string
+  phone?: string | null
+  email?: string | null
+  externalId?: string | null
+  position?: string | null
+  source?: string | null
+  notes?: string | null
+  tags?: Prisma.CustomerCreatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  workspace: Prisma.WorkspaceCreateNestedOneWithoutCustomersInput
+  company?: Prisma.CompanyCreateNestedOneWithoutContactsInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutCustomerInput
+  leads?: Prisma.LeadCreateNestedManyWithoutCustomerInput
+  appointments?: Prisma.AppointmentCreateNestedManyWithoutCustomerInput
+  deals?: Prisma.DealCreateNestedManyWithoutCustomerInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutCustomerInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutCustomerInput
+}
+
+export type CustomerUncheckedCreateWithoutOwnerInput = {
+  id?: string
+  workspaceId: string
+  name: string
+  phone?: string | null
+  email?: string | null
+  externalId?: string | null
+  companyId?: string | null
+  position?: string | null
+  source?: string | null
+  notes?: string | null
+  tags?: Prisma.CustomerCreatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutCustomerInput
+  leads?: Prisma.LeadUncheckedCreateNestedManyWithoutCustomerInput
+  appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCustomerInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutCustomerInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutCustomerInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutCustomerInput
+}
+
+export type CustomerCreateOrConnectWithoutOwnerInput = {
+  where: Prisma.CustomerWhereUniqueInput
+  create: Prisma.XOR<Prisma.CustomerCreateWithoutOwnerInput, Prisma.CustomerUncheckedCreateWithoutOwnerInput>
+}
+
+export type CustomerCreateManyOwnerInputEnvelope = {
+  data: Prisma.CustomerCreateManyOwnerInput | Prisma.CustomerCreateManyOwnerInput[]
+  skipDuplicates?: boolean
+}
+
+export type CustomerUpsertWithWhereUniqueWithoutOwnerInput = {
+  where: Prisma.CustomerWhereUniqueInput
+  update: Prisma.XOR<Prisma.CustomerUpdateWithoutOwnerInput, Prisma.CustomerUncheckedUpdateWithoutOwnerInput>
+  create: Prisma.XOR<Prisma.CustomerCreateWithoutOwnerInput, Prisma.CustomerUncheckedCreateWithoutOwnerInput>
+}
+
+export type CustomerUpdateWithWhereUniqueWithoutOwnerInput = {
+  where: Prisma.CustomerWhereUniqueInput
+  data: Prisma.XOR<Prisma.CustomerUpdateWithoutOwnerInput, Prisma.CustomerUncheckedUpdateWithoutOwnerInput>
+}
+
+export type CustomerUpdateManyWithWhereWithoutOwnerInput = {
+  where: Prisma.CustomerScalarWhereInput
+  data: Prisma.XOR<Prisma.CustomerUpdateManyMutationInput, Prisma.CustomerUncheckedUpdateManyWithoutOwnerInput>
 }
 
 export type CustomerCreateWithoutConversationsInput = {
@@ -521,9 +1018,22 @@ export type CustomerCreateWithoutConversationsInput = {
   phone?: string | null
   email?: string | null
   externalId?: string | null
+  position?: string | null
+  source?: string | null
+  notes?: string | null
+  tags?: Prisma.CustomerCreatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   workspace: Prisma.WorkspaceCreateNestedOneWithoutCustomersInput
+  company?: Prisma.CompanyCreateNestedOneWithoutContactsInput
+  owner?: Prisma.WorkspaceMemberCreateNestedOneWithoutOwnedCustomersInput
   leads?: Prisma.LeadCreateNestedManyWithoutCustomerInput
   appointments?: Prisma.AppointmentCreateNestedManyWithoutCustomerInput
+  deals?: Prisma.DealCreateNestedManyWithoutCustomerInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutCustomerInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerUncheckedCreateWithoutConversationsInput = {
@@ -533,8 +1043,21 @@ export type CustomerUncheckedCreateWithoutConversationsInput = {
   phone?: string | null
   email?: string | null
   externalId?: string | null
+  companyId?: string | null
+  ownerMemberId?: string | null
+  position?: string | null
+  source?: string | null
+  notes?: string | null
+  tags?: Prisma.CustomerCreatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   leads?: Prisma.LeadUncheckedCreateNestedManyWithoutCustomerInput
   appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCustomerInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutCustomerInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutCustomerInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerCreateOrConnectWithoutConversationsInput = {
@@ -559,9 +1082,22 @@ export type CustomerUpdateWithoutConversationsInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   workspace?: Prisma.WorkspaceUpdateOneRequiredWithoutCustomersNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutContactsNestedInput
+  owner?: Prisma.WorkspaceMemberUpdateOneWithoutOwnedCustomersNestedInput
   leads?: Prisma.LeadUpdateManyWithoutCustomerNestedInput
   appointments?: Prisma.AppointmentUpdateManyWithoutCustomerNestedInput
+  deals?: Prisma.DealUpdateManyWithoutCustomerNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutCustomerNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerUncheckedUpdateWithoutConversationsInput = {
@@ -571,8 +1107,21 @@ export type CustomerUncheckedUpdateWithoutConversationsInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerMemberId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   leads?: Prisma.LeadUncheckedUpdateManyWithoutCustomerNestedInput
   appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCustomerNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutCustomerNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutCustomerNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerCreateWithoutLeadsInput = {
@@ -581,9 +1130,22 @@ export type CustomerCreateWithoutLeadsInput = {
   phone?: string | null
   email?: string | null
   externalId?: string | null
+  position?: string | null
+  source?: string | null
+  notes?: string | null
+  tags?: Prisma.CustomerCreatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   workspace: Prisma.WorkspaceCreateNestedOneWithoutCustomersInput
+  company?: Prisma.CompanyCreateNestedOneWithoutContactsInput
+  owner?: Prisma.WorkspaceMemberCreateNestedOneWithoutOwnedCustomersInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutCustomerInput
   appointments?: Prisma.AppointmentCreateNestedManyWithoutCustomerInput
+  deals?: Prisma.DealCreateNestedManyWithoutCustomerInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutCustomerInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerUncheckedCreateWithoutLeadsInput = {
@@ -593,8 +1155,21 @@ export type CustomerUncheckedCreateWithoutLeadsInput = {
   phone?: string | null
   email?: string | null
   externalId?: string | null
+  companyId?: string | null
+  ownerMemberId?: string | null
+  position?: string | null
+  source?: string | null
+  notes?: string | null
+  tags?: Prisma.CustomerCreatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutCustomerInput
   appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCustomerInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutCustomerInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutCustomerInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerCreateOrConnectWithoutLeadsInput = {
@@ -619,9 +1194,22 @@ export type CustomerUpdateWithoutLeadsInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   workspace?: Prisma.WorkspaceUpdateOneRequiredWithoutCustomersNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutContactsNestedInput
+  owner?: Prisma.WorkspaceMemberUpdateOneWithoutOwnedCustomersNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutCustomerNestedInput
   appointments?: Prisma.AppointmentUpdateManyWithoutCustomerNestedInput
+  deals?: Prisma.DealUpdateManyWithoutCustomerNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutCustomerNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerUncheckedUpdateWithoutLeadsInput = {
@@ -631,8 +1219,21 @@ export type CustomerUncheckedUpdateWithoutLeadsInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerMemberId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutCustomerNestedInput
   appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCustomerNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutCustomerNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutCustomerNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerCreateWithoutAppointmentsInput = {
@@ -641,9 +1242,22 @@ export type CustomerCreateWithoutAppointmentsInput = {
   phone?: string | null
   email?: string | null
   externalId?: string | null
+  position?: string | null
+  source?: string | null
+  notes?: string | null
+  tags?: Prisma.CustomerCreatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   workspace: Prisma.WorkspaceCreateNestedOneWithoutCustomersInput
+  company?: Prisma.CompanyCreateNestedOneWithoutContactsInput
+  owner?: Prisma.WorkspaceMemberCreateNestedOneWithoutOwnedCustomersInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutCustomerInput
   leads?: Prisma.LeadCreateNestedManyWithoutCustomerInput
+  deals?: Prisma.DealCreateNestedManyWithoutCustomerInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutCustomerInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerUncheckedCreateWithoutAppointmentsInput = {
@@ -653,8 +1267,21 @@ export type CustomerUncheckedCreateWithoutAppointmentsInput = {
   phone?: string | null
   email?: string | null
   externalId?: string | null
+  companyId?: string | null
+  ownerMemberId?: string | null
+  position?: string | null
+  source?: string | null
+  notes?: string | null
+  tags?: Prisma.CustomerCreatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutCustomerInput
   leads?: Prisma.LeadUncheckedCreateNestedManyWithoutCustomerInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutCustomerInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutCustomerInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerCreateOrConnectWithoutAppointmentsInput = {
@@ -679,9 +1306,22 @@ export type CustomerUpdateWithoutAppointmentsInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   workspace?: Prisma.WorkspaceUpdateOneRequiredWithoutCustomersNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutContactsNestedInput
+  owner?: Prisma.WorkspaceMemberUpdateOneWithoutOwnedCustomersNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutCustomerNestedInput
   leads?: Prisma.LeadUpdateManyWithoutCustomerNestedInput
+  deals?: Prisma.DealUpdateManyWithoutCustomerNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutCustomerNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerUncheckedUpdateWithoutAppointmentsInput = {
@@ -691,8 +1331,431 @@ export type CustomerUncheckedUpdateWithoutAppointmentsInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerMemberId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutCustomerNestedInput
   leads?: Prisma.LeadUncheckedUpdateManyWithoutCustomerNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutCustomerNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutCustomerNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutCustomerNestedInput
+}
+
+export type CustomerCreateWithoutCompanyInput = {
+  id?: string
+  name: string
+  phone?: string | null
+  email?: string | null
+  externalId?: string | null
+  position?: string | null
+  source?: string | null
+  notes?: string | null
+  tags?: Prisma.CustomerCreatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  workspace: Prisma.WorkspaceCreateNestedOneWithoutCustomersInput
+  owner?: Prisma.WorkspaceMemberCreateNestedOneWithoutOwnedCustomersInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutCustomerInput
+  leads?: Prisma.LeadCreateNestedManyWithoutCustomerInput
+  appointments?: Prisma.AppointmentCreateNestedManyWithoutCustomerInput
+  deals?: Prisma.DealCreateNestedManyWithoutCustomerInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutCustomerInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutCustomerInput
+}
+
+export type CustomerUncheckedCreateWithoutCompanyInput = {
+  id?: string
+  workspaceId: string
+  name: string
+  phone?: string | null
+  email?: string | null
+  externalId?: string | null
+  ownerMemberId?: string | null
+  position?: string | null
+  source?: string | null
+  notes?: string | null
+  tags?: Prisma.CustomerCreatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutCustomerInput
+  leads?: Prisma.LeadUncheckedCreateNestedManyWithoutCustomerInput
+  appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCustomerInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutCustomerInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutCustomerInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutCustomerInput
+}
+
+export type CustomerCreateOrConnectWithoutCompanyInput = {
+  where: Prisma.CustomerWhereUniqueInput
+  create: Prisma.XOR<Prisma.CustomerCreateWithoutCompanyInput, Prisma.CustomerUncheckedCreateWithoutCompanyInput>
+}
+
+export type CustomerCreateManyCompanyInputEnvelope = {
+  data: Prisma.CustomerCreateManyCompanyInput | Prisma.CustomerCreateManyCompanyInput[]
+  skipDuplicates?: boolean
+}
+
+export type CustomerUpsertWithWhereUniqueWithoutCompanyInput = {
+  where: Prisma.CustomerWhereUniqueInput
+  update: Prisma.XOR<Prisma.CustomerUpdateWithoutCompanyInput, Prisma.CustomerUncheckedUpdateWithoutCompanyInput>
+  create: Prisma.XOR<Prisma.CustomerCreateWithoutCompanyInput, Prisma.CustomerUncheckedCreateWithoutCompanyInput>
+}
+
+export type CustomerUpdateWithWhereUniqueWithoutCompanyInput = {
+  where: Prisma.CustomerWhereUniqueInput
+  data: Prisma.XOR<Prisma.CustomerUpdateWithoutCompanyInput, Prisma.CustomerUncheckedUpdateWithoutCompanyInput>
+}
+
+export type CustomerUpdateManyWithWhereWithoutCompanyInput = {
+  where: Prisma.CustomerScalarWhereInput
+  data: Prisma.XOR<Prisma.CustomerUpdateManyMutationInput, Prisma.CustomerUncheckedUpdateManyWithoutCompanyInput>
+}
+
+export type CustomerCreateWithoutDealsInput = {
+  id?: string
+  name: string
+  phone?: string | null
+  email?: string | null
+  externalId?: string | null
+  position?: string | null
+  source?: string | null
+  notes?: string | null
+  tags?: Prisma.CustomerCreatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  workspace: Prisma.WorkspaceCreateNestedOneWithoutCustomersInput
+  company?: Prisma.CompanyCreateNestedOneWithoutContactsInput
+  owner?: Prisma.WorkspaceMemberCreateNestedOneWithoutOwnedCustomersInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutCustomerInput
+  leads?: Prisma.LeadCreateNestedManyWithoutCustomerInput
+  appointments?: Prisma.AppointmentCreateNestedManyWithoutCustomerInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutCustomerInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutCustomerInput
+}
+
+export type CustomerUncheckedCreateWithoutDealsInput = {
+  id?: string
+  workspaceId: string
+  name: string
+  phone?: string | null
+  email?: string | null
+  externalId?: string | null
+  companyId?: string | null
+  ownerMemberId?: string | null
+  position?: string | null
+  source?: string | null
+  notes?: string | null
+  tags?: Prisma.CustomerCreatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutCustomerInput
+  leads?: Prisma.LeadUncheckedCreateNestedManyWithoutCustomerInput
+  appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCustomerInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutCustomerInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutCustomerInput
+}
+
+export type CustomerCreateOrConnectWithoutDealsInput = {
+  where: Prisma.CustomerWhereUniqueInput
+  create: Prisma.XOR<Prisma.CustomerCreateWithoutDealsInput, Prisma.CustomerUncheckedCreateWithoutDealsInput>
+}
+
+export type CustomerUpsertWithoutDealsInput = {
+  update: Prisma.XOR<Prisma.CustomerUpdateWithoutDealsInput, Prisma.CustomerUncheckedUpdateWithoutDealsInput>
+  create: Prisma.XOR<Prisma.CustomerCreateWithoutDealsInput, Prisma.CustomerUncheckedCreateWithoutDealsInput>
+  where?: Prisma.CustomerWhereInput
+}
+
+export type CustomerUpdateToOneWithWhereWithoutDealsInput = {
+  where?: Prisma.CustomerWhereInput
+  data: Prisma.XOR<Prisma.CustomerUpdateWithoutDealsInput, Prisma.CustomerUncheckedUpdateWithoutDealsInput>
+}
+
+export type CustomerUpdateWithoutDealsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workspace?: Prisma.WorkspaceUpdateOneRequiredWithoutCustomersNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutContactsNestedInput
+  owner?: Prisma.WorkspaceMemberUpdateOneWithoutOwnedCustomersNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutCustomerNestedInput
+  leads?: Prisma.LeadUpdateManyWithoutCustomerNestedInput
+  appointments?: Prisma.AppointmentUpdateManyWithoutCustomerNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutCustomerNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutCustomerNestedInput
+}
+
+export type CustomerUncheckedUpdateWithoutDealsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  workspaceId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerMemberId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutCustomerNestedInput
+  leads?: Prisma.LeadUncheckedUpdateManyWithoutCustomerNestedInput
+  appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCustomerNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutCustomerNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutCustomerNestedInput
+}
+
+export type CustomerCreateWithoutCrmTasksInput = {
+  id?: string
+  name: string
+  phone?: string | null
+  email?: string | null
+  externalId?: string | null
+  position?: string | null
+  source?: string | null
+  notes?: string | null
+  tags?: Prisma.CustomerCreatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  workspace: Prisma.WorkspaceCreateNestedOneWithoutCustomersInput
+  company?: Prisma.CompanyCreateNestedOneWithoutContactsInput
+  owner?: Prisma.WorkspaceMemberCreateNestedOneWithoutOwnedCustomersInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutCustomerInput
+  leads?: Prisma.LeadCreateNestedManyWithoutCustomerInput
+  appointments?: Prisma.AppointmentCreateNestedManyWithoutCustomerInput
+  deals?: Prisma.DealCreateNestedManyWithoutCustomerInput
+  crmActivities?: Prisma.CrmActivityCreateNestedManyWithoutCustomerInput
+}
+
+export type CustomerUncheckedCreateWithoutCrmTasksInput = {
+  id?: string
+  workspaceId: string
+  name: string
+  phone?: string | null
+  email?: string | null
+  externalId?: string | null
+  companyId?: string | null
+  ownerMemberId?: string | null
+  position?: string | null
+  source?: string | null
+  notes?: string | null
+  tags?: Prisma.CustomerCreatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutCustomerInput
+  leads?: Prisma.LeadUncheckedCreateNestedManyWithoutCustomerInput
+  appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCustomerInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutCustomerInput
+  crmActivities?: Prisma.CrmActivityUncheckedCreateNestedManyWithoutCustomerInput
+}
+
+export type CustomerCreateOrConnectWithoutCrmTasksInput = {
+  where: Prisma.CustomerWhereUniqueInput
+  create: Prisma.XOR<Prisma.CustomerCreateWithoutCrmTasksInput, Prisma.CustomerUncheckedCreateWithoutCrmTasksInput>
+}
+
+export type CustomerUpsertWithoutCrmTasksInput = {
+  update: Prisma.XOR<Prisma.CustomerUpdateWithoutCrmTasksInput, Prisma.CustomerUncheckedUpdateWithoutCrmTasksInput>
+  create: Prisma.XOR<Prisma.CustomerCreateWithoutCrmTasksInput, Prisma.CustomerUncheckedCreateWithoutCrmTasksInput>
+  where?: Prisma.CustomerWhereInput
+}
+
+export type CustomerUpdateToOneWithWhereWithoutCrmTasksInput = {
+  where?: Prisma.CustomerWhereInput
+  data: Prisma.XOR<Prisma.CustomerUpdateWithoutCrmTasksInput, Prisma.CustomerUncheckedUpdateWithoutCrmTasksInput>
+}
+
+export type CustomerUpdateWithoutCrmTasksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workspace?: Prisma.WorkspaceUpdateOneRequiredWithoutCustomersNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutContactsNestedInput
+  owner?: Prisma.WorkspaceMemberUpdateOneWithoutOwnedCustomersNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutCustomerNestedInput
+  leads?: Prisma.LeadUpdateManyWithoutCustomerNestedInput
+  appointments?: Prisma.AppointmentUpdateManyWithoutCustomerNestedInput
+  deals?: Prisma.DealUpdateManyWithoutCustomerNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutCustomerNestedInput
+}
+
+export type CustomerUncheckedUpdateWithoutCrmTasksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  workspaceId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerMemberId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutCustomerNestedInput
+  leads?: Prisma.LeadUncheckedUpdateManyWithoutCustomerNestedInput
+  appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCustomerNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutCustomerNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutCustomerNestedInput
+}
+
+export type CustomerCreateWithoutCrmActivitiesInput = {
+  id?: string
+  name: string
+  phone?: string | null
+  email?: string | null
+  externalId?: string | null
+  position?: string | null
+  source?: string | null
+  notes?: string | null
+  tags?: Prisma.CustomerCreatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  workspace: Prisma.WorkspaceCreateNestedOneWithoutCustomersInput
+  company?: Prisma.CompanyCreateNestedOneWithoutContactsInput
+  owner?: Prisma.WorkspaceMemberCreateNestedOneWithoutOwnedCustomersInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutCustomerInput
+  leads?: Prisma.LeadCreateNestedManyWithoutCustomerInput
+  appointments?: Prisma.AppointmentCreateNestedManyWithoutCustomerInput
+  deals?: Prisma.DealCreateNestedManyWithoutCustomerInput
+  crmTasks?: Prisma.CrmTaskCreateNestedManyWithoutCustomerInput
+}
+
+export type CustomerUncheckedCreateWithoutCrmActivitiesInput = {
+  id?: string
+  workspaceId: string
+  name: string
+  phone?: string | null
+  email?: string | null
+  externalId?: string | null
+  companyId?: string | null
+  ownerMemberId?: string | null
+  position?: string | null
+  source?: string | null
+  notes?: string | null
+  tags?: Prisma.CustomerCreatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutCustomerInput
+  leads?: Prisma.LeadUncheckedCreateNestedManyWithoutCustomerInput
+  appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCustomerInput
+  deals?: Prisma.DealUncheckedCreateNestedManyWithoutCustomerInput
+  crmTasks?: Prisma.CrmTaskUncheckedCreateNestedManyWithoutCustomerInput
+}
+
+export type CustomerCreateOrConnectWithoutCrmActivitiesInput = {
+  where: Prisma.CustomerWhereUniqueInput
+  create: Prisma.XOR<Prisma.CustomerCreateWithoutCrmActivitiesInput, Prisma.CustomerUncheckedCreateWithoutCrmActivitiesInput>
+}
+
+export type CustomerUpsertWithoutCrmActivitiesInput = {
+  update: Prisma.XOR<Prisma.CustomerUpdateWithoutCrmActivitiesInput, Prisma.CustomerUncheckedUpdateWithoutCrmActivitiesInput>
+  create: Prisma.XOR<Prisma.CustomerCreateWithoutCrmActivitiesInput, Prisma.CustomerUncheckedCreateWithoutCrmActivitiesInput>
+  where?: Prisma.CustomerWhereInput
+}
+
+export type CustomerUpdateToOneWithWhereWithoutCrmActivitiesInput = {
+  where?: Prisma.CustomerWhereInput
+  data: Prisma.XOR<Prisma.CustomerUpdateWithoutCrmActivitiesInput, Prisma.CustomerUncheckedUpdateWithoutCrmActivitiesInput>
+}
+
+export type CustomerUpdateWithoutCrmActivitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workspace?: Prisma.WorkspaceUpdateOneRequiredWithoutCustomersNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutContactsNestedInput
+  owner?: Prisma.WorkspaceMemberUpdateOneWithoutOwnedCustomersNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutCustomerNestedInput
+  leads?: Prisma.LeadUpdateManyWithoutCustomerNestedInput
+  appointments?: Prisma.AppointmentUpdateManyWithoutCustomerNestedInput
+  deals?: Prisma.DealUpdateManyWithoutCustomerNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutCustomerNestedInput
+}
+
+export type CustomerUncheckedUpdateWithoutCrmActivitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  workspaceId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerMemberId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutCustomerNestedInput
+  leads?: Prisma.LeadUncheckedUpdateManyWithoutCustomerNestedInput
+  appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCustomerNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutCustomerNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerCreateManyWorkspaceInput = {
@@ -701,6 +1764,16 @@ export type CustomerCreateManyWorkspaceInput = {
   phone?: string | null
   email?: string | null
   externalId?: string | null
+  companyId?: string | null
+  ownerMemberId?: string | null
+  position?: string | null
+  source?: string | null
+  notes?: string | null
+  tags?: Prisma.CustomerCreatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type CustomerUpdateWithoutWorkspaceInput = {
@@ -709,9 +1782,22 @@ export type CustomerUpdateWithoutWorkspaceInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  company?: Prisma.CompanyUpdateOneWithoutContactsNestedInput
+  owner?: Prisma.WorkspaceMemberUpdateOneWithoutOwnedCustomersNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutCustomerNestedInput
   leads?: Prisma.LeadUpdateManyWithoutCustomerNestedInput
   appointments?: Prisma.AppointmentUpdateManyWithoutCustomerNestedInput
+  deals?: Prisma.DealUpdateManyWithoutCustomerNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutCustomerNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerUncheckedUpdateWithoutWorkspaceInput = {
@@ -720,9 +1806,22 @@ export type CustomerUncheckedUpdateWithoutWorkspaceInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerMemberId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutCustomerNestedInput
   leads?: Prisma.LeadUncheckedUpdateManyWithoutCustomerNestedInput
   appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCustomerNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutCustomerNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutCustomerNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerUncheckedUpdateManyWithoutWorkspaceInput = {
@@ -731,6 +1830,184 @@ export type CustomerUncheckedUpdateManyWithoutWorkspaceInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerMemberId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type CustomerCreateManyOwnerInput = {
+  id?: string
+  workspaceId: string
+  name: string
+  phone?: string | null
+  email?: string | null
+  externalId?: string | null
+  companyId?: string | null
+  position?: string | null
+  source?: string | null
+  notes?: string | null
+  tags?: Prisma.CustomerCreatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type CustomerUpdateWithoutOwnerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workspace?: Prisma.WorkspaceUpdateOneRequiredWithoutCustomersNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutContactsNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutCustomerNestedInput
+  leads?: Prisma.LeadUpdateManyWithoutCustomerNestedInput
+  appointments?: Prisma.AppointmentUpdateManyWithoutCustomerNestedInput
+  deals?: Prisma.DealUpdateManyWithoutCustomerNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutCustomerNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutCustomerNestedInput
+}
+
+export type CustomerUncheckedUpdateWithoutOwnerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  workspaceId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutCustomerNestedInput
+  leads?: Prisma.LeadUncheckedUpdateManyWithoutCustomerNestedInput
+  appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCustomerNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutCustomerNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutCustomerNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutCustomerNestedInput
+}
+
+export type CustomerUncheckedUpdateManyWithoutOwnerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  workspaceId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type CustomerCreateManyCompanyInput = {
+  id?: string
+  workspaceId: string
+  name: string
+  phone?: string | null
+  email?: string | null
+  externalId?: string | null
+  ownerMemberId?: string | null
+  position?: string | null
+  source?: string | null
+  notes?: string | null
+  tags?: Prisma.CustomerCreatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type CustomerUpdateWithoutCompanyInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workspace?: Prisma.WorkspaceUpdateOneRequiredWithoutCustomersNestedInput
+  owner?: Prisma.WorkspaceMemberUpdateOneWithoutOwnedCustomersNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutCustomerNestedInput
+  leads?: Prisma.LeadUpdateManyWithoutCustomerNestedInput
+  appointments?: Prisma.AppointmentUpdateManyWithoutCustomerNestedInput
+  deals?: Prisma.DealUpdateManyWithoutCustomerNestedInput
+  crmTasks?: Prisma.CrmTaskUpdateManyWithoutCustomerNestedInput
+  crmActivities?: Prisma.CrmActivityUpdateManyWithoutCustomerNestedInput
+}
+
+export type CustomerUncheckedUpdateWithoutCompanyInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  workspaceId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerMemberId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutCustomerNestedInput
+  leads?: Prisma.LeadUncheckedUpdateManyWithoutCustomerNestedInput
+  appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCustomerNestedInput
+  deals?: Prisma.DealUncheckedUpdateManyWithoutCustomerNestedInput
+  crmTasks?: Prisma.CrmTaskUncheckedUpdateManyWithoutCustomerNestedInput
+  crmActivities?: Prisma.CrmActivityUncheckedUpdateManyWithoutCustomerNestedInput
+}
+
+export type CustomerUncheckedUpdateManyWithoutCompanyInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  workspaceId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerMemberId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.CustomerUpdatetagsInput | string[]
+  customFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -742,12 +2019,18 @@ export type CustomerCountOutputType = {
   conversations: number
   leads: number
   appointments: number
+  deals: number
+  crmTasks: number
+  crmActivities: number
 }
 
 export type CustomerCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   conversations?: boolean | CustomerCountOutputTypeCountConversationsArgs
   leads?: boolean | CustomerCountOutputTypeCountLeadsArgs
   appointments?: boolean | CustomerCountOutputTypeCountAppointmentsArgs
+  deals?: boolean | CustomerCountOutputTypeCountDealsArgs
+  crmTasks?: boolean | CustomerCountOutputTypeCountCrmTasksArgs
+  crmActivities?: boolean | CustomerCountOutputTypeCountCrmActivitiesArgs
 }
 
 /**
@@ -781,6 +2064,27 @@ export type CustomerCountOutputTypeCountAppointmentsArgs<ExtArgs extends runtime
   where?: Prisma.AppointmentWhereInput
 }
 
+/**
+ * CustomerCountOutputType without action
+ */
+export type CustomerCountOutputTypeCountDealsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DealWhereInput
+}
+
+/**
+ * CustomerCountOutputType without action
+ */
+export type CustomerCountOutputTypeCountCrmTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CrmTaskWhereInput
+}
+
+/**
+ * CustomerCountOutputType without action
+ */
+export type CustomerCountOutputTypeCountCrmActivitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CrmActivityWhereInput
+}
+
 
 export type CustomerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -789,10 +2093,25 @@ export type CustomerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   phone?: boolean
   email?: boolean
   externalId?: boolean
+  companyId?: boolean
+  ownerMemberId?: boolean
+  position?: boolean
+  source?: boolean
+  notes?: boolean
+  tags?: boolean
+  customFields?: boolean
+  lastActivityAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   workspace?: boolean | Prisma.WorkspaceDefaultArgs<ExtArgs>
+  company?: boolean | Prisma.Customer$companyArgs<ExtArgs>
+  owner?: boolean | Prisma.Customer$ownerArgs<ExtArgs>
   conversations?: boolean | Prisma.Customer$conversationsArgs<ExtArgs>
   leads?: boolean | Prisma.Customer$leadsArgs<ExtArgs>
   appointments?: boolean | Prisma.Customer$appointmentsArgs<ExtArgs>
+  deals?: boolean | Prisma.Customer$dealsArgs<ExtArgs>
+  crmTasks?: boolean | Prisma.Customer$crmTasksArgs<ExtArgs>
+  crmActivities?: boolean | Prisma.Customer$crmActivitiesArgs<ExtArgs>
   _count?: boolean | Prisma.CustomerCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["customer"]>
 
@@ -803,7 +2122,19 @@ export type CustomerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   phone?: boolean
   email?: boolean
   externalId?: boolean
+  companyId?: boolean
+  ownerMemberId?: boolean
+  position?: boolean
+  source?: boolean
+  notes?: boolean
+  tags?: boolean
+  customFields?: boolean
+  lastActivityAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   workspace?: boolean | Prisma.WorkspaceDefaultArgs<ExtArgs>
+  company?: boolean | Prisma.Customer$companyArgs<ExtArgs>
+  owner?: boolean | Prisma.Customer$ownerArgs<ExtArgs>
 }, ExtArgs["result"]["customer"]>
 
 export type CustomerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -813,7 +2144,19 @@ export type CustomerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   phone?: boolean
   email?: boolean
   externalId?: boolean
+  companyId?: boolean
+  ownerMemberId?: boolean
+  position?: boolean
+  source?: boolean
+  notes?: boolean
+  tags?: boolean
+  customFields?: boolean
+  lastActivityAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   workspace?: boolean | Prisma.WorkspaceDefaultArgs<ExtArgs>
+  company?: boolean | Prisma.Customer$companyArgs<ExtArgs>
+  owner?: boolean | Prisma.Customer$ownerArgs<ExtArgs>
 }, ExtArgs["result"]["customer"]>
 
 export type CustomerSelectScalar = {
@@ -823,30 +2166,54 @@ export type CustomerSelectScalar = {
   phone?: boolean
   email?: boolean
   externalId?: boolean
+  companyId?: boolean
+  ownerMemberId?: boolean
+  position?: boolean
+  source?: boolean
+  notes?: boolean
+  tags?: boolean
+  customFields?: boolean
+  lastActivityAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type CustomerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "workspaceId" | "name" | "phone" | "email" | "externalId", ExtArgs["result"]["customer"]>
+export type CustomerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "workspaceId" | "name" | "phone" | "email" | "externalId" | "companyId" | "ownerMemberId" | "position" | "source" | "notes" | "tags" | "customFields" | "lastActivityAt" | "createdAt" | "updatedAt", ExtArgs["result"]["customer"]>
 export type CustomerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   workspace?: boolean | Prisma.WorkspaceDefaultArgs<ExtArgs>
+  company?: boolean | Prisma.Customer$companyArgs<ExtArgs>
+  owner?: boolean | Prisma.Customer$ownerArgs<ExtArgs>
   conversations?: boolean | Prisma.Customer$conversationsArgs<ExtArgs>
   leads?: boolean | Prisma.Customer$leadsArgs<ExtArgs>
   appointments?: boolean | Prisma.Customer$appointmentsArgs<ExtArgs>
+  deals?: boolean | Prisma.Customer$dealsArgs<ExtArgs>
+  crmTasks?: boolean | Prisma.Customer$crmTasksArgs<ExtArgs>
+  crmActivities?: boolean | Prisma.Customer$crmActivitiesArgs<ExtArgs>
   _count?: boolean | Prisma.CustomerCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CustomerIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   workspace?: boolean | Prisma.WorkspaceDefaultArgs<ExtArgs>
+  company?: boolean | Prisma.Customer$companyArgs<ExtArgs>
+  owner?: boolean | Prisma.Customer$ownerArgs<ExtArgs>
 }
 export type CustomerIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   workspace?: boolean | Prisma.WorkspaceDefaultArgs<ExtArgs>
+  company?: boolean | Prisma.Customer$companyArgs<ExtArgs>
+  owner?: boolean | Prisma.Customer$ownerArgs<ExtArgs>
 }
 
 export type $CustomerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Customer"
   objects: {
     workspace: Prisma.$WorkspacePayload<ExtArgs>
+    company: Prisma.$CompanyPayload<ExtArgs> | null
+    owner: Prisma.$WorkspaceMemberPayload<ExtArgs> | null
     conversations: Prisma.$ConversationPayload<ExtArgs>[]
     leads: Prisma.$LeadPayload<ExtArgs>[]
     appointments: Prisma.$AppointmentPayload<ExtArgs>[]
+    deals: Prisma.$DealPayload<ExtArgs>[]
+    crmTasks: Prisma.$CrmTaskPayload<ExtArgs>[]
+    crmActivities: Prisma.$CrmActivityPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -855,6 +2222,16 @@ export type $CustomerPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     phone: string | null
     email: string | null
     externalId: string | null
+    companyId: string | null
+    ownerMemberId: string | null
+    position: string | null
+    source: string | null
+    notes: string | null
+    tags: string[]
+    customFields: runtime.JsonValue | null
+    lastActivityAt: Date | null
+    createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["customer"]>
   composites: {}
 }
@@ -1250,9 +2627,14 @@ readonly fields: CustomerFieldRefs;
 export interface Prisma__CustomerClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   workspace<T extends Prisma.WorkspaceDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WorkspaceDefaultArgs<ExtArgs>>): Prisma.Prisma__WorkspaceClient<runtime.Types.Result.GetResult<Prisma.$WorkspacePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  company<T extends Prisma.Customer$companyArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Customer$companyArgs<ExtArgs>>): Prisma.Prisma__CompanyClient<runtime.Types.Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  owner<T extends Prisma.Customer$ownerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Customer$ownerArgs<ExtArgs>>): Prisma.Prisma__WorkspaceMemberClient<runtime.Types.Result.GetResult<Prisma.$WorkspaceMemberPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   conversations<T extends Prisma.Customer$conversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Customer$conversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   leads<T extends Prisma.Customer$leadsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Customer$leadsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LeadPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   appointments<T extends Prisma.Customer$appointmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Customer$appointmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AppointmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  deals<T extends Prisma.Customer$dealsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Customer$dealsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DealPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  crmTasks<T extends Prisma.Customer$crmTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Customer$crmTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CrmTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  crmActivities<T extends Prisma.Customer$crmActivitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Customer$crmActivitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CrmActivityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1288,6 +2670,16 @@ export interface CustomerFieldRefs {
   readonly phone: Prisma.FieldRef<"Customer", 'String'>
   readonly email: Prisma.FieldRef<"Customer", 'String'>
   readonly externalId: Prisma.FieldRef<"Customer", 'String'>
+  readonly companyId: Prisma.FieldRef<"Customer", 'String'>
+  readonly ownerMemberId: Prisma.FieldRef<"Customer", 'String'>
+  readonly position: Prisma.FieldRef<"Customer", 'String'>
+  readonly source: Prisma.FieldRef<"Customer", 'String'>
+  readonly notes: Prisma.FieldRef<"Customer", 'String'>
+  readonly tags: Prisma.FieldRef<"Customer", 'String[]'>
+  readonly customFields: Prisma.FieldRef<"Customer", 'Json'>
+  readonly lastActivityAt: Prisma.FieldRef<"Customer", 'DateTime'>
+  readonly createdAt: Prisma.FieldRef<"Customer", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"Customer", 'DateTime'>
 }
     
 
@@ -1684,6 +3076,44 @@ export type CustomerDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
 }
 
 /**
+ * Customer.company
+ */
+export type Customer$companyArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Company
+   */
+  select?: Prisma.CompanySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Company
+   */
+  omit?: Prisma.CompanyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanyInclude<ExtArgs> | null
+  where?: Prisma.CompanyWhereInput
+}
+
+/**
+ * Customer.owner
+ */
+export type Customer$ownerArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WorkspaceMember
+   */
+  select?: Prisma.WorkspaceMemberSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the WorkspaceMember
+   */
+  omit?: Prisma.WorkspaceMemberOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkspaceMemberInclude<ExtArgs> | null
+  where?: Prisma.WorkspaceMemberWhereInput
+}
+
+/**
  * Customer.conversations
  */
 export type Customer$conversationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1753,6 +3183,78 @@ export type Customer$appointmentsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.AppointmentScalarFieldEnum | Prisma.AppointmentScalarFieldEnum[]
+}
+
+/**
+ * Customer.deals
+ */
+export type Customer$dealsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Deal
+   */
+  select?: Prisma.DealSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Deal
+   */
+  omit?: Prisma.DealOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DealInclude<ExtArgs> | null
+  where?: Prisma.DealWhereInput
+  orderBy?: Prisma.DealOrderByWithRelationInput | Prisma.DealOrderByWithRelationInput[]
+  cursor?: Prisma.DealWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DealScalarFieldEnum | Prisma.DealScalarFieldEnum[]
+}
+
+/**
+ * Customer.crmTasks
+ */
+export type Customer$crmTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CrmTask
+   */
+  select?: Prisma.CrmTaskSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CrmTask
+   */
+  omit?: Prisma.CrmTaskOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CrmTaskInclude<ExtArgs> | null
+  where?: Prisma.CrmTaskWhereInput
+  orderBy?: Prisma.CrmTaskOrderByWithRelationInput | Prisma.CrmTaskOrderByWithRelationInput[]
+  cursor?: Prisma.CrmTaskWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CrmTaskScalarFieldEnum | Prisma.CrmTaskScalarFieldEnum[]
+}
+
+/**
+ * Customer.crmActivities
+ */
+export type Customer$crmActivitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CrmActivity
+   */
+  select?: Prisma.CrmActivitySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CrmActivity
+   */
+  omit?: Prisma.CrmActivityOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CrmActivityInclude<ExtArgs> | null
+  where?: Prisma.CrmActivityWhereInput
+  orderBy?: Prisma.CrmActivityOrderByWithRelationInput | Prisma.CrmActivityOrderByWithRelationInput[]
+  cursor?: Prisma.CrmActivityWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CrmActivityScalarFieldEnum | Prisma.CrmActivityScalarFieldEnum[]
 }
 
 /**

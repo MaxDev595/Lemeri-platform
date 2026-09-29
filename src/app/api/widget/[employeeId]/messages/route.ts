@@ -58,7 +58,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ emp
           const raced = await tx.conversation.findUnique({ where: { workspaceId_channelType_externalId: { workspaceId: employee.workspaceId, channelType: "WEBSITE", externalId: visitorExternalId } } });
           if (raced) return { conversation: raced, created: false };
           await assertConversationCreationAllowed(tx, employee.workspaceId);
-          const customer = await tx.customer.upsert({ where: { workspaceId_externalId: { workspaceId: employee.workspaceId, externalId: visitorExternalId } }, create: { workspaceId: employee.workspaceId, externalId: visitorExternalId, name: parsed.data.name ?? t("server.visitor",{suffix:parsed.data.visitorId.slice(-4)}) }, update: parsed.data.name ? { name: parsed.data.name } : {} });
+          const customer = await tx.customer.upsert({ where: { workspaceId_externalId: { workspaceId: employee.workspaceId, externalId: visitorExternalId } }, create: { workspaceId: employee.workspaceId, externalId: visitorExternalId, name: parsed.data.name ?? t("server.visitor",{suffix:parsed.data.visitorId.slice(-4)}), source: "WEBSITE", lastActivityAt: new Date() }, update: { lastActivityAt: new Date(), ...(parsed.data.name ? { name: parsed.data.name } : {}) } });
           const created = await tx.conversation.create({ data: { workspaceId: employee.workspaceId, employeeId, customerId: customer.id, status: "AI_ACTIVE", channelType: "WEBSITE", externalId: visitorExternalId } });
           await tx.analyticsEvent.create({ data: { workspaceId: employee.workspaceId, type: "CONVERSATION_STARTED", payload: { conversationId: created.id, channelType: "WEBSITE" } } });
           return { conversation: created, created: true };

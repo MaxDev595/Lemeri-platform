@@ -99,6 +99,13 @@ model Workspace {
   testCases     AITestCase[]
   knowledgeGaps KnowledgeGap[]
   insights      AIInsight[]
+  companies     Company[]
+  pipelines     Pipeline[]
+  deals         Deal[]
+  products      Product[]
+  crmTasks      CrmTask[]
+  crmActivities CrmActivity[]
+  crmFields     CrmFieldDefinition[]
   createdAt     DateTime          @default(now())
 }
 
@@ -112,6 +119,10 @@ model WorkspaceMember {
   assignedEmployees AIEmployee[] @relation("EmployeeAssignee")
   assignedConversations Conversation[] @relation("ConversationAssignee")
   assignedLeads Lead[] @relation("LeadAssignee")
+  ownedCustomers Customer[] @relation("CustomerOwner")
+  ownedCompanies Company[] @relation("CompanyOwner")
+  ownedDeals    Deal[] @relation("DealOwner")
+  crmTasks      CrmTask[] @relation("TaskAssignee")
   @@unique([workspaceId, userId])
   @@index([workspaceId])
 }
@@ -215,11 +226,27 @@ model Customer {
   phone         String?
   email         String?
   externalId    String?
+  companyId     String?
+  ownerMemberId String?
+  position      String?
+  source        String?
+  notes         String?
+  tags          String[]       @default([])
+  customFields  Json?
+  lastActivityAt DateTime?
   workspace     Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  company       Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  owner         WorkspaceMember? @relation("CustomerOwner", fields: [ownerMemberId], references: [id], onDelete: SetNull)
   conversations Conversation[]
   leads         Lead[]
   appointments  Appointment[]
+  deals         Deal[]
+  crmTasks      CrmTask[]
+  crmActivities CrmActivity[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @default(now()) @updatedAt
   @@index([workspaceId])
+  @@index([workspaceId, companyId])
   @@unique([workspaceId, externalId])
 }
 
@@ -269,6 +296,7 @@ model Lead {
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   assignee    WorkspaceMember? @relation("LeadAssignee", fields: [assignedMemberId], references: [id], onDelete: SetNull)
   customer    Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  deal        Deal?
   createdAt   DateTime  @default(now())
   @@index([workspaceId, stage])
   @@index([assignedMemberId])
@@ -525,4 +553,188 @@ model AIInsight {
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   createdAt   DateTime  @default(now())
   @@index([workspaceId, dismissedAt, createdAt])
+}
+
+// ---------------------------------------------------------------- CRM
+model Company {
+  id            String    @id @default(cuid())
+  workspaceId   String
+  name          String
+  website       String?
+  phone         String?
+  email         String?
+  address       String?
+  industry      String?
+  taxId         String?
+  notes         String?
+  ownerMemberId String?
+  tags          String[]  @default([])
+  customFields  Json?
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  owner         WorkspaceMember? @relation("CompanyOwner", fields: [ownerMemberId], references: [id], onDelete: SetNull)
+  contacts      Customer[]
+  deals         Deal[]
+  crmTasks      CrmTask[]
+  crmActivities CrmActivity[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
+  @@index([workspaceId])
+}
+
+model Pipeline {
+  id          String          @id @default(cuid())
+  workspaceId String
+  name        String
+  isDefault   Boolean         @default(false)
+  sort        Int             @default(0)
+  workspace   Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  stages      PipelineStage[]
+  deals       Deal[]
+  createdAt   DateTime        @default(now())
+  @@index([workspaceId])
+}
+
+model PipelineStage {
+  id          String   @id @default(cuid())
+  pipelineId  String
+  name        String
+  color       String   @default("#6254e8")
+  kind        String   @default("OPEN")
+  probability Int      @default(0)
+  sort        Int      @default(0)
+  pipeline    Pipeline @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  deals       Deal[]
+  @@index([pipelineId])
+}
+
+model Deal {
+  id             String    @id @default(cuid())
+  workspaceId    String
+  pipelineId     String
+  stageId        String
+  title          String
+  amount         Float     @default(0)
+  currency       String    @default("RUB")
+  customerId     String?
+  companyId      String?
+  ownerMemberId  String?
+  leadId         String?   @unique
+  source         String?
+  status         String    @default("OPEN")
+  lostReason     String?
+  expectedCloseAt DateTime?
+  closedAt       DateTime?
+  stageChangedAt DateTime  @default(now())
+  tags           String[]  @default([])
+  customFields   Json?
+  sort           Float     @default(0)
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  pipeline       Pipeline  @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  stage          PipelineStage @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  customer       Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  company        Company?  @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  owner          WorkspaceMember? @relation("DealOwner", fields: [ownerMemberId], references: [id], onDelete: SetNull)
+  lead           Lead?     @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  items          DealItem[]
+  crmTasks       CrmTask[]
+  crmActivities  CrmActivity[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now()) @updatedAt
+  @@index([workspaceId, pipelineId, stageId])
+  @@index([workspaceId, status])
+  @@index([customerId])
+  @@index([companyId])
+}
+
+model DealItem {
+  id        String   @id @default(cuid())
+  dealId    String
+  productId String?
+  name      String
+  price     Float    @default(0)
+  quantity  Float    @default(1)
+  discount  Float    @default(0)
+  deal      Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  @@index([dealId])
+}
+
+model Product {
+  id          String     @id @default(cuid())
+  workspaceId String
+  name        String
+  sku         String?
+  category    String?
+  description String?
+  price       Float      @default(0)
+  currency    String     @default("RUB")
+  durationMin Int?
+  active      Boolean    @default(true)
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  dealItems   DealItem[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now()) @updatedAt
+  @@index([workspaceId])
+}
+
+model CrmTask {
+  id               String    @id @default(cuid())
+  workspaceId      String
+  title            String
+  description      String?
+  type             String    @default("TODO")
+  priority         String    @default("NORMAL")
+  dueAt            DateTime?
+  completedAt      DateTime?
+  remindedAt       DateTime?
+  assigneeMemberId String?
+  createdByUserId  String?
+  customerId       String?
+  companyId        String?
+  dealId           String?
+  workspace        Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  assignee         WorkspaceMember? @relation("TaskAssignee", fields: [assigneeMemberId], references: [id], onDelete: SetNull)
+  customer         Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  company          Company?  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  deal             Deal?     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @default(now()) @updatedAt
+  @@index([workspaceId, completedAt, dueAt])
+  @@index([assigneeMemberId])
+}
+
+model CrmActivity {
+  id           String    @id @default(cuid())
+  workspaceId  String
+  type         String
+  body         String?
+  meta         Json?
+  authorUserId String?
+  authorName   String?
+  customerId   String?
+  companyId    String?
+  dealId       String?
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  customer     Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  company      Company?  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  deal         Deal?     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now())
+  @@index([workspaceId, createdAt])
+  @@index([customerId])
+  @@index([companyId])
+  @@index([dealId])
+}
+
+model CrmFieldDefinition {
+  id          String    @id @default(cuid())
+  workspaceId String
+  entity      String
+  key         String
+  label       String
+  type        String    @default("TEXT")
+  options     String[]  @default([])
+  sort        Int       @default(0)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  @@unique([workspaceId, entity, key])
 }
