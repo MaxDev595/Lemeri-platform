@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { db } from "@/lib/db";
+import { crmSchemaReady, db } from "@/lib/db";
+import { schemaStatus } from "@/lib/crm/schema";
 import { getApiWorkspace } from "@/lib/auth/api";
 import { canWorkspace } from "@/lib/auth/permissions";
 import { validateRequestOrigin } from "@/lib/security/request";
@@ -495,10 +496,32 @@ async function reports(ctx: Ctx) {
   };
 }
 
+// ------------------------------------------------------------------ health (diagnostics for owners)
+async function health(ctx: Ctx) {
+  need(ctx, "admin");
+  const started = Date.now();
+  await crmSchemaReady();
+  const probe = async <T,>(run: () => Promise<T>) => { const t = Date.now(); try { return { ok: true, ms: Date.now() - t, value: await run() }; } catch (error) { return { ok: false, ms: Date.now() - t, error: errorText(error) }; } };
+  const crmTables = ["Company", "Pipeline", "PipelineStage", "Deal", "DealItem", "Product", "CrmTask", "CrmActivity", "CrmFieldDefinition"];
+  const [tables, customerColumns, idTypes, marker, read, write] = await Promise.all([
+    probe(() => db.$queryRawUnsafe<Array<{ table_name: string }>>(`SELECT table_name::text AS table_name FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = ANY($1::text[])`, crmTables).then(r => crmTables.map(name => ({ name, exists: r.some(x => x.table_name === name) })))),
+    probe(() => db.$queryRawUnsafe<Array<{ column_name: string; data_type: string }>>(`SELECT column_name::text AS column_name, data_type::text AS data_type FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'Customer' ORDER BY ordinal_position`)),
+    probe(() => db.$queryRawUnsafe<Array<{ table_name: string; data_type: string }>>(`SELECT table_name::text AS table_name, data_type::text AS data_type FROM information_schema.columns WHERE table_schema = current_schema() AND column_name = 'id' AND table_name IN ('Workspace','WorkspaceMember','Lead','Customer','User','Conversation')`)),
+    probe(() => db.$queryRawUnsafe<Array<{ version: string }>>(`SELECT "version" FROM "_lemiri_schema"`)),
+    probe(() => db.pipeline.count({ where: { workspaceId: ws(ctx) } })),
+    probe(() => db.$transaction(async tx => (tx as unknown as { $queryRawUnsafe: (q: string) => Promise<unknown> }).$queryRawUnsafe("SELECT 1 AS ok"))),
+  ]);
+  return { ms: Date.now() - started, schema: schemaStatus, marker, tables, customerColumns, idTypes, read, write };
+}
+function errorText(error: unknown) {
+  const e = error as { code?: string; message?: string; meta?: unknown };
+  return { code: e?.code ?? "", message: String(e?.message ?? error).replace(/postgres(ql)?:\/\/[^\s"']+/gi, "postgres://***").slice(0, 500), meta: e?.meta ? JSON.stringify(e.meta).slice(0, 300) : undefined };
+}
+
 // ------------------------------------------------------------------ router
 type Handler = (ctx: Ctx, ...args: string[]) => Promise<unknown>;
 const routes: Array<[string, RegExp, Handler]> = [
-  ["GET", /^bootstrap$/, bootstrap],
+  ["GET", /^bootstrap$/, bootstrap], ["GET", /^health$/, health],
   ["POST", /^pipelines$/, createPipeline], ["PATCH", /^pipelines\/([^/]+)$/, updatePipeline], ["DELETE", /^pipelines\/([^/]+)$/, deletePipeline],
   ["GET", /^deals$/, listDeals], ["POST", /^deals$/, createDeal], ["GET", /^deals\/([^/]+)$/, dealDetail], ["PATCH", /^deals\/([^/]+)$/, updateDeal], ["DELETE", /^deals\/([^/]+)$/, deleteDeal], ["POST", /^deals\/([^/]+)\/move$/, moveDeal], ["PUT", /^deals\/([^/]+)\/items$/, dealItems],
   ["GET", /^contacts$/, listContacts], ["POST", /^contacts$/, createContact], ["GET", /^contacts\/export$/, exportContacts], ["GET", /^contacts\/duplicates$/, duplicates], ["POST", /^contacts\/import$/, importContacts], ["POST", /^contacts\/bulk$/, bulkContacts], ["POST", /^contacts\/merge$/, mergeContacts],
@@ -526,8 +549,10 @@ async function handle(request: Request, { params }: { params: Promise<{ path: st
     return NextResponse.json(result ?? { ok: true }, { status: request.method === "POST" ? 201 : 200 });
   } catch (error) {
     if (error instanceof HttpError) return NextResponse.json({ error: error.code }, { status: error.status });
-    console.error("CRM request failed", request.method, path, error instanceof Error ? error.message : error);
-    return NextResponse.json({ error: "CRM_FAILED" }, { status: 500 });
+    const detail = errorText(error);
+    console.error("CRM request failed", request.method, path, detail.code, detail.message);
+    // The short reason is shown to signed-in users on the error card, so a failure can be reported precisely.
+    return NextResponse.json({ error: "CRM_FAILED", code: detail.code || undefined, detail: detail.message.split("\n").filter(Boolean).slice(-2).join(" ").slice(0, 240) }, { status: 500 });
   }
 }
 

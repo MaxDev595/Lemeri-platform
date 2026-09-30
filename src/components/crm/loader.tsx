@@ -31,7 +31,7 @@ export function CrmSkeleton({ variant = "board", locale, label, tabs = false }: 
   </div>;
 }
 
-type Failure = { status?: number; code?: string; message?: string };
+type Failure = { status?: number; code?: string; message?: string; detail?: string };
 function describe(error: unknown, en: boolean) {
   const e = (error ?? {}) as Failure;
   const offline = typeof navigator !== "undefined" && navigator.onLine === false;
@@ -57,6 +57,7 @@ export function CrmFailure({ error, onRetry, locale, compact = false }: { error:
     <h3>{title}</h3>
     <p>{copy}</p>
     {code && <code>{code}</code>}
+    {e.detail && <details className="crmFailMore"><summary>{en ? "Details" : "Подробнее"}</summary><p>{e.detail}</p><a href="/api/crm/health" target="_blank" rel="noreferrer">{en ? "Open diagnostics" : "Открыть диагностику"}</a></details>}
     <button type="button" className="crmRetry" onClick={retry} disabled={busy} aria-busy={busy}>
       <RotateCw size={16} className={busy ? "spin" : ""}/>{busy ? (en ? "Retrying…" : "Пробуем снова…") : (en ? "Try again" : "Повторить")}
     </button>

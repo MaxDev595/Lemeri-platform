@@ -1,7 +1,7 @@
 import "@/lib/neon-local";
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaNeon, PrismaNeonHTTP } from "@prisma/adapter-neon";
-import { applyCrmSchema } from "@/lib/crm/schema";
+import { applyCrmSchema, schemaStatus } from "@/lib/crm/schema";
 
 // Turbopack's WASM loader uses compileStreaming, while workerd currently only
 // exposes compile. Install the equivalent fallback before Prisma compiles its
@@ -68,11 +68,18 @@ const readOperations = new Set(["findUnique", "findUniqueOrThrow", "findFirst", 
 
 // New columns/tables (CRM) must exist before Prisma selects them, so the first
 // database operation of each isolate makes sure the additive schema is applied.
+// A failed attempt is retried at most every few minutes, so one bad statement
+// cannot make every request replay the whole schema (that took ~10 s each).
 let schemaReady: Promise<unknown> | undefined;
+let schemaRetryAt = 0;
 function ensureSchema() {
-  schemaReady ??= applyCrmSchema(createHttpClient()).catch(error => { schemaReady = undefined; console.error("Schema update failed", error instanceof Error ? error.message : error); });
+  if (schemaReady && !schemaStatus.applied && schemaStatus.checkedAt && Date.now() > schemaRetryAt) schemaReady = undefined;
+  schemaReady ??= applyCrmSchema(createHttpClient())
+    .then(applied => { if (!schemaStatus.applied) schemaRetryAt = Date.now() + 5 * 60_000; return applied; })
+    .catch(error => { schemaRetryAt = Date.now() + 60_000; schemaStatus.failures = [{ statement: "(connect)", code: "", message: error instanceof Error ? error.message.slice(0, 400) : String(error) }]; console.error("Schema update failed", error instanceof Error ? error.message : error); });
   return schemaReady;
 }
+export function crmSchemaReady() { return process.env.NODE_ENV === "production" ? ensureSchema() : Promise.resolve(); }
 
 async function withTransactionClient<T>(run: (client: PrismaClient) => Promise<T>) {
   const client = createTransactionClient();

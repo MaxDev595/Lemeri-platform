@@ -323,3 +323,7 @@ button.crmChip { cursor: pointer; font-size: var(--fs-12); padding: 5px 10px; }
 @media (max-width: 760px) { .crmLoadBoard { grid-template-columns: repeat(2, minmax(160px, 1fr)); } .crmLoadKpis { grid-template-columns: repeat(2, 1fr); } }
 @media (prefers-reduced-motion: reduce) { .crmLoad *, .crmFail, .crmFailIcon, .crmRetry::after { animation: none !important; } }
 .crmLoadCol > .crmSk { background-image: linear-gradient(90deg, var(--line) 25%, var(--line-strong) 37%, var(--line) 63%); }
+.crmFailMore { max-width: 100%; font-size: var(--fs-12); color: var(--text-3); }
+.crmFailMore summary { cursor: pointer; }
+.crmFailMore p { margin: 6px 0; padding: 8px 10px; border-radius: var(--r-md); background: var(--surface-2); font-family: ui-monospace, monospace; text-align: left; word-break: break-word; }
+.crmFailMore a { color: var(--accent-text, var(--accent)); }

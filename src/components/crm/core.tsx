@@ -50,7 +50,7 @@ export type Copy = typeof dict.ru;
 export const copyFor = (locale: Locale): Copy => dict[locale];
 export const fill = (template: string, values: Record<string, string | number>) => template.replace(/\{(\w+)\}/g, (_, key) => String(values[key] ?? ""));
 
-export class ApiError extends Error { constructor(public status: number, public code: string) { super(code); } }
+export class ApiError extends Error { constructor(public status: number, public code: string, public detail?: string) { super(code); } }
 export async function api<T = unknown>(path: string, init?: { method?: string; body?: unknown }): Promise<T> {
   const method = init?.method ?? "GET";
   // Reads are retried on network errors and 5xx (e.g. a Worker hitting its CPU limit), so a
@@ -66,7 +66,7 @@ export async function api<T = unknown>(path: string, init?: { method?: string; b
     }
     if (response.status >= 500 && attempt < attempts) { await new Promise(r => setTimeout(r, 400 * attempt * attempt)); continue; }
     const body = await response.json().catch(() => ({}));
-    if (!response.ok) throw new ApiError(response.status, (body as { error?: string }).error ?? String(response.status));
+    if (!response.ok) { const b = body as { error?: string; code?: string; detail?: string }; throw new ApiError(response.status, [b.error, b.code].filter(Boolean).join(" ") || String(response.status), b.detail); }
     return body as T;
   }
 }
