@@ -16,3 +16,4 @@ public/vendor/pdfjs/
 
 # local dev database (scripts/local-db.mjs)
 /.local-db
+/scripts/local-db-runtime/node_modules

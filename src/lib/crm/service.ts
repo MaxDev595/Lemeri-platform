@@ -40,10 +40,11 @@ export async function ensureDefaultPipeline(workspaceId: string, locale?: CrmLoc
   // Backfill: leads the AI created before the CRM existed appear in the pipeline.
   const leads = await db.lead.findMany({ where: { workspaceId, deal: null }, include: { customer: { select: { name: true } } }, orderBy: { createdAt: "asc" }, take: 500 });
   const first = pipeline.stages[0], qualified = pipeline.stages[1] ?? first, won = pipeline.stages.find(s => s.kind === "WON"), lost = pipeline.stages.find(s => s.kind === "LOST");
-  for (const [index, lead] of leads.entries()) {
+  // One statement for all of them: a query per lead used to exhaust the Worker's CPU budget.
+  if (leads.length) await db.deal.createMany({ skipDuplicates: true, data: leads.map((lead, index) => {
     const stage = lead.stage === "WON" && won ? won : lead.stage === "LOST" && lost ? lost : lead.stage === "QUALIFIED" ? qualified : first;
-    await db.deal.create({ data: { workspaceId, pipelineId: pipeline.id, stageId: stage.id, title: lead.interest || lead.customer.name, customerId: lead.customerId, leadId: lead.id, ownerMemberId: lead.assignedMemberId, source: "AI", status: stage.kind, closedAt: stage.kind === "OPEN" ? null : lead.createdAt, sort: index, createdAt: lead.createdAt } }).catch(() => undefined);
-  }
+    return { workspaceId, pipelineId: pipeline.id, stageId: stage.id, title: (lead.interest || lead.customer.name).slice(0, 200), customerId: lead.customerId, leadId: lead.id, ownerMemberId: lead.assignedMemberId, source: "AI", status: stage.kind, closedAt: stage.kind === "OPEN" ? null : lead.createdAt, sort: index, createdAt: lead.createdAt };
+  }) }).catch(error => console.error("CRM backfill failed", error instanceof Error ? error.message : error));
   return pipeline;
 }
 

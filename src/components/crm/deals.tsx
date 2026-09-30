@@ -3,6 +3,7 @@
 import { DragEvent, FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { AlertCircle, Columns3, List, Plus, Settings2, Trash2, Trophy, XCircle, RotateCcw } from "lucide-react";
 import { api, Avatar, CustomFieldsEditor, daysSince, Drawer, Empty, EntityPicker, MemberSelect, Modal, money, shortMoney, TagEditor, toInputDate, useCrm, when, type Stage } from "./core";
+import { CrmFailure, CrmSkeleton } from "./loader";
 import { NoteComposer, TaskComposer, TaskRow, Timeline, type Activity, type Task } from "./panels";
 
 export type DealCard = { id: string; title: string; amount: number; currency: string; stageId: string; pipelineId: string; status: string; tags: string[]; sort: number; stageChangedAt: string; createdAt: string; expectedCloseAt: string | null; source: string | null; customer: { id: string; name: string; phone: string | null } | null; company: { id: string; name: string } | null; owner: { id: string; name: string } | null; openTasks: number; overdueTasks: number };
@@ -11,7 +12,7 @@ export function DealsView({ onSettings }: { onSettings: () => void }) {
   const { c, locale, boot, notify, open, canWrite, refreshKey, bump } = useCrm();
   const [pipelineId, setPipelineId] = useState(boot.pipelines[0]?.id ?? "");
   const pipeline = boot.pipelines.find(p => p.id === pipelineId) ?? boot.pipelines[0];
-  const [deals, setDeals] = useState<DealCard[] | null>(null);
+  const [deals, setDeals] = useState<DealCard[] | null>(null); const [loadError, setLoadError] = useState<unknown>(null);
   const [view, setView] = useState<"board" | "list">(() => { try { return (localStorage.getItem("crm:dealsView") as "board" | "list") || "board"; } catch { return "board"; } });
   const [q, setQ] = useState(""); const [owner, setOwner] = useState(""); const [tag, setTag] = useState("");
   const [creating, setCreating] = useState<string | null>(null);
@@ -21,7 +22,7 @@ export function DealsView({ onSettings }: { onSettings: () => void }) {
   const load = useCallback(async () => {
     if (!pipeline) return;
     const params = new URLSearchParams({ pipelineId: pipeline.id, ...(q ? { q } : {}), ...(owner ? { owner } : {}), ...(tag ? { tag } : {}) });
-    try { setDeals(await api<DealCard[]>(`deals?${params}`)); } catch { notify(c.failed); }
+    try { setDeals(await api<DealCard[]>(`deals?${params}`)); setLoadError(null); } catch (error) { setLoadError(error); setDeals(prev => { if (prev) notify(c.failed); return prev; }); }
   }, [pipeline, q, owner, tag, notify, c.failed]);
   useEffect(() => { const t = window.setTimeout(load, q ? 250 : 0); return () => window.clearTimeout(t); }, [load, q, refreshKey]);
   useEffect(() => { try { localStorage.setItem("crm:dealsView", view); } catch { /* ignore */ } }, [view]);
@@ -58,7 +59,7 @@ export function DealsView({ onSettings }: { onSettings: () => void }) {
       {boot.role !== "VIEWER" && ["OWNER", "ADMIN"].includes(boot.role) && <button type="button" className="crmIcon" onClick={onSettings} aria-label={c.settings} title={c.settings}><Settings2 size={17}/></button>}
       {canWrite && <button type="button" className="crmBtn primary" onClick={() => setCreating(pipeline.stages[0]?.id ?? null)}><Plus size={15}/>{c.newDeal}</button>}
     </div>
-    {deals === null ? <p className="crmMuted pad">{c.loading}</p> : view === "board" ? <div className="crmBoard">
+    {deals === null ? (loadError ? <CrmFailure error={loadError} locale={locale} onRetry={load}/> : <CrmSkeleton locale={locale} variant="board" label={c.loading}/>) : view === "board" ? <div className="crmBoard">
       {pipeline.stages.map(stage => { const list = byStage.get(stage.id) ?? []; return <section key={stage.id} className={`crmColumn k-${stage.kind.toLowerCase()}${overStage === stage.id ? " over" : ""}`} onDragOver={e => { if (canWrite) { e.preventDefault(); setOverStage(stage.id); } }} onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setOverStage(null); }} onDrop={e => onDrop(e, stage)}>
         <header style={{ borderTopColor: stage.color }}><div><b>{stage.name}</b><span>{list.length}</span></div><small>{money(totals(list), list[0]?.currency ?? "RUB", locale)}{stage.kind === "OPEN" && stage.probability ? ` · ${stage.probability}%` : ""}</small></header>
         <div className="crmColumnBody">
@@ -125,7 +126,7 @@ export function DealDrawer({ id, onClose }: { id: string; onClose: () => void })
   const load = useCallback(async () => { try { setDeal(await api<DealFull>(`deals/${id}`)); } catch { notify(c.failed); onClose(); } }, [id, notify, c.failed, onClose]);
   useEffect(() => { void load(); }, [load]);
   const patch = async (body: Record<string, unknown>) => { try { setDeal(await api<DealFull>(`deals/${id}`, { method: "PATCH", body })); bump(); } catch { notify(c.failed); } };
-  if (!deal) return <Drawer title={c.loading} onClose={onClose}><p className="crmMuted">{c.loading}</p></Drawer>;
+  if (!deal) return <Drawer title={c.loading} onClose={onClose}><CrmSkeleton variant="list" label={c.loading}/></Drawer>;
   const won = deal.pipeline.stages.find(s => s.kind === "WON"), lost = deal.pipeline.stages.find(s => s.kind === "LOST"), firstOpen = deal.pipeline.stages.find(s => s.kind === "OPEN");
   const remove = async () => { if (!window.confirm(c.confirmDelete)) return; try { await api(`deals/${id}`, { method: "DELETE" }); bump(); onClose(); } catch { notify(c.failed); } };
   return <Drawer wide onClose={onClose}

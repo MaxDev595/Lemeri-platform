@@ -13,11 +13,12 @@ import { AppSelect } from "./app-select";
 import { AssistantCard } from "./assistant-card";
 import dynamic from "next/dynamic";
 import type { CrmView } from "./crm/crm-app";
+import { CrmSkeleton } from "./crm/loader";
 import { extractPdfTextInBrowser } from "@/lib/knowledge/pdf-client";
 
 type PageId="overview"|"employees"|"conversations"|"leads"|"appointments"|"knowledge"|"actions"|"rules"|"channels"|"integrations"|"analytics"|"team"|"billing"|"settings"|"notifications"|"testing"|CrmView;
 const crmViews=new Set<string>(["deals","contacts","companies","tasks","products","reports","crmSettings"]);
-const CrmApp=dynamic(()=>import("./crm/crm-app"),{ssr:false,loading:()=><p className="crmMuted pad">…</p>});
+const CrmApp=dynamic(()=>import("./crm/crm-app"),{ssr:false,loading:()=><CrmSkeleton tabs/>});
 const SiteInstall=dynamic(()=>import("./site-install/site-install"),{ssr:false,loading:()=><p className="crmMuted pad">…</p>});
 const pageLabels:Record<PageId,string>={overview:"Обзор",employees:"Сотрудники",conversations:"Диалоги",leads:"Лиды",appointments:"Записи",knowledge:"Знания",actions:"Действия",rules:"Правила",channels:"Каналы",integrations:"Интеграции",analytics:"Аналитика",team:"Команда",billing:"Тариф и использование",settings:"Настройки",notifications:"Уведомления",testing:"Тестирование",deals:"Сделки",contacts:"Контакты",companies:"Компании",tasks:"Задачи",products:"Товары и услуги",reports:"Отчёты",crmSettings:"Настройки CRM"};
 const pageByLabel=new Map(Object.entries(pageLabels).map(([id,label])=>[label,id as PageId]));
@@ -89,9 +90,9 @@ export function Platform({ workspaceId, workspaces, workspaceName, userName, emp
   useEffect(()=>{const closeDesktopDrawer=()=>{if(window.innerWidth>1024)setDrawer(false)};window.addEventListener("resize",closeDesktopDrawer);return()=>window.removeEventListener("resize",closeDesktopDrawer)},[]);
   useEffect(()=>{if(!drawer)return;const previous=document.body.style.overflow;document.body.style.overflow="hidden";return()=>{document.body.style.overflow=previous}},[drawer]);
   useEffect(()=>{const handler=(event:KeyboardEvent)=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="k"){event.preventDefault();setSearchOpen(value=>!value)}if(event.key==="Escape")setSearchOpen(false)};window.addEventListener("keydown",handler);return()=>window.removeEventListener("keydown",handler)},[]);
-  const searchable:Array<{id:PageId;Icon:typeof Settings;label:string}>=[...sections.flatMap(group=>group.items.map(([id,Icon,key])=>({id:id as PageId,Icon,label:t(key as MessageKey)}))),{id:"settings",Icon:Settings,label:t("nav.settings")},{id:"notifications",Icon:Bell,label:t("nav.notifications")}];
+  const searchable:Array<{id:PageId;Icon:typeof Settings;label:string}>=[...sections.flatMap(group=>group.items.map(([id,Icon,key])=>({id:id as PageId,Icon,label:t(key as MessageKey)}))),{id:"settings",Icon:Settings,label:t("nav.settings")},{id:"notifications",Icon:Bell,label:t("nav.notifications")},...(["contacts","companies","tasks","products","reports"] as const).map(id=>({id:id as PageId,Icon:KanbanSquare,label:`CRM · ${t(`nav.${id}` as MessageKey)}`}))];
   const searchResults=searchable.filter(item=>item.label.toLocaleLowerCase(locale).includes(searchQuery.trim().toLocaleLowerCase(locale)));
-  const pageTitle=page==="testing"?t("nav.testing"):searchable.find(item=>item.id===page)?.label??"";
+  const pageTitle=page==="testing"?t("nav.testing"):crmViews.has(page)?"CRM":searchable.find(item=>item.id===page)?.label??"";
   const myRole=workspaces.find(item=>item.id===workspaceId)?.role;
   const roleName=myRole==="OWNER"?t("team.owner"):myRole==="ADMIN"?t("team.admin"):myRole==="MANAGER"?t("team.manager"):myRole==="VIEWER"?t("team.viewer"):"";
   useLayoutEffect(()=>{const nav=navRef.current;const active=nav?.querySelector<HTMLElement>(".navItem.active");if(!nav||!active){setIndicator(value=>({...value,opacity:0}));return}setIndicator({opacity:1,transform:`translateY(${active.offsetTop}px)`,height:active.offsetHeight})},[page,collapsed,locale]);

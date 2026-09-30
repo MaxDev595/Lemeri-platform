@@ -3,6 +3,7 @@
 import { ChangeEvent, FormEvent, useCallback, useEffect, useState } from "react";
 import { Download, Merge, Plus, Trash2, Upload, ExternalLink } from "lucide-react";
 import { api, Avatar, CustomFieldsEditor, Drawer, Empty, EntityPicker, fill, MemberSelect, Modal, money, TagEditor, useCrm, when } from "./core";
+import { CrmFailure, CrmSkeleton } from "./loader";
 import { NoteComposer, TaskComposer, TaskRow, Timeline, type Activity, type Task } from "./panels";
 import { DealCreateModal } from "./deals";
 
@@ -30,13 +31,13 @@ const HEADER_MAP: Record<string, string> = { name: "name", "имя": "name", "ф
 
 export function ContactsView() {
   const { c, locale, boot, notify, open, canWrite, isAdmin, refreshKey, bump } = useCrm();
-  const [data, setData] = useState<{ total: number; page: number; pageSize: number; rows: ContactRow[] } | null>(null);
+  const [data, setData] = useState<{ total: number; page: number; pageSize: number; rows: ContactRow[] } | null>(null); const [loadError, setLoadError] = useState<unknown>(null);
   const [q, setQ] = useState(""); const [tag, setTag] = useState(""); const [owner, setOwner] = useState(""); const [channel, setChannel] = useState(""); const [hasDeals, setHasDeals] = useState(""); const [sort, setSort] = useState("recent"); const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [creating, setCreating] = useState(false); const [dupes, setDupes] = useState(false); const [bulkTag, setBulkTag] = useState("");
   const load = useCallback(async () => {
     const params = new URLSearchParams({ page: String(page), pageSize: "50", sort, ...(q ? { q } : {}), ...(tag ? { tag } : {}), ...(owner ? { owner } : {}), ...(channel ? { channel } : {}), ...(hasDeals ? { hasDeals } : {}) });
-    try { setData(await api(`contacts?${params}`)); } catch { notify(c.failed); }
+    try { setData(await api(`contacts?${params}`)); setLoadError(null); } catch (error) { setLoadError(error); setData(prev => { if (prev) notify(c.failed); return prev; }); }
   }, [page, sort, q, tag, owner, channel, hasDeals, notify, c.failed]);
   useEffect(() => { const t = window.setTimeout(load, q ? 250 : 0); return () => window.clearTimeout(t); }, [load, q, refreshKey]);
   useEffect(() => { setPage(1); }, [q, tag, owner, channel, hasDeals, sort]);
@@ -80,7 +81,7 @@ export function ContactsView() {
       <select defaultValue="" onChange={e => { if (e.target.value) void bulk("assign", e.target.value === "none" ? null : e.target.value); e.target.value = ""; }}><option value="">{c.assign}…</option><option value="none">{c.none}</option>{boot.members.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}</select>
       {isAdmin && <button type="button" className="crmBtn danger ghost" onClick={() => bulk("delete")}><Trash2 size={14}/>{c.bulkDelete}</button>}
     </div>}
-    {!data ? <p className="crmMuted pad">{c.loading}</p> : data.rows.length === 0 ? <Empty title={c.noContacts} copy={c.emptyCopy}/> : <>
+    {!data ? (loadError ? <CrmFailure error={loadError} locale={locale} onRetry={load}/> : <CrmSkeleton locale={locale} variant="table" label={c.loading}/>) : data.rows.length === 0 ? <Empty title={c.noContacts} copy={c.emptyCopy}/> : <>
       <div className="crmTableWrap"><table className="crmTable"><thead><tr>
         {canWrite && <th className="chk"><input type="checkbox" checked={allChecked} onChange={e => setSelected(e.target.checked ? new Set(data.rows.map(r => r.id)) : new Set())} aria-label={c.all}/></th>}
         <th>{c.name}</th><th>{c.phone} / {c.email}</th><th>{c.company}</th><th>{c.channels}</th><th className="num">{c.dealsCol}</th><th>{c.owner}</th><th>{c.lastActivity}</th>
@@ -145,7 +146,7 @@ export function ContactDrawer({ id, onClose }: { id: string; onClose: () => void
   const load = useCallback(async () => { try { setContact(await api<ContactFull>(`contacts/${id}`)); } catch { notify(c.failed); onClose(); } }, [id, notify, c.failed, onClose]);
   useEffect(() => { void load(); }, [load]);
   const patch = async (body: Record<string, unknown>) => { try { setContact(await api<ContactFull>(`contacts/${id}`, { method: "PATCH", body })); bump(); } catch { notify(c.failed); } };
-  if (!contact) return <Drawer title={c.loading} onClose={onClose}><p className="crmMuted">{c.loading}</p></Drawer>;
+  if (!contact) return <Drawer title={c.loading} onClose={onClose}><CrmSkeleton variant="list" label={c.loading}/></Drawer>;
   const remove = async () => { if (!window.confirm(c.confirmDelete)) return; try { await api(`contacts/${id}`, { method: "DELETE" }); bump(); onClose(); } catch { notify(c.failed); } };
   const field = (key: "name" | "phone" | "email" | "position", label: string, type = "text") => <label>{label}<input type={type} disabled={!canWrite} defaultValue={contact[key] ?? ""} key={`${key}-${contact[key]}`} onBlur={e => { const v = e.target.value.trim(); if (v !== (contact[key] ?? "") && (key !== "name" || v)) void patch({ [key]: v || null }); }}/></label>;
   const messageExtras = contact.conversations.map(v => ({ id: v.id, at: v.updatedAt, title: `${CHANNEL_LABEL[v.channelType] ?? v.channelType} · ${c.conversations}`, body: v.summary ?? v.messages[0]?.content?.slice(0, 280) ?? null, onClick: goConversations }));
@@ -184,13 +185,13 @@ export function ContactDrawer({ id, onClose }: { id: string; onClose: () => void
 type CompanyRow = { id: string; name: string; phone: string | null; email: string | null; website: string | null; industry: string | null; tags: string[]; owner: { id: string; name: string } | null; contacts: number; deals: number; wonAmount: number };
 export function CompaniesView() {
   const { c, locale, notify, open, canWrite, refreshKey, bump } = useCrm();
-  const [rows, setRows] = useState<CompanyRow[] | null>(null); const [q, setQ] = useState(""); const [creating, setCreating] = useState(false);
-  const load = useCallback(async () => { try { setRows(await api<CompanyRow[]>(`companies${q ? `?q=${encodeURIComponent(q)}` : ""}`)); } catch { notify(c.failed); } }, [q, notify, c.failed]);
+  const [rows, setRows] = useState<CompanyRow[] | null>(null); const [loadError, setLoadError] = useState<unknown>(null); const [q, setQ] = useState(""); const [creating, setCreating] = useState(false);
+  const load = useCallback(async () => { try { setRows(await api<CompanyRow[]>(`companies${q ? `?q=${encodeURIComponent(q)}` : ""}`)); setLoadError(null); } catch (error) { setLoadError(error); setRows(prev => { if (prev) notify(c.failed); return prev; }); } }, [q, notify, c.failed]);
   useEffect(() => { const t = window.setTimeout(load, q ? 250 : 0); return () => window.clearTimeout(t); }, [load, q, refreshKey]);
   const create = async (e: FormEvent<HTMLFormElement>) => { e.preventDefault(); const d = new FormData(e.currentTarget); try { const co = await api<{ id: string }>("companies", { method: "POST", body: { name: String(d.get("name")), phone: String(d.get("phone") ?? ""), email: String(d.get("email") ?? ""), website: String(d.get("website") ?? ""), industry: String(d.get("industry") ?? "") } }); setCreating(false); bump(); load(); open({ type: "company", id: co.id }); } catch { notify(c.failed); } };
   return <div className="crmPage">
     <div className="crmToolbar"><input className="crmSearch" value={q} onChange={e => setQ(e.target.value)} placeholder={c.search}/><div className="crmSpacer"/>{canWrite && <button type="button" className="crmBtn primary" onClick={() => setCreating(true)}><Plus size={15}/>{c.newCompany}</button>}</div>
-    {!rows ? <p className="crmMuted pad">{c.loading}</p> : !rows.length ? <Empty title={c.noCompanies}/> : <div className="crmTableWrap"><table className="crmTable"><thead><tr><th>{c.company}</th><th>{c.industry}</th><th>{c.phone} / {c.email}</th><th className="num">{c.contacts}</th><th className="num">{c.dealsCol}</th><th className="num">{c.won}</th><th>{c.owner}</th></tr></thead><tbody>
+    {!rows ? (loadError ? <CrmFailure error={loadError} locale={locale} onRetry={load}/> : <CrmSkeleton locale={locale} variant="table" label={c.loading}/>) : !rows.length ? <Empty title={c.noCompanies}/> : <div className="crmTableWrap"><table className="crmTable"><thead><tr><th>{c.company}</th><th>{c.industry}</th><th>{c.phone} / {c.email}</th><th className="num">{c.contacts}</th><th className="num">{c.dealsCol}</th><th className="num">{c.won}</th><th>{c.owner}</th></tr></thead><tbody>
       {rows.map(r => <tr key={r.id} onClick={() => open({ type: "company", id: r.id })}><td><div className="crmNameCell"><Avatar name={r.name}/><div><b>{r.name}</b>{r.website && <small>{r.website}</small>}</div></div></td><td>{r.industry ?? "—"}</td><td><div className="crmStack">{r.phone && <span>{r.phone}</span>}{r.email && <small>{r.email}</small>}</div></td><td className="num">{r.contacts}</td><td className="num">{r.deals}</td><td className="num">{r.wonAmount ? money(r.wonAmount, "RUB", locale) : "—"}</td><td>{r.owner?.name ?? "—"}</td></tr>)}
     </tbody></table></div>}
     {creating && <Modal title={c.newCompany} onClose={() => setCreating(false)}><form className="crmForm" onSubmit={create}>
@@ -209,7 +210,7 @@ export function CompanyDrawer({ id, onClose }: { id: string; onClose: () => void
   const load = useCallback(async () => { try { setCo(await api<CompanyFull>(`companies/${id}`)); } catch { notify(c.failed); onClose(); } }, [id, notify, c.failed, onClose]);
   useEffect(() => { void load(); }, [load]);
   const patch = async (body: Record<string, unknown>) => { try { setCo(await api<CompanyFull>(`companies/${id}`, { method: "PATCH", body })); bump(); } catch { notify(c.failed); } };
-  if (!co) return <Drawer title={c.loading} onClose={onClose}><p className="crmMuted">{c.loading}</p></Drawer>;
+  if (!co) return <Drawer title={c.loading} onClose={onClose}><CrmSkeleton variant="list" label={c.loading}/></Drawer>;
   const remove = async () => { if (!window.confirm(c.confirmDelete)) return; try { await api(`companies/${id}`, { method: "DELETE" }); bump(); onClose(); } catch { notify(c.failed); } };
   const field = (key: "name" | "phone" | "email" | "website" | "address" | "industry" | "taxId", label: string) => <label>{label}<input disabled={!canWrite} defaultValue={co[key] ?? ""} key={`${key}-${co[key]}`} onBlur={e => { const v = e.target.value.trim(); if (v !== (co[key] ?? "") && (key !== "name" || v)) void patch({ [key]: v || null }); }}/></label>;
   return <Drawer wide onClose={onClose} title={<span className="crmDrawerName"><Avatar name={co.name}/>{co.name}</span>} subtitle={co.industry ?? undefined}

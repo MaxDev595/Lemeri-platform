@@ -52,10 +52,23 @@ export const fill = (template: string, values: Record<string, string | number>) 
 
 export class ApiError extends Error { constructor(public status: number, public code: string) { super(code); } }
 export async function api<T = unknown>(path: string, init?: { method?: string; body?: unknown }): Promise<T> {
-  const response = await fetch(`/api/crm/${path}`, { method: init?.method ?? "GET", headers: init?.body === undefined ? undefined : { "content-type": "application/json" }, body: init?.body === undefined ? undefined : JSON.stringify(init.body) });
-  const body = await response.json().catch(() => ({}));
-  if (!response.ok) throw new ApiError(response.status, (body as { error?: string }).error ?? String(response.status));
-  return body as T;
+  const method = init?.method ?? "GET";
+  // Reads are retried on network errors and 5xx (e.g. a Worker hitting its CPU limit), so a
+  // single hiccup does not leave the screen empty. Writes are never repeated automatically.
+  const attempts = method === "GET" ? 3 : 1;
+  for (let attempt = 1; ; attempt++) {
+    let response: Response;
+    try {
+      response = await fetch(`/api/crm/${path}`, { method, headers: init?.body === undefined ? undefined : { "content-type": "application/json" }, body: init?.body === undefined ? undefined : JSON.stringify(init.body) });
+    } catch (error) {
+      if (attempt < attempts) { await new Promise(r => setTimeout(r, 400 * attempt * attempt)); continue; }
+      throw new ApiError(0, error instanceof Error ? error.message : "NETWORK_ERROR");
+    }
+    if (response.status >= 500 && attempt < attempts) { await new Promise(r => setTimeout(r, 400 * attempt * attempt)); continue; }
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new ApiError(response.status, (body as { error?: string }).error ?? String(response.status));
+    return body as T;
+  }
 }
 
 type CrmContextValue = { locale: Locale; c: Copy; boot: Bootstrap; reloadBoot: () => Promise<void>; notify: (text: string) => void; open: (target: Opened) => void; canWrite: boolean; isAdmin: boolean; refreshKey: number; bump: () => void; goConversations: () => void };

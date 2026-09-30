@@ -1,0 +1,11 @@
+{
+  "name": "lemiri-local-db",
+  "private": true,
+  "type": "module",
+  "description": "Local development Postgres (PGlite). Kept out of the root package so it never reaches the Worker bundle.",
+  "dependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "@electric-sql/pglite-pgvector": "0.0.9",
+    "@electric-sql/pglite-socket": "0.2.11"
+  }
+}

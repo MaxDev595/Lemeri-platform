@@ -3,14 +3,15 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 import { api, Empty, Modal, money, shortMoney, useCrm, type FieldDef, type Pipeline, type Product } from "./core";
+import { CrmFailure, CrmSkeleton } from "./loader";
 import { TaskComposer, TaskRow, taskBucket, type Task } from "./panels";
 
 // ------------------------------------------------------------------ tasks
 export function TasksView() {
-  const { c, notify, refreshKey, boot } = useCrm();
+  const { c, locale, notify, refreshKey, boot } = useCrm();
   const [scope, setScope] = useState<"mine" | "all">("mine"); const [showDone, setShowDone] = useState(false);
-  const [tasks, setTasks] = useState<Task[] | null>(null);
-  const load = useCallback(async () => { try { setTasks(await api<Task[]>(`tasks?status=${showDone ? "all" : "open"}${scope === "mine" ? "&scope=mine" : ""}`)); } catch { notify(c.failed); } }, [scope, showDone, notify, c.failed]);
+  const [tasks, setTasks] = useState<Task[] | null>(null); const [loadError, setLoadError] = useState<unknown>(null);
+  const load = useCallback(async () => { try { setTasks(await api<Task[]>(`tasks?status=${showDone ? "all" : "open"}${scope === "mine" ? "&scope=mine" : ""}`)); setLoadError(null); } catch (error) { setLoadError(error); setTasks(prev => { if (prev) notify(c.failed); return prev; }); } }, [scope, showDone, notify, c.failed]);
   useEffect(() => { void load(); }, [load, refreshKey]);
   const groups: Array<[string, string]> = [["overdue", c.overdue], ["today", c.today], ["tomorrow", c.tomorrow], ["later", c.later], ["noDue", c.noDue], ["done", c.done]];
   return <div className="crmPage">
@@ -19,15 +20,15 @@ export function TasksView() {
       <label className="crmCheckLabel"><input type="checkbox" checked={showDone} onChange={e => setShowDone(e.target.checked)}/>{c.showDone}</label>
     </div>
     {boot.role !== "VIEWER" && <div className="crmCardBox"><TaskComposer target={{}} onDone={load}/></div>}
-    {!tasks ? <p className="crmMuted pad">{c.loading}</p> : !tasks.length ? <Empty title={c.noTasks}/> : <div className="crmTaskGroups">{groups.map(([key, label]) => { const list = tasks.filter(t => taskBucket(t) === key); if (!list.length) return null; return <section key={key} className={`crmTaskGroup g-${key}`}><h4>{label}<span>{list.length}</span></h4><ul className="crmTaskList">{list.map(t => <TaskRow key={t.id} task={t} onChanged={load} showLinks/>)}</ul></section>; })}</div>}
+    {!tasks ? (loadError ? <CrmFailure error={loadError} locale={locale} onRetry={load}/> : <CrmSkeleton locale={locale} variant="list" label={c.loading}/>) : !tasks.length ? <Empty title={c.noTasks}/> : <div className="crmTaskGroups">{groups.map(([key, label]) => { const list = tasks.filter(t => taskBucket(t) === key); if (!list.length) return null; return <section key={key} className={`crmTaskGroup g-${key}`}><h4>{label}<span>{list.length}</span></h4><ul className="crmTaskList">{list.map(t => <TaskRow key={t.id} task={t} onChanged={load} showLinks/>)}</ul></section>; })}</div>}
   </div>;
 }
 
 // ------------------------------------------------------------------ products
 export function ProductsView() {
   const { c, locale, notify, canWrite, refreshKey, reloadBoot } = useCrm();
-  const [rows, setRows] = useState<Product[] | null>(null); const [editing, setEditing] = useState<Product | "new" | null>(null);
-  const load = useCallback(async () => { try { setRows(await api<Product[]>("products")); } catch { notify(c.failed); } }, [notify, c.failed]);
+  const [rows, setRows] = useState<Product[] | null>(null); const [loadError, setLoadError] = useState<unknown>(null); const [editing, setEditing] = useState<Product | "new" | null>(null);
+  const load = useCallback(async () => { try { setRows(await api<Product[]>("products")); setLoadError(null); } catch (error) { setLoadError(error); setRows(prev => { if (prev) notify(c.failed); return prev; }); } }, [notify, c.failed]);
   useEffect(() => { void load(); }, [load, refreshKey]);
   const save = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault(); const d = new FormData(e.currentTarget);
@@ -38,7 +39,7 @@ export function ProductsView() {
   const item = editing && editing !== "new" ? editing : null;
   return <div className="crmPage">
     <div className="crmToolbar"><div className="crmSpacer"/>{canWrite && <button type="button" className="crmBtn primary" onClick={() => setEditing("new")}><Plus size={15}/>{c.newProduct}</button>}</div>
-    {!rows ? <p className="crmMuted pad">{c.loading}</p> : !rows.length ? <Empty title={c.noProducts}/> : <div className="crmTableWrap"><table className="crmTable"><thead><tr><th>{c.title}</th><th>{c.category}</th><th>{c.sku}</th><th className="num">{c.duration}</th><th className="num">{c.price}</th><th>{c.status}</th></tr></thead><tbody>
+    {!rows ? (loadError ? <CrmFailure error={loadError} locale={locale} onRetry={load}/> : <CrmSkeleton locale={locale} variant="table" label={c.loading}/>) : !rows.length ? <Empty title={c.noProducts}/> : <div className="crmTableWrap"><table className="crmTable"><thead><tr><th>{c.title}</th><th>{c.category}</th><th>{c.sku}</th><th className="num">{c.duration}</th><th className="num">{c.price}</th><th>{c.status}</th></tr></thead><tbody>
       {rows.map(p => <tr key={p.id} onClick={() => canWrite && setEditing(p)} className={p.active ? "" : "muted"}><td><b>{p.name}</b>{p.description && <small className="crmClamp">{p.description}</small>}</td><td>{p.category ?? "—"}</td><td>{p.sku ?? "—"}</td><td className="num">{p.durationMin ?? "—"}</td><td className="num">{money(p.price, p.currency, locale)}</td><td>{p.active ? c.active : c.inactive}</td></tr>)}
     </tbody></table></div>}
     {editing && <Modal title={item ? item.name : c.newProduct} onClose={() => setEditing(null)}><form className="crmForm" onSubmit={save}>
@@ -58,9 +59,10 @@ type Report = { pipeline: { id: string; name: string }; days: number; funnel: Ar
 export function ReportsView() {
   const { c, locale, boot, notify, refreshKey } = useCrm();
   const [pipelineId, setPipelineId] = useState(boot.pipelines[0]?.id ?? ""); const [days, setDays] = useState(90);
-  const [report, setReport] = useState<Report | null>(null);
-  useEffect(() => { api<Report>(`reports?days=${days}${pipelineId ? `&pipelineId=${pipelineId}` : ""}`).then(setReport).catch(() => notify(c.failed)); }, [days, pipelineId, notify, c.failed, refreshKey]);
-  if (!report) return <p className="crmMuted pad">{c.loading}</p>;
+  const [report, setReport] = useState<Report | null>(null); const [loadError, setLoadError] = useState<unknown>(null);
+  const load = useCallback(() => api<Report>(`reports?days=${days}${pipelineId ? `&pipelineId=${pipelineId}` : ""}`).then(r => { setReport(r); setLoadError(null); }).catch(error => { setLoadError(error); setReport(prev => { if (prev) notify(c.failed); return prev; }); }), [days, pipelineId, notify, c.failed]);
+  useEffect(() => { void load(); }, [load, refreshKey]);
+  if (!report) return loadError ? <CrmFailure error={loadError} locale={locale} onRetry={load}/> : <CrmSkeleton locale={locale} variant="report" label={c.loading}/>;
   const t = report.totals;
   const maxFunnel = Math.max(1, ...report.funnel.map(f => f.count));
   const maxMonth = Math.max(1, ...report.revenueByMonth.map(m => m.won));

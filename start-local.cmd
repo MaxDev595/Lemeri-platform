@@ -13,6 +13,11 @@ rem Если в .env нет настоящей базы — поднимаем �
 findstr /r /c:"^DATABASE_URL=postgresql://USER" .env >nul 2>&1
 if %errorlevel%==0 (
   echo [i] В .env нет базы — запускаю локальную базу в отдельном окне...
+  if not exist scripts\local-db-runtime\node_modules (
+    pushd scripts\local-db-runtime
+    call npm install --no-audit --no-fund
+    popd
+  )
   start "Lemiri DB (не закрывать)" cmd /k node scripts\local-db.mjs
   set DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5433/postgres
   timeout /t 8 /nobreak >nul
