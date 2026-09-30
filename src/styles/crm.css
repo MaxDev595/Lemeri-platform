@@ -265,3 +265,5 @@ button.crmChip { cursor: pointer; font-size: var(--fs-12); padding: 5px 10px; }
 .crmItems .crmTable td:first-child input { width: 100%; }
 .crmItems .crmTable.compact td.num input { width: 78px; }
 .crmTaskForm.compact .crmBtn { grid-column: 1 / -1; }
+.crmSections { margin: 0 0 16px; overflow-x: auto; scrollbar-width: none; }
+.crmSections button { flex: none; white-space: nowrap; }

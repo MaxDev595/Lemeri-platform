@@ -2,7 +2,7 @@
 
 import { ChangeEvent, CSSProperties, FormEvent, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Activity, KanbanSquare, Contact, Building2, ListTodo, Package, PieChart, BarChart3, Bell, BookOpen, Bot, CalendarDays, ArrowUpRight, Check, ChevronDown, ChevronRight, CircleHelp, CornerDownLeft, CreditCard, FileText, Image as ImageIcon, Languages, LayoutDashboard, LogOut, Menu, MessageCircle, PanelLeftClose, PanelLeftOpen, Pause, Play, Plug, Plus, Search, Send, Settings, Sparkles, TestTube2, Upload, UserRoundPlus, WandSparkles, X, Zap } from "lucide-react";
+import { Activity, KanbanSquare, BarChart3, Bell, BookOpen, Bot, CalendarDays, ArrowUpRight, Check, ChevronDown, ChevronRight, CircleHelp, CornerDownLeft, CreditCard, FileText, Image as ImageIcon, Languages, LayoutDashboard, LogOut, Menu, MessageCircle, PanelLeftClose, PanelLeftOpen, Pause, Play, Plug, Plus, Search, Send, Settings, Sparkles, TestTube2, Upload, UserRoundPlus, WandSparkles, X, Zap } from "lucide-react";
 import { LemiriGlyph, Logo } from "./logo";
 import { CountUp } from "./motion";
 import { ChannelGlyph, EmptyArt, Ring } from "./illustrations";
@@ -24,8 +24,7 @@ const pageByLabel=new Map(Object.entries(pageLabels).map(([id,label])=>[label,id
 const sections=[
   {title:"group.main",items:[["overview",LayoutDashboard,"nav.overview"]]},
   {title:"group.ai",items:[["employees",Bot,"nav.employees"]]},
-  {title:"group.work",items:[["conversations",MessageCircle,"nav.conversations"],["leads",UserRoundPlus,"nav.leads"],["appointments",CalendarDays,"nav.appointments"]]},
-  {title:"group.crm",items:[["deals",KanbanSquare,"nav.deals"],["contacts",Contact,"nav.contacts"],["companies",Building2,"nav.companies"],["tasks",ListTodo,"nav.tasks"],["products",Package,"nav.products"],["reports",PieChart,"nav.reports"]]},
+  {title:"group.work",items:[["conversations",MessageCircle,"nav.conversations"],["leads",UserRoundPlus,"nav.leads"],["appointments",CalendarDays,"nav.appointments"],["deals",KanbanSquare,"nav.crm"]]},
   {title:"group.setup",items:[["knowledge",BookOpen,"nav.knowledge"],["actions",Zap,"nav.actions"],["rules",CircleHelp,"nav.rules"]]},
   {title:"group.connections",items:[["channels",Plug,"nav.channels"],["integrations",WandSparkles,"nav.integrations"]]},
   {title:"group.results",items:[["analytics",BarChart3,"nav.analytics"]]},
@@ -104,7 +103,7 @@ export function Platform({ workspaceId, workspaces, workspaceName, userName, emp
     <aside className={drawer ? "sidebar open" : "sidebar"}>
       <div className="sideTop"><Logo compact={collapsed}/><button className="iconButton collapseButton" onClick={()=>setCollapsed(value=>!value)} aria-label={collapsed?"Развернуть боковую панель":"Свернуть боковую панель"}>{collapsed?<PanelLeftOpen size={18}/>:<PanelLeftClose size={18}/>}</button><button type="button" className="iconButton mobileOnly" onClick={() => setDrawer(false)} aria-label={locale==="ru"?"Закрыть меню":"Close menu"}><X size={18}/></button></div>
       <div className="workspace"><span className="workspaceAvatar">{data.settings.logoUrl?<img src={data.settings.logoUrl} alt=""/>:workspaceName.slice(0,1).toUpperCase()}</span><AppSelect ariaLabel={locale==="en"?"Switch workspace":"Переключить пространство"} value={workspaceId} options={workspaces.map(item=>({value:item.id,label:item.name}))} onChange={switchWorkspace}/></div>
-      <nav ref={navRef}><span className="navIndicator" style={indicator} aria-hidden="true"/>{sections.map(group=><div className="navGroup" key={group.title}><small>{t(group.title as MessageKey)}</small>{group.items.map(([id,Icon,key])=><button key={id} data-tip={t(key as MessageKey)} aria-current={page===id?"page":undefined} className={page===id?"navItem active":"navItem"} onClick={()=>select(id)}><Icon size={18}/><span>{t(key as MessageKey)}</span>{id==="conversations"&&data.conversations.some(c=>c.status!=="CLOSED")&&<em>{data.conversations.filter(c=>c.status!=="CLOSED").length}</em>}</button>)}</div>)}</nav>
+      <nav ref={navRef}><span className="navIndicator" style={indicator} aria-hidden="true"/>{sections.map(group=><div className="navGroup" key={group.title}><small>{t(group.title as MessageKey)}</small>{group.items.map(([id,Icon,key])=><button key={id} data-tip={t(key as MessageKey)} aria-current={page===id||(id==="deals"&&crmViews.has(page))?"page":undefined} className={page===id||(id==="deals"&&crmViews.has(page))?"navItem active":"navItem"} onClick={()=>select(id)}><Icon size={18}/><span>{t(key as MessageKey)}</span>{id==="conversations"&&data.conversations.some(c=>c.status!=="CLOSED")&&<em>{data.conversations.filter(c=>c.status!=="CLOSED").length}</em>}</button>)}</div>)}</nav>
       <div className="sideBottom"><button data-tip={t("nav.settings")} className={page==="settings"?"navItem active":"navItem"} onClick={()=>select("settings")}><Settings size={18}/><span>{t("nav.settings")}</span></button><div className="profile"><span className="profileAvatar">{userName.slice(0,1).toUpperCase()}</span><span><b>{userName}</b>{roleName&&<small>{roleName}</small>}</span><form action={logout}><button className="iconButton logoutButton" type="submit" aria-label={locale==="ru"?"Выйти":"Sign out"} title={locale==="ru"?"Выйти":"Sign out"}><LogOut size={16}/></button></form></div></div>
     </aside>
     {drawer && <button className="scrim" onClick={() => setDrawer(false)} aria-label={t("common.closeMenu")}/>} 
