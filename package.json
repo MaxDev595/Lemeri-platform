@@ -7,7 +7,7 @@
     "dev": "next dev",
     "start": "next start",
     "build": "next build",
-    "build:cloudflare": "node scripts/copy-pdfjs.mjs && opennextjs-cloudflare build",
+    "build:cloudflare": "node scripts/copy-pdfjs.mjs && opennextjs-cloudflare build && node scripts/slim-worker.mjs",
     "deploy:cloudflare": "opennextjs-cloudflare deploy",
     "preview:cloudflare": "opennextjs-cloudflare preview",
     "postinstall": "prisma generate && node scripts/copy-pdfjs.mjs",

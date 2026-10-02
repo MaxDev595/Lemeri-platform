@@ -1,6 +1,7 @@
 import { SECTION_IDS, SECTION_TITLES, type SectionId } from "./guide";
 import { TOOLS, runTool, type ActionProposal, type AssistantContext } from "./tools";
 import { planWithoutModel } from "./planner";
+import { modelEndpoint } from "@/lib/ai/endpoint";
 
 export type ChatTurn = { role: "user" | "assistant"; content: string };
 export type AssistantReply = { reply: string; sections: SectionId[]; navigate?: SectionId; proposals: ActionProposal[]; mode: "model" | "rules" };
@@ -15,12 +16,6 @@ type Completion = { choices?: Array<{ message?: { content?: string | null; tool_
 const MAX_ROUNDS = 6;
 const MAX_TOOL_OUTPUT = 7000;
 
-function modelEndpoint() {
-  const provider = process.env.AI_PROVIDER ?? "mock";
-  if (provider === "groq" && process.env.GROQ_API_KEY) return { url: `${process.env.GROQ_API_BASE ?? "https://api.groq.com"}/openai/v1/chat/completions`, key: process.env.GROQ_API_KEY, model: process.env.GROQ_ASSISTANT_MODEL || process.env.GROQ_CHAT_MODEL || "openai/gpt-oss-120b", extra: { reasoning_effort: "low" } };
-  if (provider === "openai" && process.env.OPENAI_API_KEY) return { url: `${process.env.OPENAI_API_BASE ?? "https://api.openai.com"}/v1/chat/completions`, key: process.env.OPENAI_API_KEY, model: process.env.OPENAI_ASSISTANT_MODEL || process.env.OPENAI_RESPONSE_MODEL || "gpt-4.1-mini", extra: {} };
-  return null;
-}
 
 function systemPrompt(ctx: AssistantContext, page: SectionId | undefined) {
   const sections = SECTION_IDS.map(id => `${id} = ${SECTION_TITLES[id][ctx.locale]}`).join(", ");

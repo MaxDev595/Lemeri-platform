@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { crmSchemaReady, db } from "@/lib/db";
-import { schemaStatus } from "@/lib/crm/schema";
+import { schemaStatus } from "@/lib/crm/schema-status";
+import { handleTeam } from "@/lib/team/router";
 import { getApiWorkspace } from "@/lib/auth/api";
 import { canWorkspace } from "@/lib/auth/permissions";
 import { validateRequestOrigin } from "@/lib/security/request";
@@ -535,10 +536,13 @@ const routes: Array<[string, RegExp, Handler]> = [
 ];
 
 async function handle(request: Request, { params }: { params: Promise<{ path: string[] }> }) {
+  const segments = (await params).path;
+  // The team hub lives in its own module but rides on this route (one bundle instead of two).
+  if (segments[0] === "team") return handleTeam(request, segments.slice(1));
   const auth = await getApiWorkspace();
   if (!auth) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
   if (request.method !== "GET" && !validateRequestOrigin(request)) return NextResponse.json({ error: "INVALID_ORIGIN" }, { status: 403 });
-  const path = (await params).path.join("/");
+  const path = segments.join("/");
   const route = routes.find(([method, pattern]) => method === request.method && pattern.test(path));
   if (!route) return NextResponse.json({ error: "NOT_FOUND" }, { status: 404 });
   const match = path.match(route[1])!;

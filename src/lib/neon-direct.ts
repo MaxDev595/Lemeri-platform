@@ -26,6 +26,13 @@ export async function createRegisteredUser(input:{name:string;email:string;passw
   return{id:String((rows[0] as {id:string}).id)};
 }
 
+export async function createEmployeeUser(input:{name:string;email:string;password:string}){
+  await ensurePgcrypto();
+  const userId=crypto.randomUUID();
+  const rows=await client().query(`INSERT INTO "User" ("id","email","name","passwordHash") VALUES ($1,$2,$3,crypt(encode(digest($4,'sha256'),'hex'),gen_salt('bf',10))) RETURNING "id"`,[userId,input.email,input.name,input.password]);
+  return{id:String((rows[0] as {id:string}).id)};
+}
+
 export async function createDirectWorkspace(input:{userId:string;name:string;slug:string;locale:"ru"|"en"}){
   const workspaceId=crypto.randomUUID();
   await client().query(`WITH created_workspace AS (INSERT INTO "Workspace" ("id","name","slug") VALUES ($1,$2,$3) RETURNING "id"), created_settings AS (INSERT INTO "WorkspaceSettings" ("id","workspaceId","locale","updatedAt") SELECT $4,"id",$5,CURRENT_TIMESTAMP FROM created_workspace) INSERT INTO "WorkspaceMember" ("id","workspaceId","userId","role") SELECT $6,"id",$7,'OWNER'::"MemberRole" FROM created_workspace`,[workspaceId,input.name,input.slug,crypto.randomUUID(),input.locale,crypto.randomUUID(),input.userId]);

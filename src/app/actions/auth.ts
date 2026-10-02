@@ -5,14 +5,15 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { createSession, destroySession } from "@/lib/auth/session";
 import { hashPassword, verifyPassword } from "@/lib/auth/password";
-import { loginSchema, registerSchema } from "@/lib/validation/auth";
+import { employeeRegisterSchema, loginSchema, registerSchema } from "@/lib/validation/auth";
 import { guardServerAction } from "@/lib/security/request";
 import { createPasswordResetToken, passwordResetTokenHash } from "@/lib/auth/password-reset";
 import { ResendEmailProvider } from "@/lib/email/provider";
 import { z } from "zod";
 import { createTranslator, type Locale } from "@/lib/i18n";
 import { safeReturnTo } from "@/lib/locale-utils";
-import { createDirectPasswordReset, createRegisteredUser, resetDirectPassword, verifyDirectUserPassword } from "@/lib/neon-direct";
+import { createDirectPasswordReset, createEmployeeUser, createRegisteredUser, resetDirectPassword, verifyDirectUserPassword } from "@/lib/neon-direct";
+import { crmSchemaReady } from "@/lib/db";
 import { isUniqueConstraintError } from "@/lib/db-errors";
 
 export type AuthState = { error?: string; message?: string };
@@ -40,6 +41,7 @@ function registrationFailure(locale: Locale, error: unknown, phase: "rate-limit"
 
 export async function register(_: AuthState, formData: FormData): Promise<AuthState> {
   const locale=formLocale(formData);const t=createTranslator(locale);
+  if(formData.get("accountType")==="EMPLOYEE")return registerEmployee(formData,locale);
   const parsed = registerSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: t("auth.checkData") };
   const { name, email, password, company } = parsed.data;
@@ -63,6 +65,29 @@ export async function register(_: AuthState, formData: FormData): Promise<AuthSt
     if (isUniqueConstraintError(error)) return { error: t("auth.accountExists") };
     console.error("Registration failed",error);
     return { error: registrationFailure(locale, error, phase) };
+  }
+  redirect("/onboarding");
+}
+
+// Employee account: no company yet — they pick a position and join by code on /join.
+async function registerEmployee(formData:FormData,locale:Locale):Promise<AuthState>{
+  const t=createTranslator(locale);
+  const parsed=employeeRegisterSchema.safeParse(Object.fromEntries(formData));
+  if(!parsed.success)return{error:t("auth.checkData")};
+  const {name,email,password}=parsed.data;
+  let phase:"rate-limit"|"password"|"create"|"session"="rate-limit";
+  try{
+    if(!(await guardServerAction("auth:register",5,15*60)).allowed)return{error:t("auth.rateLimited")};
+    await crmSchemaReady();
+    phase="create";
+    const user=process.env.NODE_ENV==="production"?await createEmployeeUser({name,email,password}):await db.user.create({data:{name,email,passwordHash:await hashPassword(password)}});
+    await db.$executeRawUnsafe(`UPDATE "User" SET "accountType" = 'EMPLOYEE' WHERE "id" = $1`,user.id);
+    phase="session";
+    await createSession(user.id);
+  }catch(error){
+    if(isUniqueConstraintError(error))return{error:t("auth.accountExists")};
+    console.error("Employee registration failed",error);
+    return{error:registrationFailure(locale,error,phase)};
   }
   redirect("/onboarding");
 }

@@ -7,4 +7,7 @@ export const registerSchema = z.object({
   company: z.string().trim().min(2, "Укажите компанию").max(120),
 });
 
+// Employees join an existing company later, so they don't name one.
+export const employeeRegisterSchema = registerSchema.omit({ company: true });
+
 export const loginSchema = registerSchema.pick({ email: true, password: true });

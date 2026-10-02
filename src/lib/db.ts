@@ -1,7 +1,8 @@
 import "@/lib/neon-local";
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaNeon, PrismaNeonHTTP } from "@prisma/adapter-neon";
-import { applyCrmSchema, schemaStatus } from "@/lib/crm/schema";
+import { applyCrmSchema } from "@/lib/crm/schema";
+import { schemaStatus } from "@/lib/crm/schema-status";
 
 // Turbopack's WASM loader uses compileStreaming, while workerd currently only
 // exposes compile. Install the equivalent fallback before Prisma compiles its

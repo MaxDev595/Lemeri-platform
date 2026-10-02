@@ -1,9 +1,12 @@
 import { CRM_SCHEMA_STATEMENTS } from "./schema-sql";
+import { TEAM_SCHEMA_STATEMENTS } from "@/lib/team/schema-sql";
+import { schemaStatus, type SchemaFailure } from "./schema-status";
+export { schemaStatus };
 
 // Bumped from crm-1: databases that already had tables named like the CRM's
 // (from an earlier experiment) kept their old shape, because CREATE TABLE IF NOT
 // EXISTS skipped them. The reconcile pass below brings such tables in line.
-export const CRM_SCHEMA_VERSION = "crm-2";
+export const CRM_SCHEMA_VERSION = "crm-3";
 
 /**
  * For every CRM table: add any missing column (nullable when it has no default,
@@ -37,7 +40,7 @@ function reconcileStatements() {
 function allStatements() {
   const creates = CRM_SCHEMA_STATEMENTS.filter(s => /^(ALTER TABLE "\w+" ADD COLUMN|CREATE TABLE)/.test(s));
   const rest = CRM_SCHEMA_STATEMENTS.filter(s => !creates.includes(s));
-  return [...creates, ...reconcileStatements(), ...rest];
+  return [...creates, ...reconcileStatements(), ...rest, ...TEAM_SCHEMA_STATEMENTS];
 }
 
 type RawExecutor = {
@@ -52,9 +55,6 @@ function errorCode(error: unknown) {
   return value?.code ?? value?.meta?.code ?? value?.cause?.code ?? "";
 }
 
-export type SchemaFailure = { statement: string; code: string; message: string };
-/** Failures of the last attempt in this isolate — surfaced by /api/crm/health. */
-export const schemaStatus: { applied: boolean; checkedAt: number; failures: SchemaFailure[] } = { applied: false, checkedAt: 0, failures: [] };
 
 /**
  * Applies the additive CRM schema once per database. Every statement is

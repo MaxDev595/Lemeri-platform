@@ -204,7 +204,7 @@ export function AssistantCard({ locale, workspaceId, page, onNavigate, onLocaleC
         <textarea ref={inputRef} name="message" rows={1} maxLength={4000} placeholder={c.placeholder} aria-label={c.placeholder} onKeyDown={onInputKey} onInput={e => autosize(e.currentTarget)}/>
         <button type="submit" className="primary" disabled={busy} aria-label={c.send}><ArrowUp size={17}/></button>
       </form>
-      <footer className="asHint">{c.hint}</footer>
+      <footer className="asHint">{c.hint} · {locale === "en" ? "AI can make mistakes" : "ИИ может ошибаться"}</footer>
     </section>
   </div>;
 }
