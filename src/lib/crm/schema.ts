@@ -66,20 +66,42 @@ function errorCode(error: unknown) {
  * tables and columns the CRM needs are still created, the failure is recorded,
  * and the marker is written only once everything succeeded.
  */
+const APPLY_FUNCTION = `CREATE OR REPLACE FUNCTION "_lemiri_apply_schema"(statements text)
+RETURNS TABLE ("idx" integer, "code" text, "message" text) LANGUAGE plpgsql AS $fn$
+DECLARE s text; i integer := 0;
+BEGIN
+  FOR s IN SELECT value FROM jsonb_array_elements_text(statements::jsonb) LOOP
+    BEGIN
+      EXECUTE s;
+    EXCEPTION WHEN others THEN
+      idx := i; code := SQLSTATE; message := SQLERRM; RETURN NEXT;
+    END;
+    i := i + 1;
+  END LOOP;
+END
+$fn$`;
+
 export async function applyCrmSchema(db: RawExecutor) {
   schemaStatus.checkedAt = Date.now();
   await db.$executeRawUnsafe(`CREATE TABLE IF NOT EXISTS "_lemiri_schema" ("version" TEXT NOT NULL PRIMARY KEY, "appliedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP)`).catch(error => { if (!ALREADY_EXISTS.has(errorCode(error))) throw error; });
   const done = await db.$queryRawUnsafe<Array<{ version: string }>>(`SELECT "version" FROM "_lemiri_schema" WHERE "version" = $1`, CRM_SCHEMA_VERSION);
   if (done.length) { schemaStatus.applied = true; schemaStatus.failures = []; return false; }
+  // One round trip for the whole schema. Cloudflare Workers allow only 50
+  // subrequests per invocation on the free plan and every Neon HTTP query is one,
+  // so running ~160 statements one by one failed with "Too many subrequests".
+  // A server-side function runs each statement in its own sub-transaction and
+  // returns only the failures.
+  const statements = allStatements();
+  // Two isolates may race on CREATE OR REPLACE; the call below still works then.
+  await db.$executeRawUnsafe(APPLY_FUNCTION).catch(error => console.warn("schema function", errorCode(error)));
+  const rows = await db.$queryRawUnsafe<Array<{ idx: number; code: string; message: string }>>(`SELECT "idx", "code", "message" FROM "_lemiri_apply_schema"($1::text)`, JSON.stringify(statements));
   const failures: SchemaFailure[] = [];
-  for (const statement of allStatements()) {
-    try { await db.$executeRawUnsafe(statement); }
-    catch (error) {
-      const code = errorCode(error), message = error instanceof Error ? error.message : String(error);
-      if (ALREADY_EXISTS.has(code) || /already exists/i.test(message)) continue;
-      failures.push({ statement: statement.replace(/\s+/g, " ").slice(0, 160), code, message: message.slice(0, 400) });
-      console.error("CRM schema statement failed", code, message.slice(0, 300));
-    }
+  for (const row of rows) {
+    const statement = statements[Number(row.idx)] ?? "";
+    const code = row.code ?? "", message = row.message ?? "";
+    if (ALREADY_EXISTS.has(code) || /already exists/i.test(message)) continue;
+    failures.push({ statement: statement.replace(/\s+/g, " ").slice(0, 160), code, message: message.slice(0, 400) });
+    console.error("CRM schema statement failed", code, message.slice(0, 300));
   }
   schemaStatus.failures = failures;
   // Foreign keys and indexes are nice-to-have (old rows may violate them); tables and
