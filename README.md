@@ -1,6 +1,10 @@
-# Lemiri AI Platform
+# Lemiri AI — AI seller for websites
 
-Production-oriented multi-tenant SaaS for AI employees: authenticated workspaces, RAG knowledge sources, website/Telegram/WhatsApp/email conversations, human handoff, leads, appointments, automations, CRM webhooks, analytics, team roles and Stripe billing.
+One product: an AI sales assistant shown as a chat card on the customer's website. It consults visitors, recommends products and services from the business knowledge base, and collects requests (with consent). Plans: Trial ($0, 14 days), Starter ($19), Custom ($29, advanced card editor). AI can make mistakes.
+
+- Product context and rules: `docs/CLAUDE_CONTEXT.md`
+- Deferred modules (CRM, team, messengers, integrations, automations, booking…) kept in code behind `LEMIRI_FEATURES` flags: `docs/FUTURE_FEATURES.md`
+- Roadmap: `docs/PRODUCT_ROADMAP.md`
 
 ## Local development
 

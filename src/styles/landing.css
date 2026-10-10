@@ -1359,3 +1359,61 @@ html.lenis {
     align-items: flex-start;
   }
 }
+
+/* ======================================================================
+   AI seller landing (single product): demo card, problem, features,
+   benefits, three plans and the coming-soon block.
+   ====================================================================== */
+.lnHero h1 { max-width: 15ch; }
+.lnDemo { position: relative; justify-self: center; width: min(560px, 100%); }
+.lnDemoBrowser { position: relative; height: 520px; overflow: hidden; border: 1px solid var(--line); border-radius: 22px; background: var(--surface-2); box-shadow: var(--e-3); }
+.lnDemoBar { display: flex; align-items: center; gap: 6px; padding: 12px 14px; border-bottom: 1px solid var(--line-soft); background: var(--surface); }
+.lnDemoBar i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+.lnDemoBar span { margin-left: 10px; padding: 3px 12px; border-radius: 999px; background: var(--surface-2); color: var(--text-3); font-size: 12px; }
+.lnDemoPage { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 22px; opacity: .7; }
+.lnDemoPage b { height: 120px; border-radius: 14px; background: color-mix(in srgb, var(--text-3) 14%, transparent); }
+.lnDemoPage span { grid-column: 1 / -1; height: 12px; border-radius: 6px; background: color-mix(in srgb, var(--text-3) 14%, transparent); }
+.lnDemoPage span:nth-of-type(2) { width: 70%; } .lnDemoPage span:nth-of-type(3) { width: 45%; }
+.lnDemoCard { position: absolute; top: 58px; right: 18px; bottom: 82px; display: flex; flex-direction: column; width: 300px; overflow: hidden; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); box-shadow: 0 4px 8px rgba(20, 20, 40, .08), 0 28px 72px -12px rgba(20, 20, 40, .28); }
+.lnDemoCard header { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-bottom: 1px solid var(--line-soft); background: radial-gradient(120% 140% at 0 0, var(--accent-softer), transparent 60%), var(--surface); }
+.lnDemoCard header > span { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 10px; background: var(--accent); color: #fff; }
+.lnDemoCard header div { display: grid; line-height: 1.25; }
+.lnDemoCard header b { font-size: 13px; }
+.lnDemoCard header small { color: var(--text-3); font-size: 11px; }
+.lnDemoChat { display: flex; flex: 1; flex-direction: column; justify-content: flex-end; gap: 6px; min-height: 0; overflow: hidden; padding: 12px; font-size: 12.5px; line-height: 1.45; }
+.lnDemoChat p { margin: 0; }
+.lnDemoChat .me { align-self: flex-end; max-width: 86%; padding: 7px 10px; border-radius: 14px 14px 4px 14px; background: var(--accent); color: #fff; }
+.lnDemoChat .ai { align-self: flex-start; max-width: 92%; padding: 7px 10px; border-radius: 14px 14px 14px 4px; background: var(--surface-2); }
+.lnDemoChat div.ai ul { margin: 4px 0; padding-left: 16px; }
+.lnDemoCard footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 10px 10px; padding: 6px 6px 6px 12px; border: 1px solid var(--line); border-radius: 12px; color: var(--text-4, var(--text-3)); font-size: 12px; }
+.lnDemoCard footer i { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 9px; background: var(--accent); color: #fff; }
+.lnDemoLauncher { position: absolute; right: 18px; bottom: 18px; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 17px; background: var(--accent); color: #fff; box-shadow: var(--e-accent, var(--e-3)); }
+.lnDemo .lnFloatLead { position: absolute; left: -28px; bottom: 36px; top: auto; }
+.lnProblems { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.lnProblem { display: grid; gap: 8px; padding: 24px; border: 1px solid var(--line); border-radius: var(--r-2xl); background: var(--surface); }
+.lnProblem h3 { font-size: var(--fs-17, 17px); letter-spacing: -0.02em; }
+.lnProblem p { color: var(--text-3); line-height: 1.55; }
+.lnFeatures { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.lnFeatures .lnCard { min-height: 220px; }
+.lnTruth { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 18px auto 0; color: var(--text-2); font-size: var(--fs-14); text-align: center; }
+.lnTruth svg { flex: none; color: var(--ok); }
+.lnBenefits { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; max-width: 920px; margin: 0 auto; }
+.lnBenefit { display: flex; gap: 14px; padding: 20px; border: 1px solid var(--line); border-radius: var(--r-xl, 18px); background: var(--surface); }
+.lnBenefit > svg { flex: none; margin-top: 2px; color: var(--accent); }
+.lnBenefit b { font-size: var(--fs-16, 16px); }
+.lnBenefit p { margin-top: 4px; color: var(--text-3); line-height: 1.5; }
+.lnCases { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.lnPlans.lnPlans3 { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 1040px; margin: 0 auto; }
+.lnPlanList { display: grid; align-content: start; gap: 7px; margin: 4px 0 0; padding: 0; list-style: none; color: var(--text-2); font-size: var(--fs-14); }
+.lnPlanList li { display: flex; gap: 8px; line-height: 1.45; }
+.lnPlanList svg { flex: none; margin-top: 3px; color: var(--ok); }
+.lnPlans3 .lnPlan p { flex: none; }
+.lnPlans3 .lnPlanList { flex: 1; }
+.lnSoon { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); align-items: center; gap: 24px; max-width: 1040px; margin: 28px auto 0; padding: 22px 24px; border: 1px dashed var(--line-strong, var(--line)); border-radius: var(--r-2xl); }
+.lnSoon h3 { margin-top: 6px; font-size: var(--fs-20); letter-spacing: -0.02em; }
+.lnSoon p { margin-top: 4px; color: var(--text-3); }
+.lnSoon ul { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.lnSoon li { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px; background: var(--surface-2); color: var(--text-2); font-size: var(--fs-13); }
+@media (max-width: 1100px) { .lnFeatures, .lnCases { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 900px) { .lnPlans.lnPlans3, .lnProblems { grid-template-columns: 1fr; } .lnSoon { grid-template-columns: 1fr; } .lnDemo .lnFloatLead { left: 8px; bottom: 12px; } }
+@media (max-width: 640px) { .lnFeatures, .lnCases, .lnBenefits { grid-template-columns: 1fr; } .lnDemoBrowser { height: 470px; } .lnDemoCard { right: 10px; left: 10px; width: auto; } .lnDemoPage { display: none; } }

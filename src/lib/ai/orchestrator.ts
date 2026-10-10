@@ -1,3 +1,4 @@
+import { withSalesPrompt } from "@/lib/ai/prompt";
 import { db } from "@/lib/db";
 import { retrieveKnowledge } from "@/lib/knowledge/retrieve";
 import { configuredAIProvider } from "./provider";
@@ -7,22 +8,32 @@ import { executeAllowedAction } from "@/lib/actions/execute";
 import { getWorkspaceTranslator } from "@/lib/workspace-locale";
 import { createTranslator, type MessageKey } from "@/lib/i18n";
 import { employeeRoleLabel, employeeToneLabel } from "@/lib/employee-domain";
+import { profileFromRules } from "./profile";
+import { aiReplyGate } from "@/lib/billing/access";
+import { featureEnabled } from "@/lib/features";
 
 export async function handleIncomingMessage(params: { workspaceId: string; employeeId: string; conversationId: string; content: string; provider?: AIProvider }) {
   const employee = await db.aIEmployee.findFirst({ where: { id: params.employeeId, workspaceId: params.workspaceId }, include: { settings: true, permissions: { where: { enabled: true } } } });
   if (!employee?.settings) throw new Error("AI employee is not configured");
   const {locale,t}=await getWorkspaceTranslator(params.workspaceId);
+  // Plan check before any model call: an ended trial/subscription or a used-up
+  // monthly allowance must never cost model tokens.
+  const gate=await aiReplyGate(params.workspaceId);
+  if(!gate.ok)return limitedReply({...params,locale,employeeName:employee.name,reason:gate.reason});
   const history = await db.message.findMany({ where: { conversationId: params.conversationId }, orderBy: { createdAt: "desc" }, take: 20 });
   const knowledge = await retrieveKnowledge(params.workspaceId, params.content);
   const provider = params.provider ?? configuredAIProvider();
-  const [conversation, settings] = await Promise.all([
+  const [conversation, workspace, settings] = await Promise.all([
     db.conversation.findFirst({ where: { id: params.conversationId, workspaceId: params.workspaceId }, select: { channelType: true, customer: { select: { name: true, phone: true, email: true } } } }),
+    db.workspace.findUnique({ where: { id: params.workspaceId }, select: { name: true } }),
     db.workspaceSettings.findUnique({ where: { workspaceId: params.workspaceId }, select: { timezone: true, workingHours: true } }),
   ]);
   const context = businessContext(settings?.timezone ?? "Europe/Moscow", settings?.workingHours, conversation);
   let result: Awaited<ReturnType<AIProvider["generateResponse"]>>;
   try {
-    result = await provider.generateResponse({ context, employeeName: employee.name, role: employeeRoleLabel(employee.role,locale), goal: employee.settings.goal, tone: employeeToneLabel(employee.settings.tone,locale), instructions:employee.settings.instructions??undefined,handoffRules:employee.settings.handoffRules as Record<string,unknown>,messages: history.reverse().map(item => ({ role: item.direction === "INBOUND" ? "user" as const : "assistant" as const, content: item.content })), knowledge, allowedActionKeys: employee.permissions.map(permission=>permission.actionKey) });
+    // Deferred modules (docs/FUTURE_FEATURES.md) never reach the model as actions.
+    const allowedActionKeys = employee.permissions.map(permission=>permission.actionKey).filter(key=>key!=="createAppointment"||featureEnabled("appointments"));
+    result = await provider.generateResponse(withSalesPrompt({ companyName: workspace?.name, profile: profileFromRules(employee.settings.handoffRules), context, employeeName: employee.name, role: employeeRoleLabel(employee.role,locale), goal: employee.settings.goal, tone: employeeToneLabel(employee.settings.tone,locale), instructions:employee.settings.instructions??undefined,handoffRules:employee.settings.handoffRules as Record<string,unknown>,messages: history.reverse().map(item => ({ role: item.direction === "INBOUND" ? "user" as const : "assistant" as const, content: item.content })), knowledge, allowedActionKeys }));
   } catch (error) {
     // A provider outage must not leave the customer without an answer: the inbound
     // message is already stored, so channel retries would be dropped as duplicates.
@@ -47,6 +58,21 @@ export async function handleIncomingMessage(params: { workspaceId: string; emplo
   });
   await triggerAutomations(effectiveHandoffReason?"HANDOFF_CREATED":"AI_RESPONSE",{workspaceId:params.workspaceId,employeeId:params.employeeId,conversationId:params.conversationId,data:{handoff:Boolean(effectiveHandoffReason),confidence:result.confidence}});
   return saved;
+}
+
+/** Reply when the plan does not allow AI answers: no model call, the visitor is asked for a contact and the owner is told once a day. */
+async function limitedReply(params:{workspaceId:string;employeeId:string;conversationId:string;content:string;locale:string;employeeName:string;reason:"PLAN_INACTIVE"|"PLAN_MESSAGE_LIMIT_REACHED"}){
+  const ru=params.locale!=="en";
+  const text=ru?"Спасибо за сообщение! Сейчас я не могу ответить автоматически. Оставьте, пожалуйста, имя и телефон (кнопка «Оставить заявку» ниже) — менеджер свяжется с вами.":"Thanks for your message! I can't answer automatically right now. Please leave your name and phone (the “Leave a request” button below) and a manager will contact you.";
+  const ownerTitle=params.reason==="PLAN_INACTIVE"?(ru?"ИИ-продавец остановлен: нет активного тарифа":"AI assistant paused: no active plan"):(ru?"ИИ-продавец остановлен: лимит сообщений исчерпан":"AI assistant paused: message limit reached");
+  return db.$transaction(async tx=>{
+    const message=await tx.message.create({data:{conversationId:params.conversationId,direction:"OUTBOUND",content:text,sources:[]}});
+    await tx.conversation.update({where:{id:params.conversationId},data:{status:"NEEDS_ATTENTION"}});
+    const recent=await tx.notification.findFirst({where:{workspaceId:params.workspaceId,type:"BILLING",createdAt:{gte:new Date(Date.now()-86400_000)}},select:{id:true}});
+    if(!recent)await tx.notification.create({data:{workspaceId:params.workspaceId,type:"BILLING",title:ownerTitle,body:ru?"Посетители сайта получают просьбу оставить контакты вместо ответа ИИ. Продлите или смените тариф в разделе «Настройки и подписка».":"Visitors are asked to leave contacts instead of getting AI answers. Renew or change the plan in Settings & plan."}});
+    await tx.analyticsEvent.create({data:{workspaceId:params.workspaceId,type:"AI_LIMITED",payload:{conversationId:params.conversationId,reason:params.reason}}});
+    return{message,confidence:0,handoff:true};
+  });
 }
 
 function businessContext(timezone: string, workingHours: unknown, conversation: { channelType: string; customer: { name: string; phone: string | null; email: string | null } } | null) {

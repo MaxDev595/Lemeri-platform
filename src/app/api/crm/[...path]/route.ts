@@ -1,3 +1,4 @@
+import { featureEnabled, FEATURE_DISABLED } from "@/lib/features";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { crmSchemaReady, db } from "@/lib/db";
@@ -538,7 +539,9 @@ const routes: Array<[string, RegExp, Handler]> = [
 async function handle(request: Request, { params }: { params: Promise<{ path: string[] }> }) {
   const segments = (await params).path;
   // The team hub lives in its own module but rides on this route (one bundle instead of two).
-  if (segments[0] === "team") return handleTeam(request, segments.slice(1));
+  if (segments[0] === "team") return featureEnabled("team") ? handleTeam(request, segments.slice(1)) : NextResponse.json(FEATURE_DISABLED, { status: 404 });
+  // CRM is a deferred module (docs/FUTURE_FEATURES.md); the schema health check stays available.
+  if (segments[0] !== "health" && !featureEnabled("crm")) return NextResponse.json(FEATURE_DISABLED, { status: 404 });
   const auth = await getApiWorkspace();
   if (!auth) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
   if (request.method !== "GET" && !validateRequestOrigin(request)) return NextResponse.json({ error: "INVALID_ORIGIN" }, { status: 403 });

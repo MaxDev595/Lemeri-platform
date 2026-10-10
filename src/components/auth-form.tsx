@@ -5,7 +5,7 @@ import type { AuthState } from "@/app/actions/auth";
 import { createTranslator, type Locale } from "@/lib/i18n";
 import { localeHref } from "@/lib/locale-utils";
 
-export function AuthForm({ locale, action, mode, returnTo }: {locale:Locale; action: (state: AuthState, data: FormData) => Promise<AuthState>; mode: "login" | "register";returnTo?:string }) {
+export function AuthForm({ locale, action, mode, returnTo, employeeAccounts = false }: {locale:Locale; action: (state: AuthState, data: FormData) => Promise<AuthState>; mode: "login" | "register";returnTo?:string;/** Owner/employee choice (team module, docs/FUTURE_FEATURES.md). */employeeAccounts?:boolean }) {
   const t=createTranslator(locale);
   const [state, formAction, pending] = useActionState(action, {});
   const [reveal,setReveal]=useState(false);
@@ -16,10 +16,10 @@ export function AuthForm({ locale, action, mode, returnTo }: {locale:Locale; act
     {returnTo&&<input type="hidden" name="returnTo" value={returnTo}/>} 
     {mode === "register" && <>
       <input type="hidden" name="accountType" value={account}/>
-      <div className="accountChoice" role="radiogroup" aria-label={ru?"Кто вы":"Who are you"}>
+      {employeeAccounts&&<div className="accountChoice" role="radiogroup" aria-label={ru?"Кто вы":"Who are you"}>
         <button type="button" role="radio" aria-checked={account==="OWNER"} className={account==="OWNER"?"on":""} onClick={()=>setAccount("OWNER")}><b>{ru?"Владелец":"Owner"}</b><small>{ru?"Создаю компанию и подключаю ИИ":"I set up my company and AI"}</small></button>
         <button type="button" role="radio" aria-checked={account==="EMPLOYEE"} className={account==="EMPLOYEE"?"on":""} onClick={()=>setAccount("EMPLOYEE")}><b>{ru?"Сотрудник":"Employee"}</b><small>{ru?"Присоединяюсь к своей компании":"I'm joining my company"}</small></button>
-      </div>
+      </div>}
       <label>{t("auth.name")}<input name="name" autoComplete="name" required placeholder={t("auth.namePlaceholder")}/></label>
       {account==="EMPLOYEE"&&<p className="accountNote">{ru?"После регистрации выберете должность и присоединитесь к компании по коду от руководителя.":"After signing up you'll pick your position and join your company with a code from your manager."}</p>}
       {account==="OWNER"&&<label>{t("auth.company")}<input name="company" autoComplete="organization" required placeholder="Nova Clinic"/></label>}

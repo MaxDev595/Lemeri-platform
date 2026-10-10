@@ -1,5 +1,5 @@
 import type { Prisma } from "@/generated/prisma/client";
-import { canActivateEmployee, canCreateConversation, effectivePlan } from "@/lib/billing/plans";
+import { canActivateEmployee, effectivePlan } from "@/lib/billing/plans";
 
 export class BillingLimitError extends Error {
   readonly code: "PLAN_EMPLOYEE_LIMIT_REACHED" | "PLAN_CONVERSATION_LIMIT_REACHED";
@@ -15,16 +15,10 @@ export async function lockConversationCreation(tx: Prisma.TransactionClient, wor
   await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`lemiri:conversation-limit:${workspaceId}`}, 0))`;
 }
 
-export async function assertConversationCreationAllowed(tx: Prisma.TransactionClient, workspaceId: string, date = new Date()) {
+// Conversations are no longer capped per plan (AI replies are, see billing/access.ts).
+// The advisory lock still serialises concurrent creation for one visitor.
+export async function assertConversationCreationAllowed(tx: Prisma.TransactionClient, workspaceId: string) {
   await lockConversationCreation(tx, workspaceId);
-  const periodStart = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
-  const periodEnd = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 1));
-  const [subscription, monthlyConversations] = await Promise.all([
-    tx.subscription.findUnique({ where: { workspaceId }, select: { plan: true, status: true } }),
-    tx.conversation.count({ where: { workspaceId, createdAt: { gte: periodStart, lt: periodEnd } } }),
-  ]);
-  const plan = effectivePlan(subscription?.plan, subscription?.status);
-  if (!canCreateConversation(monthlyConversations, plan)) throw new BillingLimitError("PLAN_CONVERSATION_LIMIT_REACHED");
 }
 
 export async function assertEmployeeActivationAllowed(tx: Prisma.TransactionClient, workspaceId: string) {

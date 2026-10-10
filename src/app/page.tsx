@@ -5,8 +5,8 @@ import { getSessionUser } from "@/lib/auth/session";
 import { getPublicLocale } from "@/lib/public-locale";
 
 export const metadata: Metadata = {
-  title: "Lemiri AI — AI-сотрудник, который не пропускает ни одного клиента",
-  description: "Отвечает клиентам, собирает заявки, записывает на услуги и передаёт сложные диалоги команде. Запуск за 15 минут.",
+  title: "Lemiri AI — ИИ-продавец для сайта, который работает 24/7",
+  description: "ИИ-продавец консультирует посетителей сайта, помогает выбрать товары и услуги, отвечает на вопросы и собирает заявки — автоматически.",
 };
 
 // lemeriai.com: signed-in users go straight to the platform, everyone else sees the landing.

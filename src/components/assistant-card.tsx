@@ -5,7 +5,7 @@ import { ArrowUp, Check, Maximize2, Minimize2, Minus, Pin, PinOff, RotateCcw, Sp
 import { floatingCardRuntime, type CardController } from "@/lib/floating-card/runtime";
 import { LemiriGlyph } from "./logo";
 
-type Section = "overview" | "employees" | "conversations" | "leads" | "appointments" | "knowledge" | "actions" | "rules" | "channels" | "integrations" | "analytics" | "team" | "billing" | "settings" | "notifications" | "testing" | "deals" | "contacts" | "companies" | "tasks" | "products" | "reports" | "crmSettings";
+type Section = "overview" | "widget" | "employees" | "conversations" | "leads" | "appointments" | "knowledge" | "actions" | "rules" | "channels" | "integrations" | "analytics" | "team" | "billing" | "settings" | "notifications" | "testing" | "deals" | "contacts" | "companies" | "tasks" | "products" | "reports" | "crmSettings";
 type Proposal = {
   id: string; kind: string; title: string; details: string[]; danger?: boolean;
   request: { method: string; path: string; body?: unknown };
@@ -21,7 +21,7 @@ const copy = {
     placeholder: "Спросите что угодно…", send: "Отправить", thinking: "Думаю", failed: "Не получилось ответить. Попробуйте ещё раз.", rateLimited: "Слишком много запросов, подождите минуту.",
     confirm: "Подтвердить", cancel: "Отмена", done: "Выполнено", cancelled: "Отменено", running: "Выполняю…", actionFailed: "Не удалось выполнить", openSection: "Открыть", hint: "Enter — отправить · Shift+Enter — новая строка",
     pinnedNote: "Положение закреплено", resized: "Тяните за края, чтобы изменить размер",
-    sections: { overview: "Обзор", employees: "Сотрудники", conversations: "Диалоги", leads: "Лиды", appointments: "Записи", knowledge: "Знания", actions: "Действия", rules: "Правила", channels: "Каналы", integrations: "Интеграции", analytics: "Аналитика", team: "Команда", billing: "Тариф", settings: "Настройки", notifications: "Уведомления", testing: "Тестирование", deals: "Сделки", contacts: "Контакты", companies: "Компании", tasks: "Задачи", products: "Товары", reports: "Отчёты", crmSettings: "Настройки CRM" },
+    sections: { overview: "Обзор", widget: "Карточка и подключение", employees: "Сотрудники", conversations: "Диалоги", leads: "Лиды", appointments: "Записи", knowledge: "Знания", actions: "Действия", rules: "Правила", channels: "Каналы", integrations: "Интеграции", analytics: "Аналитика", team: "Команда", billing: "Тариф", settings: "Настройки", notifications: "Уведомления", testing: "Тестирование", deals: "Сделки", contacts: "Контакты", companies: "Компании", tasks: "Задачи", products: "Товары", reports: "Отчёты", crmSettings: "Настройки CRM" },
   },
   en: {
     title: "Lemiri Assistant", status: "Sees your workspace data", open: "Open assistant (Ctrl+J)", collapse: "Collapse", pin: "Lock position", unpin: "Unlock", maximize: "Maximize", restore: "Restore size", reset: "New chat",
@@ -29,7 +29,7 @@ const copy = {
     placeholder: "Ask anything…", send: "Send", thinking: "Thinking", failed: "Could not answer. Please try again.", rateLimited: "Too many requests, wait a minute.",
     confirm: "Confirm", cancel: "Cancel", done: "Done", cancelled: "Cancelled", running: "Running…", actionFailed: "Failed", openSection: "Open", hint: "Enter to send · Shift+Enter for a new line",
     pinnedNote: "Position locked", resized: "Drag the edges to resize",
-    sections: { overview: "Overview", employees: "Employees", conversations: "Conversations", leads: "Leads", appointments: "Appointments", knowledge: "Knowledge", actions: "Actions", rules: "Rules", channels: "Channels", integrations: "Integrations", analytics: "Analytics", team: "Team", billing: "Plan", settings: "Settings", notifications: "Notifications", testing: "Testing", deals: "Deals", contacts: "Contacts", companies: "Companies", tasks: "Tasks", products: "Products", reports: "Reports", crmSettings: "CRM settings" },
+    sections: { overview: "Overview", widget: "Card & installation", employees: "Employees", conversations: "Conversations", leads: "Leads", appointments: "Appointments", knowledge: "Knowledge", actions: "Actions", rules: "Rules", channels: "Channels", integrations: "Integrations", analytics: "Analytics", team: "Team", billing: "Plan", settings: "Settings", notifications: "Notifications", testing: "Testing", deals: "Deals", contacts: "Contacts", companies: "Companies", tasks: "Tasks", products: "Products", reports: "Reports", crmSettings: "CRM settings" },
   },
 } as const;
 

@@ -1,3 +1,4 @@
+import { featureEnabled, FEATURE_DISABLED } from "@/lib/features";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -6,7 +7,7 @@ import { getSessionUser, WORKSPACE_COOKIE } from "@/lib/auth/session";
 
 const schema=z.object({workspaceId:entityId});
 
-export async function POST(request:Request){
+export async function POST(request:Request){if(!featureEnabled("multiWorkspace"))return NextResponse.json(FEATURE_DISABLED,{status:404});
   const user=await getSessionUser();
   if(!user)return NextResponse.json({error:"UNAUTHORIZED"},{status:401});
   const parsed=schema.safeParse(await request.json().catch(()=>null));
@@ -18,7 +19,7 @@ export async function POST(request:Request){
 
 // Navigation variant used after accepting an invitation: activates the workspace
 // and opens the platform. Server Components cannot set cookies themselves.
-export async function GET(request:Request){
+export async function GET(request:Request){if(!featureEnabled("multiWorkspace"))return NextResponse.json(FEATURE_DISABLED,{status:404});
   const url=new URL(request.url);const target=new URL("/app",url.origin);
   const user=await getSessionUser();
   if(!user)return NextResponse.redirect(new URL("/login",url.origin));

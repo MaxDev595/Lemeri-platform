@@ -9,7 +9,7 @@ import { Check, Copy, Download, ExternalLink, Mail, RefreshCw, Sparkles } from "
 
 type Look = { accent?: string; title?: string; status?: string; greeting?: string; help?: string; suggestions?: string[]; position?: "right" | "left"; theme?: "auto" | "light" | "dark"; autoOpenSeconds?: number; hostedLink?: boolean };
 type State = { widget: Look; allowedOrigins: string[]; seen: { origin: string; lastSeenAt: string }[] };
-type Props = { locale: string; channelId: string; employeeId: string; employeeName: string; origin: string; notify: (message: string) => void };
+type Props = { locale: string; channelId: string; employeeId: string; employeeName: string; origin: string; notify: (message: string) => void; /** Show one tab only (the card design lives in the card studio). */ only?: "install" | "link" };
 
 const ACCENTS = ["#6254e8", "#2563eb", "#0ea5e9", "#10b981", "#16a34a", "#f59e0b", "#ef4444", "#ec4899", "#111827"];
 
@@ -88,10 +88,10 @@ function gtmContainer(code: string) {
   return JSON.stringify({ exportFormatVersion: 2, exportTime: new Date().toISOString().replace("T", " ").slice(0, 19), containerVersion: { path: "accounts/0/containers/0/versions/0", ...ids, containerVersionId: "0", container: { path: "accounts/0/containers/0", ...ids, name: "Lemiri AI", publicId: "GTM-LEMIRI", usageContext: ["WEB"] }, tag: [{ ...ids, tagId: "1", name: "Lemiri AI — чат", type: "html", parameter: [{ type: "TEMPLATE", key: "html", value: code }, { type: "BOOLEAN", key: "supportDocumentWrite", value: "false" }], firingTriggerId: ["2147479553"], tagFiringOption: "ONCE_PER_EVENT" }] } }, null, 2);
 }
 
-export default function SiteInstall({ locale, channelId, employeeId, employeeName, origin, notify }: Props) {
+export default function SiteInstall({ locale, channelId, employeeId, employeeName, origin, notify, only }: Props) {
   const l = locale === "en" ? dict.en : dict.ru;
   const lang = locale === "en" ? "en" : "ru";
-  const [tab, setTab] = useState<"look" | "install" | "link">("install");
+  const [tab, setTab] = useState<"look" | "install" | "link">(only ?? "install");
   const [state, setState] = useState<State>();
   const [look, setLook] = useState<Look>({});
   const [saving, setSaving] = useState(false);
@@ -138,9 +138,9 @@ export default function SiteInstall({ locale, channelId, employeeId, employeeNam
   const minutesAgo = (iso: string) => Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
 
   return <section className="siteInstall">
-    <div className="siTabs" role="tablist">
+    {!only && <div className="siTabs" role="tablist">
       {(["install", "look", "link"] as const).map(key => <button key={key} type="button" role="tab" aria-selected={tab === key} className={tab === key ? "on" : ""} onClick={() => setTab(key)}>{l.tabs[key]}</button>)}
-    </div>
+    </div>}
 
     {tab === "look" && <div className="siLook">
       <form className="siForm" onSubmit={event => { event.preventDefault(); void patch({ widget: look }, l.saved); }}>

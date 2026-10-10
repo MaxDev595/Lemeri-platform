@@ -2,18 +2,9 @@
 // channel's encrypted config next to allowedOrigins, so changing the look in the
 // cabinet never changes the embed code the customer already installed.
 
-export type WidgetSettings = {
-  accent: string;
-  title: string;
-  status: string;
-  greeting: string;
-  help: string;
-  suggestions: string[];
-  position: "right" | "left";
-  theme: "auto" | "light" | "dark";
-  autoOpenSeconds: number;
-  hostedLink: boolean;
-};
+import { normalizeAvatar, normalizeDesign, normalizePresets, READY_STYLES, type StoredLook } from "./design";
+
+export type WidgetSettings = StoredLook;
 
 export type WebsiteChannelConfig = {
   allowedOrigins: string[];
@@ -21,8 +12,9 @@ export type WebsiteChannelConfig = {
   seen?: Record<string, number>;
 };
 
-const str = (value: unknown, max: number) => (typeof value === "string" ? value.trim().slice(0, max) : "");
+const str = (value: unknown, max: number) => (typeof value === "string" ? value.replace(/[\u0000-\u001f<>]/g, "").trim().slice(0, max) : "");
 
+/** Validates every field the cabinet can send. Plan rules are applied by the API (see channels/[id]). */
 export function normalizeWidgetSettings(raw: unknown): Partial<WidgetSettings> {
   const v = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
   const out: Partial<WidgetSettings> = {};
@@ -35,8 +27,15 @@ export function normalizeWidgetSettings(raw: unknown): Partial<WidgetSettings> {
   const seconds = Number(v.autoOpenSeconds);
   if (Number.isFinite(seconds)) out.autoOpenSeconds = Math.max(0, Math.min(120, Math.round(seconds)));
   if (typeof v.hostedLink === "boolean") out.hostedLink = v.hostedLink;
+  if (typeof v.leadForm === "boolean") out.leadForm = v.leadForm;
+  if (v.avatarUrl !== undefined) { const avatar = normalizeAvatar(v.avatarUrl); if (avatar) out.avatarUrl = avatar; }
+  if (typeof v.style === "string" && v.style in READY_STYLES) out.style = v.style;
+  if (v.design !== undefined && v.design !== null) out.design = normalizeDesign(v.design);
+  if (v.presets !== undefined) out.presets = normalizePresets(v.presets);
   return out;
 }
+
+export { mergeForTier } from "./design";
 
 export function normalizeOrigins(raw: unknown) {
   if (!Array.isArray(raw)) return [];

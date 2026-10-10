@@ -1,3 +1,4 @@
+import { featureEnabled, FEATURE_DISABLED } from "@/lib/features";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
@@ -17,7 +18,7 @@ const schema = z.object({
 // In-dashboard assistant. It reads workspace data through scoped tools and only
 // *prepares* changes; the browser executes a prepared change through the normal
 // API (with the user's own permissions) after the user presses "Confirm".
-export async function POST(request: Request) {
+export async function POST(request: Request) {if(!featureEnabled("workspaceAssistant"))return NextResponse.json(FEATURE_DISABLED,{status:404});
   const auth = await getApiWorkspace();
   if (!auth) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
   const guard = await guardMutation(request, "assistant", 40, 60);

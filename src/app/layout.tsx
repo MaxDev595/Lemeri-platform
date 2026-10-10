@@ -14,9 +14,10 @@ import "@/styles/assistant.css";
 import "@/styles/crm.css";
 import "@/styles/site-install.css";
 import "@/styles/team.css";
+import "@/styles/sales.css";
 import "@/styles/landing.css";
 
-export const metadata: Metadata = { title: "Lemiri AI — цифровые сотрудники для бизнеса", description: "Единая платформа для AI-сотрудников, диалогов, лидов, записей и базы знаний." };
+export const metadata: Metadata = { title: "Lemiri AI — ИИ-продавец для вашего сайта", description: "ИИ-продавец на сайте: консультирует посетителей, помогает выбрать товары и услуги и собирает заявки 24/7." };
 export const viewport: Viewport = { themeColor: [{ media: "(prefers-color-scheme: light)", color: "#fbfbfd" }, { media: "(prefers-color-scheme: dark)", color: "#0e0f13" }] };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

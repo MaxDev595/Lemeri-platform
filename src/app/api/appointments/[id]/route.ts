@@ -1,3 +1,4 @@
+import { featureEnabled, FEATURE_DISABLED } from "@/lib/features";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
@@ -9,7 +10,7 @@ import { drainJobsAfterResponse } from "@/lib/jobs/kick";
 const schema = z.object({ status: z.enum(["SCHEDULED", "CONFIRMED", "COMPLETED", "CANCELLED"]) });
 
 // Confirm, complete or cancel an appointment booked by the AI employee.
-export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {if(!featureEnabled("appointments"))return NextResponse.json(FEATURE_DISABLED,{status:404});
   const auth = await getApiWorkspace();
   if (!auth) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
   if (!canWorkspace(auth.membership.role, "OPERATE_CRM")) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });

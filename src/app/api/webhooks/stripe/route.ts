@@ -38,7 +38,7 @@ export async function POST(request:Request){
     const metadata=object.metadata;
     const workspaceId=String(metadata?.workspaceId??"");
     const reference=String(object.client_reference_id??"");
-    const plan=metadata?.plan==="START"||metadata?.plan==="GROWTH"?metadata.plan:null;
+    const plan=metadata?.plan==="STARTER"||metadata?.plan==="CUSTOM"?metadata.plan:metadata?.plan==="START"?"STARTER":metadata?.plan==="GROWTH"?"CUSTOM":null;
     if(!workspaceId||reference!==workspaceId||!plan)return NextResponse.json({received:true,ignored:"INVALID_CHECKOUT_BINDING"});
     if(!await db.workspace.findUnique({where:{id:workspaceId},select:{id:true}}))return NextResponse.json({received:true,ignored:"UNKNOWN_WORKSPACE"});
     const applied=await applyStripeEvent(workspaceId,cursorEvent,async tx=>{await tx.subscription.upsert({where:{workspaceId},create:{workspaceId,provider:"STRIPE",externalCustomerId:String(object.customer??""),externalPlanId:String(object.subscription??""),plan,status:"INCOMPLETE",currentPeriodEnd:periodEnd(object.expires_at)},update:{externalCustomerId:String(object.customer??""),externalPlanId:String(object.subscription??"")}})});
@@ -56,9 +56,10 @@ export async function POST(request:Request){
     if(!existing&&!await db.workspace.findUnique({where:{id:workspaceId},select:{id:true}}))return NextResponse.json({received:true,ignored:"UNKNOWN_WORKSPACE"});
     const status=String(object.status??"UNKNOWN").toUpperCase();
     const priceId=String((object.items as {data?:Array<{price?:{id?:string}}>}|undefined)?.data?.[0]?.price?.id??"");
-    const plan=stripePlanForSubscription(priceId,process.env.STRIPE_START_PRICE_ID,process.env.STRIPE_GROWTH_PRICE_ID,existing?.plan,status);
+    const plan=stripePlanForSubscription(priceId,existing?.plan,status);
+    const periodStart=Number(object.current_period_start)>0?new Date(Number(object.current_period_start)*1000):undefined;
     if(!plan)return NextResponse.json({received:true,ignored:"UNKNOWN_PRICE"});
-    const applied=await applyStripeEvent(workspaceId,cursorEvent,async tx=>{await tx.subscription.upsert({where:{workspaceId},create:{workspaceId,provider:"STRIPE",externalCustomerId:customerId,externalPlanId:subscriptionId,plan,status,currentPeriodEnd:periodEnd(object.current_period_end),cancelAtPeriodEnd:Boolean(object.cancel_at_period_end)},update:{externalCustomerId:customerId||existing?.externalCustomerId,externalPlanId:subscriptionId||existing?.externalPlanId,plan,status,currentPeriodEnd:periodEnd(object.current_period_end),cancelAtPeriodEnd:Boolean(object.cancel_at_period_end)}})});
+    const applied=await applyStripeEvent(workspaceId,cursorEvent,async tx=>{await tx.subscription.upsert({where:{workspaceId},create:{workspaceId,provider:"STRIPE",externalCustomerId:customerId,externalPlanId:subscriptionId,plan,status,...(periodStart?{currentPeriodStart:periodStart}:{}),currentPeriodEnd:periodEnd(object.current_period_end),cancelAtPeriodEnd:Boolean(object.cancel_at_period_end)},update:{externalCustomerId:customerId||existing?.externalCustomerId,externalPlanId:subscriptionId||existing?.externalPlanId,plan,status,...(periodStart?{currentPeriodStart:periodStart}:{}),currentPeriodEnd:periodEnd(object.current_period_end),cancelAtPeriodEnd:Boolean(object.cancel_at_period_end)}})});
     if(!applied)return NextResponse.json({received:true,ignored:"STALE_EVENT"});
   }
   return NextResponse.json({received:true});

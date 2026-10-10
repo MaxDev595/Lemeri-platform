@@ -1,218 +1,179 @@
 /* ==========================================================================
-   Public website widget (rendered inside the customer's iframe)
+   Public website card chat (inside the customer's iframe and in the cabinet
+   preview). All colours, radii and the font come from --lw-* variables set by
+   lib/widget/design.ts → chatVars(), so the card follows the owner's design.
    ========================================================================== */
 
-.publicWidget {
+.publicWidget.lw {
+  --lw-font: ui-sans-serif, system-ui, sans-serif;
   display: flex;
   flex-direction: column;
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
-  background: var(--surface);
+  background: var(--lw-bg);
+  color: var(--lw-text);
+  font-family: var(--lw-font);
+  font-size: var(--lw-fs, 14px);
+  color-scheme: light;
 }
-.publicWidget > header {
+.publicWidget.lw[data-dark="true"] { color-scheme: dark; }
+.publicWidget.lw.preview { height: 100%; }
+.lw .lwHead {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
-  background: linear-gradient(160deg, #1b1c26, #1a1740);
-  color: #fff;
+  border-bottom: 1px solid var(--lw-border);
+  background: var(--lw-head-bg);
+  color: var(--lw-head-text);
 }
-.widgetAvatar {
-  position: relative;
+.lw .lwHead.accent { border-bottom: 0; background: var(--lw-accent); color: var(--lw-accent-text); }
+.lw .lwHead.gradient { background: radial-gradient(120% 140% at 0 0, color-mix(in srgb, var(--lw-accent) 16%, transparent), transparent 60%), var(--lw-head-bg); }
+.lw .lwHead.minimal { border-bottom: 0; background: transparent; }
+.lw .lwHead > div { display: grid; min-width: 0; line-height: 1.3; }
+.lw .lwHead b { overflow: hidden; font-size: 1.07em; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.lw .lwHead small { overflow: hidden; opacity: 0.72; font-size: 0.86em; text-overflow: ellipsis; white-space: nowrap; }
+.lw .lwHeadAvatar, .lw .lwWelcomeAvatar {
   display: grid;
   flex: none;
   place-items: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  background: #fff;
+  overflow: hidden;
+  background: var(--lw-accent);
+  color: var(--lw-accent-text);
 }
-.widgetAvatar::after {
-  content: "";
-  position: absolute;
-  right: -2px;
-  bottom: -2px;
-  width: 11px;
-  height: 11px;
-  border: 2.5px solid #1b1c26;
-  border-radius: 50%;
-  background: #4ade9b;
-}
-.publicWidget header div {
-  display: grid;
-  min-width: 0;
-  line-height: 1.3;
-}
-.publicWidget header b {
-  font-size: var(--fs-15);
-  font-weight: 600;
-}
-.publicWidget header small {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: var(--fs-12);
-}
-.publicWidget > section {
+.lw .lwHeadAvatar { width: 38px; height: 38px; }
+.lw .lwAvatarImg { width: 100%; height: 100%; object-fit: cover; }
+.lw > section {
   display: flex;
   flex: 1;
   flex-direction: column;
   gap: 8px;
-  padding: 18px 16px;
+  padding: 16px 14px 10px;
   overflow-y: auto;
-  background:
-    radial-gradient(circle at 1px 1px, var(--line-soft) 1px, transparent 0) 0 0 / 18px 18px,
-    var(--surface-2);
+  overscroll-behavior: contain;
 }
-.widgetWelcome {
-  display: grid;
-  justify-items: center;
-  gap: 6px;
-  margin: auto;
-  text-align: center;
-  animation: rise 600ms var(--ease-out) both;
-}
-.widgetWelcome > span {
-  display: grid;
-  place-items: center;
-  width: 52px;
-  height: 52px;
-  margin-bottom: 8px;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  background: var(--surface);
-  box-shadow: var(--e-2);
-  animation: float 5s var(--ease-in-out) infinite;
-}
-.widgetWelcome h1 {
-  font-size: var(--fs-20);
-  letter-spacing: -0.03em;
-}
-.widgetWelcome p {
-  color: var(--text-3);
-  font-size: var(--fs-14);
-}
-.widgetSuggestions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 14px;
-}
-.widgetSuggestions button {
+.lw .lwWelcome { display: flex; align-items: flex-end; gap: 8px; animation: lwIn 360ms cubic-bezier(.16, 1, .3, 1) both; }
+.lw .lwWelcome .lwWelcomeAvatar.small { width: 30px; height: 30px; }
+.lw .lwWelcome.hero { flex-direction: column; align-items: center; gap: 6px; margin: auto 0; text-align: center; }
+.lw .lwWelcome.hero .lwWelcomeAvatar { width: 64px; height: 64px; margin-bottom: 8px; box-shadow: 0 8px 24px -8px color-mix(in srgb, var(--lw-accent) 60%, transparent); }
+.lw .lwWelcome.hero h1 { margin: 0; font-size: 1.4em; letter-spacing: -0.02em; }
+.lw .lwWelcome.hero p { max-width: 280px; margin: 0; color: var(--lw-muted); }
+.lw .lwSuggestions { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 0 2px 38px; }
+.lw .lwWelcome.hero + .lwSuggestions { justify-content: center; padding-left: 0; }
+.lw .lwSuggestions button {
   padding: 7px 12px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-full);
-  background: var(--surface);
-  color: var(--text-2);
-  font-size: var(--fs-13);
-  box-shadow: var(--e-1);
-  transition:
-    border-color var(--t-fast) ease,
-    color var(--t-fast) ease,
-    transform var(--t-fast) var(--ease-out);
+  border: 1px solid color-mix(in srgb, var(--lw-accent) 35%, var(--lw-border));
+  border-radius: 999px;
+  background: var(--lw-surface);
+  color: var(--lw-text);
+  font: inherit;
+  font-size: 0.93em;
+  cursor: pointer;
+  transition: border-color .15s ease, transform .15s ease;
 }
-.widgetSuggestions button:hover:not(:disabled) {
-  border-color: var(--accent);
-  color: var(--accent-text);
-}
-.widgetSuggestions button:active:not(:disabled) {
-  transform: scale(0.97);
-}
-.widgetSuggestions button:disabled {
-  opacity: 0.5;
-}
-.widgetBubble {
-  max-width: 84%;
-  padding: 10px 14px;
-  border-radius: 16px;
-  font-size: var(--fs-14);
+.lw .lwSuggestions button:hover:not(:disabled) { border-color: var(--lw-accent); }
+.lw .lwSuggestions button:active:not(:disabled) { transform: scale(0.97); }
+.lw .lwSuggestions button:disabled { opacity: 0.5; cursor: default; }
+.lw .lwBubble {
+  max-width: 86%;
+  padding: 9px 13px;
+  border-radius: var(--lw-bubble-r);
   line-height: 1.5;
-  white-space: pre-wrap;
-  animation: pop 360ms var(--ease-out) both;
+  overflow-wrap: anywhere;
+  animation: lwIn 300ms cubic-bezier(.16, 1, .3, 1) both;
 }
-.widgetBubble.user {
-  align-self: flex-end;
-  border-bottom-right-radius: 6px;
-  background: var(--accent);
-  color: #fff;
-  box-shadow: var(--e-accent);
-}
-.widgetBubble.assistant {
-  align-self: flex-start;
-  border: 1px solid var(--line);
-  border-bottom-left-radius: 6px;
-  background: var(--surface);
-  box-shadow: var(--e-1);
-}
-.widgetBubble.typing {
+.lw .lwBubble p { margin: 0; }
+.lw .lwBubble p + p, .lw .lwBubble ul + p, .lw .lwBubble p + ul { margin-top: 6px; }
+.lw .lwBubble ul { margin: 0; padding-left: 18px; }
+.lw .lwBubble a { color: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+.lw .lwBubble.user { align-self: flex-end; border-bottom-right-radius: var(--lw-bubble-tail); background: var(--lw-user); color: var(--lw-user-text); }
+.lw .lwBubble.assistant { align-self: flex-start; border-bottom-left-radius: var(--lw-bubble-tail); background: var(--lw-bot); color: var(--lw-bot-text); }
+.lw .lwWelcome .lwBubble { max-width: calc(100% - 40px); }
+.lw .lwBubble.typing { display: inline-flex; gap: 4px; padding: 13px 15px; }
+.lw .lwBubble.typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--lw-muted); animation: lwTyping 1.1s ease-in-out infinite; }
+.lw .lwBubble.typing i:nth-child(2) { animation-delay: .15s; }
+.lw .lwBubble.typing i:nth-child(3) { animation-delay: .3s; }
+.lw .lwLeadButton {
   display: inline-flex;
-  gap: 4px;
-  padding: 14px 16px;
-}
-.widgetBubble.typing i {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--text-4);
-  animation: typing 1.1s ease-in-out infinite;
-}
-.widgetBubble.typing i:nth-child(2) { animation-delay: 0.15s; }
-.widgetBubble.typing i:nth-child(3) { animation-delay: 0.3s; }
-.publicWidget > form {
-  display: flex;
+  align-self: center;
   align-items: center;
-  gap: 8px;
-  margin: 0 12px;
-  padding: 12px 0 8px;
+  gap: 6px;
+  margin: 2px 0 0;
+  padding: 6px 12px;
+  border: 1px solid var(--lw-border);
+  border-radius: 999px;
+  background: var(--lw-surface);
+  color: var(--lw-text);
+  font: inherit;
+  font-size: 0.88em;
+  font-weight: 600;
+  cursor: pointer;
 }
-.publicWidget > form input {
+.lw .lwLeadButton:hover:not(:disabled) { border-color: var(--lw-accent); }
+.lw .lwLeadButton:disabled { opacity: .5; }
+.lw .lwComposer { display: flex; align-items: center; gap: 8px; margin: 0 12px; padding: 10px 0 6px; }
+.lw .lwComposer input {
   flex: 1;
+  min-width: 0;
   min-height: 44px;
-  border-radius: var(--r-full);
-  padding: 0 18px;
+  padding: 0 16px;
+  border: 1px solid var(--lw-border);
+  border-radius: max(var(--lw-btn-radius), 12px);
+  background: var(--lw-surface);
+  color: var(--lw-text);
+  font: inherit;
+  outline: none;
 }
-.publicWidget > form button {
+.lw .lwComposer input:focus { border-color: var(--lw-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--lw-accent) 18%, transparent); }
+.lw .lwComposer button, .lw .lwPrimary {
   display: grid;
   flex: none;
   place-items: center;
   width: 44px;
   height: 44px;
   border: 0;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
-  box-shadow: var(--e-accent);
-  transition:
-    background-color var(--t-fast) ease,
-    transform var(--t-fast) var(--ease-out),
-    opacity var(--t-fast) ease;
+  border-radius: var(--lw-btn-radius);
+  background: var(--lw-btn);
+  color: var(--lw-btn-text);
+  cursor: pointer;
+  transition: transform .15s ease, opacity .15s ease;
 }
-.publicWidget > form button:hover:not(:disabled) {
-  background: var(--accent-hover);
+.lw .lwComposer button:active:not(:disabled), .lw .lwPrimary:active:not(:disabled) { transform: scale(0.95); }
+.lw .lwComposer button:disabled, .lw .lwPrimary:disabled { opacity: .45; cursor: default; }
+.lw > footer { padding: 2px 0 9px; color: var(--lw-muted); font-size: 11px; text-align: center; }
+
+/* Lead form */
+.lw .lwLead {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--lw-border);
+  border-radius: var(--lw-bubble-r);
+  background: var(--lw-surface);
+  animation: lwIn 260ms cubic-bezier(.16, 1, .3, 1) both;
 }
-.publicWidget > form button:active:not(:disabled) {
-  transform: scale(0.94);
-}
-.publicWidget > form button:disabled {
-  opacity: 0.45;
-  box-shadow: none;
-}
-.publicWidget > footer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 2px 0 10px;
-  color: var(--text-4);
-  font-size: 11px;
-}
+.lw .lwLead header { display: flex; align-items: center; justify-content: space-between; }
+.lw .lwLead header b { display: inline-flex; align-items: center; gap: 6px; }
+.lw .lwLead header button { display: grid; place-items: center; width: 26px; height: 26px; border: 0; border-radius: 8px; background: transparent; color: var(--lw-muted); cursor: pointer; }
+.lw .lwLead > p { margin: 0; color: var(--lw-muted); font-size: 0.9em; }
+.lw .lwLead label { display: grid; gap: 3px; color: var(--lw-muted); font-size: 0.82em; }
+.lw .lwLead input:not([type=checkbox]) { min-height: 36px; padding: 0 10px; border: 1px solid var(--lw-border); border-radius: 10px; background: var(--lw-bg); color: var(--lw-text); font: inherit; font-size: 1.1em; outline: none; }
+.lw .lwLead input:focus { border-color: var(--lw-accent); }
+.lw .lwRow { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.lw .lwConsent { display: flex !important; align-items: flex-start; gap: 8px; line-height: 1.35; }
+.lw .lwConsent input { flex: none; width: 16px; height: 16px; margin: 1px 0 0; accent-color: var(--lw-accent); }
+.lw .lwConsent a { color: var(--lw-accent); }
+.lw .lwError { margin: 0; color: #d0424f; font-size: 0.86em; }
+.lw .lwPrimary { width: 100%; height: 40px; font: inherit; font-weight: 600; }
+
+@keyframes lwIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes lwTyping { 0%, 80%, 100% { opacity: .3; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .lw * { animation: none !important; transition: none !important; } }
 
 /* Inside the floating card on a customer's site the card draws the header;
    the frame must never show its own scrollbars. */
-html:has(.publicWidget.embedded),
-html:has(.publicWidget.embedded) body {
+html:has(.publicWidget.embedded:not(.preview)),
+html:has(.publicWidget.embedded:not(.preview)) body {
   overflow: hidden;
-}
-.publicWidget.embedded {
-  background: var(--surface-2);
 }

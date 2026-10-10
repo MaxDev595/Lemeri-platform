@@ -1,4 +1,5 @@
 "use server";
+import { featureEnabled } from "@/lib/features";
 
 import { Prisma } from "@/generated/prisma/client";
 import { redirect } from "next/navigation";
@@ -41,7 +42,7 @@ function registrationFailure(locale: Locale, error: unknown, phase: "rate-limit"
 
 export async function register(_: AuthState, formData: FormData): Promise<AuthState> {
   const locale=formLocale(formData);const t=createTranslator(locale);
-  if(formData.get("accountType")==="EMPLOYEE")return registerEmployee(formData,locale);
+  if(formData.get("accountType")==="EMPLOYEE"&&featureEnabled("team"))return registerEmployee(formData,locale);
   const parsed = registerSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: t("auth.checkData") };
   const { name, email, password, company } = parsed.data;

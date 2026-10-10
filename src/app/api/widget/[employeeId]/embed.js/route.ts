@@ -4,10 +4,11 @@ import { floatingCardRuntime } from "@/lib/floating-card/runtime";
 import { lemiriWidgetBootstrap, type WidgetBootConfig } from "@/lib/floating-card/embed-client";
 import { loadWebsiteWidget, recordWidgetSeen } from "@/lib/widget/channel";
 import { originAllowed } from "@/lib/widget/settings";
+import { shellConfig } from "@/lib/widget/design";
 
 const labels={
-  ru:{status:"AI-сотрудник · обычно отвечает сразу",open:"Открыть чат",collapse:"Свернуть",pin:"Закрепить положение",unpin:"Открепить",maximize:"Развернуть",restore:"Вернуть размер"},
-  en:{status:"AI employee · usually replies instantly",open:"Open chat",collapse:"Collapse",pin:"Lock position",unpin:"Unlock",maximize:"Maximize",restore:"Restore size"},
+  ru:{status:"ИИ-консультант · обычно отвечает сразу",open:"Открыть чат",collapse:"Свернуть",pin:"Закрепить положение",unpin:"Открепить",maximize:"Развернуть",restore:"Вернуть размер"},
+  en:{status:"AI consultant · usually replies instantly",open:"Open chat",collapse:"Collapse",pin:"Lock position",unpin:"Unlock",maximize:"Maximize",restore:"Restore size"},
 } as const;
 
 export async function GET(request:Request,{params}:{params:Promise<{employeeId:string}>}){
@@ -23,9 +24,10 @@ export async function GET(request:Request,{params}:{params:Promise<{employeeId:s
   if(parentOrigin&&!own&&/^https?:/.test(parentOrigin)){const channelId=widget.channelId,config=widget.config,origin=parentOrigin;after(()=>recordWidgetSeen(channelId,config,origin).catch(()=>undefined))}
   const token=createWidgetToken({employeeId,origin:parentOrigin??"*",expiresAt:Date.now()+WIDGET_TOKEN_TTL_MS});
   const frameUrl=`${base}/widget/${employeeId}`;
-  const look=widget.config.widget??{};
+  // What the current plan allows (stored Custom settings stay in the config after a downgrade).
+  const look=widget.look;
   const {status,...buttonLabels}=labels[widget.locale];
-  const config:WidgetBootConfig={base,employeeId,frameUrl,tokenUrl:`${base}/api/widget/${employeeId}/token`,token,name:look.title||widget.employee.name,status:look.status||status,locale:widget.locale,labels:buttonLabels,accent:look.accent,theme:look.theme,position:look.position,autoOpenSeconds:look.autoOpenSeconds};
+  const config:WidgetBootConfig={base,employeeId,frameUrl,tokenUrl:`${base}/api/widget/${employeeId}/token`,token,name:look.title||widget.employee.name,status:look.status||status,locale:widget.locale,labels:buttonLabels,theme:look.theme,position:look.position,autoOpenSeconds:look.autoOpenSeconds,shell:shellConfig(look.design),avatar:look.avatarUrl||undefined};
   // Same floating-card engine as the in-app assistant, shipped as plain source.
   // The Worker bundler (esbuild keepNames) may wrap functions in __name(); give
   // the shipped source a local no-op so it runs on any customer page.

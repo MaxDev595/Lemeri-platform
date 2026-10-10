@@ -24,3 +24,5 @@ import "./assignments.test.ts";
 import "./human-reply.test.ts";
 import "./conversation-events.test.ts";
 import "./floating-card.test.ts";
+import "./widget-design.test.ts";
+import "./sales-profile.test.ts";

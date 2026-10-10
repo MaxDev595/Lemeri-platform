@@ -1,3 +1,4 @@
+import { withSalesPrompt } from "@/lib/ai/prompt";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { configuredAIProvider } from "@/lib/ai/provider";
@@ -17,7 +18,7 @@ export async function POST(request:Request){
   const limited=await checkRateLimit("onboarding:preview",`${requestIp(request.headers)}:${auth.user.id}`,10,60);if(!limited.allowed)return NextResponse.json({error:"RATE_LIMITED"},{status:429,headers:{"retry-after":String(limited.retryAfter)}});
   const knowledge=chunkText(configuration.data.knowledgeContent??"").slice(0,20).map((content,index)=>({id:`preview-${index}`,content,sourceLabel:configuration.data.knowledgeTitle||"Материал onboarding",score:1}));
   try{
-    const provider=configuredAIProvider();const result=await provider.generateResponse({employeeName:configuration.data.name,role:employeeRoleLabel(configuration.data.role,auth.locale),goal:configuration.data.goal,tone:employeeToneLabel(configuration.data.tone,auth.locale),instructions:configuration.data.instructions,handoffRules:{uncertainty:configuration.data.handoffUncertainty==="on",complaint:configuration.data.handoffComplaint==="on",humanRequested:configuration.data.handoffHumanRequested==="on"},messages:[{role:"user",content:body.data.question}],knowledge,allowedActionKeys:[]});
+    const provider=configuredAIProvider();const result=await provider.generateResponse(withSalesPrompt({employeeName:configuration.data.name,role:employeeRoleLabel(configuration.data.role,auth.locale),goal:configuration.data.goal,tone:employeeToneLabel(configuration.data.tone,auth.locale),instructions:configuration.data.instructions,handoffRules:{uncertainty:configuration.data.handoffUncertainty==="on",complaint:configuration.data.handoffComplaint==="on",humanRequested:configuration.data.handoffHumanRequested==="on"},messages:[{role:"user",content:body.data.question}],knowledge,allowedActionKeys:[]}));
     const token=createOnboardingTestToken(onboardingConfigurationDigest(configuration.data));
     return NextResponse.json({message:result.text,confidence:result.confidence,handoff:Boolean(result.handoffReason),handoffReason:result.handoffReason??null,testToken:token,provider:provider.name});
   }catch(error){await captureOperationalError({workspaceId:auth.workspaceId,requestId:request.headers.get("x-request-id")??undefined,category:"AI",code:"ONBOARDING_PREVIEW_FAILED",message:error instanceof Error?error.message:"AI provider unavailable"});return NextResponse.json({error:"AI_PREVIEW_FAILED"},{status:503})}
