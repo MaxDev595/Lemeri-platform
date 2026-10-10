@@ -98,7 +98,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ emp
   const result = await handleIncomingMessage({ workspaceId: employee.workspaceId, employeeId, conversationId: conversation.id, content: parsed.data.message, site: { origin: siteOrigin, page: pageUrlFor(siteOrigin, parsed.data.page) }, siteRoot });
   // Deliver CRM events (lead/appointment created by the AI) without waiting for the scheduler.
   drainJobsAfterResponse();
-  // The site was crawled but the AI overview is not written yet: write it after this reply.
-  if ("siteOverviewPending" in result && result.siteOverviewPending) { try { after(async () => { const { ensureSiteOverview } = await import("@/lib/knowledge/site-study"); const { locale } = await getWorkspaceTranslator(employee.workspaceId); await ensureSiteOverview(employee.workspaceId, locale === "en" ? "en" : "ru").catch(error => console.error("Site overview failed", error instanceof Error ? error.message : error)); }); } catch { /* outside a request scope */ } }
+  // A site study was queued or the overview is missing: do it after this reply.
+  if ("siteWork" in result && result.siteWork) { try { after(async () => { const [{ runSiteJobs }, { ensureSiteOverview }] = await Promise.all([import("@/lib/knowledge/site-jobs"), import("@/lib/knowledge/site-study")]); const { locale } = await getWorkspaceTranslator(employee.workspaceId); await runSiteJobs(1).catch(error => console.error("Site study failed", error instanceof Error ? error.message : error)); await ensureSiteOverview(employee.workspaceId, locale === "en" ? "en" : "ru", { force: true }).catch(error => console.error("Site overview failed", error instanceof Error ? error.message : error)); }); } catch { /* outside a request scope */ } }
   return NextResponse.json({ conversationId: conversation.id, messageId:result.message.id, message: result.message.content, confidence: result.confidence, handoff: result.handoff });
 }

@@ -259,3 +259,66 @@ input[type=color] { width: 36px; height: 30px; padding: 2px; border: 1px solid v
 .sxStudyToggle svg.up { transform: rotate(180deg); }
 .sxStudyOverview { max-height: 360px; overflow: auto; padding-top: 6px; color: var(--text-2); line-height: 1.55; white-space: pre-wrap; }
 .sxStudyOverview ul { margin: 4px 0; padding-left: 18px; }
+/* Checkout (Paddle) */
+.ckPage { min-height: 100vh; background: var(--bg); color: var(--text); }
+.ckTop { display: flex; align-items: center; gap: 16px; max-width: 1120px; margin: 0 auto; padding: 18px 20px; }
+.ckBack { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); font-size: var(--fs-14); text-decoration: none; }
+.ckBack:hover { color: var(--text); }
+.ckBrand { display: inline-flex; align-items: center; gap: 8px; margin: 0 auto; font-weight: 650; }
+.ckSecure { display: inline-flex; align-items: center; gap: 6px; color: var(--ok); font-size: var(--fs-13); }
+.ckGrid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; align-items: start; gap: 28px; max-width: 1120px; margin: 0 auto; padding: 8px 20px 64px; }
+.ckMain h1 { margin: 0 0 14px; font-size: var(--fs-28); letter-spacing: -.02em; }
+.ckSteps { display: flex; gap: 18px; margin: 0 0 18px; padding: 0; list-style: none; color: var(--text-3); font-size: var(--fs-14); }
+.ckSteps li { display: inline-flex; align-items: center; gap: 8px; }
+.ckSteps span { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line-strong); font-size: var(--fs-12); }
+.ckSteps li.on { color: var(--text); font-weight: 600; }
+.ckSteps li.on span { border-color: var(--accent); background: var(--accent); color: var(--text-on-accent); }
+.ckSteps li.done span { border-color: var(--ok); background: var(--ok); color: #fff; }
+.ckForm { display: grid; gap: 14px; }
+.ckForm fieldset { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; margin: 0; padding: 18px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+.ckForm legend { display: inline-flex; align-items: center; gap: 7px; padding: 0 6px; font-weight: 600; font-size: var(--fs-14); }
+.ckForm label { display: grid; gap: 6px; font-size: var(--fs-13); color: var(--text-2); }
+.ckForm label.wide { grid-column: 1 / -1; }
+.ckForm label em { font-style: normal; color: var(--text-4); }
+.ckForm label small { color: var(--text-3); }
+.ckForm input, .ckForm select { width: 100%; min-height: 42px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--bg); color: var(--text); font: inherit; font-size: var(--fs-14); }
+.ckForm input:focus, .ckForm select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-ring); }
+.ckForm .ckCheck { display: flex; align-items: center; gap: 8px; color: var(--text); font-size: var(--fs-14); cursor: pointer; }
+.ckForm .ckCheck input { width: 16px; min-height: 16px; height: 16px; }
+.ckForm.locked fieldset { opacity: .7; }
+.ckSubmit { justify-self: start; min-height: 44px; padding: 0 22px; }
+.ckError { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--bad-soft); color: var(--bad); font-size: var(--fs-13); }
+.ckDone { display: flex; align-items: center; gap: 8px; margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--ok-soft); color: var(--ok); }
+.ckCard { display: none; margin-top: 18px; padding: 18px; border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line)); border-radius: 16px; background: var(--surface); }
+.ckCard.on { display: grid; gap: 10px; }
+.ckCard h2 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: var(--fs-16); }
+.ckNote { display: flex; align-items: flex-start; gap: 8px; margin: 0; color: var(--text-2); font-size: var(--fs-13); line-height: 1.5; }
+.ckFrame { min-height: 120px; }
+.ckSummary { position: sticky; top: 20px; display: grid; gap: 10px; padding: 20px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); }
+.ckSummary h2 { margin: 0; font-size: var(--fs-16); }
+.ckSummary small { color: var(--text-3); font-size: var(--fs-12); line-height: 1.45; }
+.ckPlan { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 12px; border-radius: 12px; background: var(--bg-sunken); }
+.ckPlan div { display: grid; gap: 2px; }
+.ckPlan small { color: var(--text-3); }
+.ckPlan strong small { font-weight: 400; }
+.ckPlanIcon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: var(--accent-soft); }
+.ckSummary ul { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; color: var(--text-2); font-size: var(--fs-13); }
+.ckSummary li { display: flex; gap: 7px; }
+.ckSummary li svg { flex: none; margin-top: 2px; color: var(--ok); }
+.ckTotal { display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px solid var(--line); font-size: var(--fs-15); }
+.ckMor, .ckLegal { margin: 0; color: var(--text-3); font-size: var(--fs-12); line-height: 1.5; }
+.ckLegal a { color: var(--accent); }
+@media (max-width: 860px) { .ckGrid { grid-template-columns: 1fr; } .ckSummary { position: static; order: -1; } .ckForm fieldset { grid-template-columns: 1fr; } .ckBrand { display: none; } }
+/* Plan comparison */
+.sxCompare { overflow-x: auto; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); }
+.sxCompare table { width: 100%; min-width: 560px; border-collapse: collapse; font-size: var(--fs-13); }
+.sxCompare th, .sxCompare td { padding: 10px 14px; border-bottom: 1px solid var(--line-soft); text-align: center; }
+.sxCompare th:first-child, .sxCompare td:first-child { text-align: left; color: var(--text-2); }
+.sxCompare thead th { color: var(--text); font-size: var(--fs-14); }
+.sxCompare tr.group td { padding-top: 16px; color: var(--text); font-weight: 600; background: var(--bg-sunken); }
+.sxCompare .yes { color: var(--ok); }
+.sxCompare .no { color: var(--text-4); }
+.sxCompare td.current, .sxCompare th.current { background: var(--accent-softer); }
+.ckForm select { height: 42px; appearance: auto; }
+.ckForm input[type="checkbox"] { appearance: auto; width: 16px; height: 16px; min-height: 16px; padding: 0; accent-color: var(--accent); }
+.ckForm > .linkButton { justify-self: start; background: none; }

@@ -4,12 +4,16 @@ import { useCallback, useEffect, useState } from "react";
 import { Check, Clock3, CreditCard, ExternalLink, Sparkles } from "lucide-react";
 import type { Access } from "@/lib/billing/plans";
 import { COMING_SOON, PLAN_OFFER } from "@/lib/billing/offer";
+import { FEATURE_MATRIX } from "@/lib/billing/features";
+import { Minus } from "lucide-react";
 
 // Subscription: current plan and trial, AI reply allowance, Trial / Starter / Custom.
-// Plan changes go through Stripe (checkout for a new subscription, in-place switch
-// with proration for an existing one, customer portal for cards and cancellation).
+// Payments go through Paddle: a new subscription opens /app/checkout (payer details +
+// Paddle's card frame), an existing one is switched in place with proration, and the
+// Paddle portal handles cards, invoices and cancellation. The comparison table comes
+// from FEATURE_MATRIX — the same list the server enforces.
 
-type Billing = { access: Access; used: number; subscription: { plan: string; status: string; currentPeriodEnd: string; cancelAtPeriodEnd: boolean; portal: boolean } | null; configured: { stripe: boolean; starter: boolean; custom: boolean } };
+type Billing = { access: Access; used: number; subscription: { plan: string; status: string; currentPeriodEnd: string; cancelAtPeriodEnd: boolean; portal: boolean } | null; configured: { stripe?: boolean; paddle?: boolean; starter: boolean; custom: boolean }; provider?: "paddle" | "stripe" };
 
 export function PlanPanel({ locale, notify, isOwner }: { locale: string; notify: (text: string) => void; isOwner: boolean }) {
   const ru = locale !== "en";
@@ -22,7 +26,7 @@ export function PlanPanel({ locale, notify, isOwner }: { locale: string; notify:
     try { const response = await fetch("/api/billing", { cache: "no-store" }); if (!response.ok) throw new Error(); setData(await response.json()); } catch { setFailed(true); }
   }, []);
   useEffect(() => { void load(); }, [load]);
-  useEffect(() => { const query = new URLSearchParams(window.location.search).get("billing"); if (query === "success") notify(ru ? "Оплата прошла — тариф обновится через минуту" : "Payment complete — the plan updates within a minute"); else if (query === "cancelled") notify(ru ? "Оплата отменена" : "Payment cancelled"); }, [notify, ru]);
+  useEffect(() => { const query = new URLSearchParams(window.location.search).get("billing"); if (query === "success") notify(ru ? "Оплата прошла — тариф обновится через минуту" : "Payment complete — the plan updates within a minute"); else if (query === "changed") notify(ru ? "Тариф изменён — разница пересчитается в следующем счёте" : "Plan changed — the difference is prorated"); else if (query === "cancelled") notify(ru ? "Оплата отменена" : "Payment cancelled"); }, [notify, ru]);
   if (failed) return <div className="sxState"><p>{ru ? "Не удалось загрузить подписку" : "Couldn't load the subscription"}</p><button className="btn" onClick={() => void load()}>{ru ? "Повторить" : "Retry"}</button></div>;
   if (!data) return <div className="sxState"><span className="sxSpinner"/>{ru ? "Загружаем подписку…" : "Loading subscription…"}</div>;
 
@@ -36,6 +40,8 @@ export function PlanPanel({ locale, notify, isOwner }: { locale: string; notify:
     : access.state === "past_due" ? (ru ? "Не удалось списать оплату — обновите карту, иначе ИИ остановится" : "Payment failed — update your card or the AI will stop")
     : (ru ? "Нет активного тарифа: ИИ не отвечает посетителям, они могут оставить заявку" : "No active plan: the AI is paused, visitors can still leave requests");
   const choose = async (plan: "STARTER" | "CUSTOM") => {
+    // New subscription with Paddle: payer details and card on the checkout page.
+    if (data.provider !== "stripe" && !paidActive) { window.location.assign(`/app/checkout?plan=${plan}`); return; }
     setBusy(plan);
     try {
       const response = await fetch("/api/billing", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "checkout", plan }) });
@@ -59,7 +65,7 @@ export function PlanPanel({ locale, notify, isOwner }: { locale: string; notify:
       {data.subscription?.portal && isOwner && <button className="btn" disabled={busy === "portal"} onClick={portal}><ExternalLink size={14}/>{ru ? "Оплата и счета" : "Billing & invoices"}</button>}
     </section>
     {access.openAccess && <p className="sxNote sxOpen"><Sparkles size={14}/>{ru ? "На время тестов вам доступно всё из Custom: полный редактор карточки, ИИ-подбор дизайна под сайт и повышенный лимит ответов. Оплата отключена." : "During testing you get everything in Custom: the full card editor, AI design matching and the higher reply limit. Payments are off."}</p>}
-    {!access.openAccess && !data.configured.stripe && <p className="sxNote">{ru ? "Онлайн-оплата пока не подключена: выбрать платный тариф можно будет после настройки Stripe." : "Online payments aren't set up yet."}</p>}
+    {!access.openAccess && !(data.configured.paddle ?? data.configured.stripe) && <p className="sxNote">{ru ? "Онлайн-оплата пока не подключена." : "Online payments aren't set up yet."}</p>}
     <div className="sxPlanGrid">
       {(["TRIAL", "STARTER", "CUSTOM"] as const).map(key => {
         const plan = offer[key]; const current = !access.openAccess && access.plan === key && (key === "TRIAL" ? access.state === "trial" : paidActive);
@@ -77,9 +83,22 @@ export function PlanPanel({ locale, notify, isOwner }: { locale: string; notify:
         </article>;
       })}
     </div>
+    <PlanCompare ru={ru} current={access.openAccess ? "CUSTOM" : access.plan}/>
     {!isOwner && <p className="sxMuted">{ru ? "Менять тариф может только владелец." : "Only the owner can change the plan."}</p>}
     <section className="sxSoon"><h3><Clock3 size={15}/>{ru ? "Скоро появится" : "Coming soon"}</h3><p>{ru ? "Не входит в тарифы сейчас — расскажем, когда будет готово." : "Not part of any plan yet."}</p><ul>{COMING_SOON[ru ? "ru" : "en"].map(item => <li key={item}>{item}</li>)}</ul></section>
   </div>;
+}
+
+/** Feature-by-feature comparison, drawn from the same matrix the API enforces. */
+function PlanCompare({ ru, current }: { ru: boolean; current: "TRIAL" | "STARTER" | "CUSTOM" }) {
+  const groups = { ai: ru ? "ИИ-продавец" : "AI seller", knowledge: ru ? "Знания" : "Knowledge", sales: ru ? "Заявки и диалоги" : "Requests & conversations", card: ru ? "Карточка на сайте" : "Website card" } as const;
+  const cell = (value: boolean | number | string) => value === true ? <Check size={15} className="yes"/> : value === false ? <Minus size={15} className="no"/> : typeof value === "number" ? value.toLocaleString(ru ? "ru-RU" : "en-US") : (ru ? "базовая" : "basic");
+  const plans = ["TRIAL", "STARTER", "CUSTOM"] as const;
+  return <section className="sxCompare" aria-label={ru ? "Сравнение тарифов" : "Plan comparison"}>
+    <table><thead><tr><th>{ru ? "Что входит" : "What's included"}</th>{plans.map(plan => <th key={plan} className={plan === current ? "current" : ""}>{PLAN_OFFER[ru ? "ru" : "en"][plan].name}</th>)}</tr></thead>
+      <tbody>{(Object.keys(groups) as Array<keyof typeof groups>).flatMap(group => [<tr key={group} className="group"><td colSpan={4}>{groups[group]}</td></tr>, ...FEATURE_MATRIX.filter(row => row.group === group).map(row => <tr key={row.key}><td>{row.label[ru ? "ru" : "en"]}</td>{plans.map(plan => <td key={plan} className={plan === current ? "current" : ""}>{cell(row.values[plan])}</td>)}</tr>)])}</tbody>
+    </table>
+  </section>;
 }
 
 /** Dashboard notice about the trial, an ended plan or a nearly used allowance. Silent when all is fine. */

@@ -29,5 +29,6 @@ export function AuthForm({ locale, action, mode, returnTo, employeeAccounts = fa
     {mode === "login" && <a className="forgotLink" href={localeHref("/forgot-password",locale)}>{t("auth.forgot")}</a>}
     {state.error && <p className="formError" role="alert">{state.error}</p>}
     <button className="primary authSubmit" disabled={pending}>{pending ? <LoaderCircle className="spin" size={17}/> : <>{mode === "login" ? t("auth.login") : account==="EMPLOYEE" ? (ru?"Создать аккаунт сотрудника":"Create employee account") : t("auth.createCompany")}<ArrowRight className="submitArrow" size={16}/></>}</button>
+    {mode === "register" && <small className="authLegal">{ru ? "Регистрируясь, вы принимаете " : "By signing up you accept the "}<a href={`/legal/terms${ru ? "" : "?lang=en"}`} target="_blank">{ru ? "условия использования" : "terms"}</a>{ru ? " и " : " and "}<a href={`/legal/privacy${ru ? "" : "?lang=en"}`} target="_blank">{ru ? "политику конфиденциальности" : "privacy policy"}</a>.</small>}
   </form>;
 }

@@ -2,12 +2,15 @@ import { after, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getApiWorkspace } from "@/lib/auth/api";
 import { canWorkspace } from "@/lib/auth/permissions";
-import { drainJobsAfterResponse } from "@/lib/jobs/kick";
 import { checkRateLimit } from "@/lib/security/request";
 import { decryptCredentials } from "@/lib/security/encryption";
 import { OVERVIEW_TITLES, siteRootFromConfig } from "@/lib/knowledge/site-basics";
 import { queueSiteStudy } from "@/lib/knowledge/site-queue";
 import { ensureSiteOverview } from "@/lib/knowledge/site-study";
+import { runSiteJobs } from "@/lib/knowledge/site-jobs";
+import { workspaceAccess } from "@/lib/billing/access";
+import { planNumber, planRequired } from "@/lib/billing/features";
+import { normalizeStartUrl } from "@/lib/knowledge/page-read";
 
 // «Изучить сайт с помощью ИИ»: GET — state for the cabinet (suggested address,
 // progress, pages, overview); POST {url?} — start or repeat the study.
@@ -42,8 +45,8 @@ export async function GET() {
   const auth = await getApiWorkspace();
   if (!auth) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
   // A study that is still queued (e.g. the inline run was cut short) is pushed along on each poll.
-  drainJobsAfterResponse(2);
   const state = await siteState(auth.workspaceId);
+  if (state.source?.status === "STUDYING") after(() => runSiteJobs(1).then(() => undefined).catch(error => console.error("Site study failed", error instanceof Error ? error.message : error)));
   if (state.source?.status === "SUMMARIZING") after(() => ensureSiteOverview(auth.workspaceId, auth.locale, { force: true }).catch(error => console.error("Site overview failed", error instanceof Error ? error.message : error)));
   return NextResponse.json(state, { headers: { "cache-control": "no-store" } });
 }
@@ -56,6 +59,12 @@ export async function POST(request: Request) {
   const state = await siteState(auth.workspaceId);
   const target = typeof body.url === "string" && body.url.trim() ? body.url.trim() : state.suggestedUrl;
   if (!target) return NextResponse.json({ error: "URL_REQUIRED" }, { status: 400 });
+  let origin = "";
+  try { origin = normalizeStartUrl(target).origin; } catch { return NextResponse.json({ error: "INVALID_URL" }, { status: 400 }); }
+  const access = await workspaceAccess(auth.workspaceId);
+  const known = await db.knowledgeSource.findFirst({ where: { workspaceId: auth.workspaceId, type: "WEBSITE", uri: { startsWith: origin } }, select: { id: true } });
+  const limit = planNumber(access, "knowledgeSources");
+  if (!known && await db.knowledgeSource.count({ where: { workspaceId: auth.workspaceId } }) >= limit) return NextResponse.json({ ...planRequired("knowledgeSources"), plan: "STARTER", limit }, { status: 402 });
   const limited = await checkRateLimit("knowledge:study-site", auth.workspaceId, 6, 3600);
   if (!limited.allowed) return NextResponse.json({ error: "RATE_LIMITED" }, { status: 429, headers: { "retry-after": String(limited.retryAfter) } });
   try {
@@ -65,6 +74,6 @@ export async function POST(request: Request) {
   }
   catch { return NextResponse.json({ error: "INVALID_URL" }, { status: 400 }); }
   await db.auditLog.create({ data: { workspaceId: auth.workspaceId, userId: auth.user.id, actorType: "USER", action: "SITE_STUDY_STARTED", entityType: "KnowledgeSource", metadata: { url: target.slice(0, 300) } } }).catch(() => undefined);
-  drainJobsAfterResponse(3);
+  after(() => runSiteJobs(1).then(() => undefined).catch(error => console.error("Site study failed", error instanceof Error ? error.message : error)));
   return NextResponse.json(await siteState(auth.workspaceId), { status: 202 });
 }

@@ -12,7 +12,7 @@ const widgetCopy = {
   ru: {
     status: "ИИ-консультант · обычно отвечает сразу", hello: "Здравствуйте!", help: "Помогу выбрать и отвечу на вопросы.",
     message: "Напишите сообщение…", connecting: "Подключение…", messageLabel: "Сообщение", send: "Отправить",
-    powered: "Lemiri AI · ИИ может ошибаться", sendFailed: "Не удалось отправить сообщение", connectionFailed: "Ошибка соединения",
+    powered: "Lemiri AI · ИИ может ошибаться", disclaimer: "ИИ может ошибаться", sendFailed: "Не удалось отправить сообщение", connectionFailed: "Ошибка соединения",
     suggestions: ["Помогите выбрать", "Сколько стоит?", "Доставка и оплата"],
     lead: "Оставить заявку", leadTitle: "Заявка", leadCopy: "Оставьте контакты — менеджер свяжется с вами.",
     name: "Имя", phone: "Телефон", email: "Email", interest: "Что вас интересует", budget: "Бюджет", comment: "Комментарий",
@@ -25,7 +25,7 @@ const widgetCopy = {
   en: {
     status: "AI consultant · usually replies instantly", hello: "Hello!", help: "I'll help you choose and answer your questions.",
     message: "Type a message…", connecting: "Connecting…", messageLabel: "Message", send: "Send",
-    powered: "Lemiri AI · AI can make mistakes", sendFailed: "Could not send the message", connectionFailed: "Connection error",
+    powered: "Lemiri AI · AI can make mistakes", disclaimer: "AI can make mistakes", sendFailed: "Could not send the message", connectionFailed: "Connection error",
     suggestions: ["Help me choose", "How much is it?", "Delivery & payment"],
     lead: "Leave a request", leadTitle: "Request", leadCopy: "Leave your contacts and a manager will get back to you.",
     name: "Name", phone: "Phone", email: "Email", interest: "What are you interested in", budget: "Budget", comment: "Comment",
@@ -246,7 +246,7 @@ export function WebsiteWidget({ locale, employeeId, employeeName, company = "", 
     </section>
     {look.leadForm && !leadOpen && <button type="button" className="lwLeadButton" disabled={!ready} onClick={() => setLeadOpen(true)}><ClipboardList size={14}/>{copy.lead}</button>}
     <form className="lwComposer" onSubmit={submit}><input ref={inputRef} name="message" required maxLength={4000} autoComplete="off" placeholder={ready ? (design.composer.placeholder || copy.message) : copy.connecting} aria-label={copy.messageLabel}/><button disabled={busy || !ready} aria-label={copy.send}><SendIcon size={18}/></button></form>
-    <footer>{copy.powered}</footer>
+    <footer>{look.tier === "custom" ? copy.disclaimer : copy.powered}</footer>
   </main>;
 }
 

@@ -4,12 +4,16 @@ import { getApiWorkspace } from "@/lib/auth/api";
 import { canWorkspace } from "@/lib/auth/permissions";
 import { db } from "@/lib/db";
 import { drainJobsAfterResponse } from "@/lib/jobs/kick";
+import { workspaceAccess } from "@/lib/billing/access";
+import { planAllows, planRequired } from "@/lib/billing/features";
 
 const replySchema=z.object({content:z.string().trim().min(1).max(4000)});
 
 export async function POST(request:Request,{params}:{params:Promise<{id:string}>}){
   const auth=await getApiWorkspace();if(!auth)return NextResponse.json({error:"UNAUTHORIZED"},{status:401});
   if(!canWorkspace(auth.membership.role,"TAKE_OVER_CONVERSATION"))return NextResponse.json({error:"FORBIDDEN"},{status:403});
+  // Replying to the visitor from the cabinet is a Starter feature (lib/billing/features.ts).
+  if(!planAllows(await workspaceAccess(auth.workspaceId),"managerReplies"))return NextResponse.json(planRequired("managerReplies"),{status:402});
   const parsed=replySchema.safeParse(await request.json().catch(()=>null));if(!parsed.success)return NextResponse.json({error:"INVALID_REQUEST"},{status:400});
   const {id}=await params;const conversation=await db.conversation.findFirst({where:{id,workspaceId:auth.workspaceId},include:{customer:true}});
   if(!conversation)return NextResponse.json({error:"NOT_FOUND"},{status:404});

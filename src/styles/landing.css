@@ -1418,3 +1418,20 @@ html.lenis {
 @media (max-width: 900px) { .lnPlans.lnPlans3, .lnProblems { grid-template-columns: 1fr; } .lnSoon { grid-template-columns: 1fr; } .lnDemo .lnFloatLead { left: 8px; bottom: 12px; } }
 @media (max-width: 640px) { .lnFeatures, .lnCases, .lnBenefits { grid-template-columns: 1fr; } .lnDemoBrowser { height: 470px; } .lnDemoCard { right: 10px; left: 10px; width: auto; } .lnDemoPage { display: none; } }
 .lnOpen { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; padding: 8px 14px; border: 1px solid color-mix(in srgb, var(--accent, #5b5bd6) 35%, transparent); border-radius: 999px; background: color-mix(in srgb, var(--accent, #5b5bd6) 10%, transparent); font-size: 14px; font-weight: 600; }
+/* Legal pages */
+.lgPage { min-height: 100vh; background: var(--bg); color: var(--text); }
+.lgTop { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; max-width: 860px; margin: 0 auto; padding: 20px; }
+.lgTop nav { display: flex; gap: 16px; flex-wrap: wrap; font-size: var(--fs-14); }
+.lgTop nav a { color: var(--text-2); text-decoration: none; }
+.lgTop nav a:hover { color: var(--text); }
+.lgBody { max-width: 860px; margin: 0 auto; padding: 8px 20px 80px; line-height: 1.65; font-size: var(--fs-15); color: var(--text-2); }
+.lgBody h1 { margin: 12px 0 4px; color: var(--text); font-size: var(--fs-32); letter-spacing: -.02em; }
+.lgBody h2 { margin: 28px 0 8px; color: var(--text); font-size: var(--fs-18); }
+.lgBody ul { padding-left: 20px; }
+.lgBody a { color: var(--accent); }
+.lgMeta { color: var(--text-3); font-size: var(--fs-13); }
+.lgContacts { margin-top: 32px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.lgContacts h2 { margin-top: 0; }
+.lnLegal { display: flex; gap: 14px; flex-wrap: wrap; font-size: var(--fs-13); }
+.lnLegal a { color: var(--text-3); text-decoration: none; }
+.lnLegal a:hover { color: var(--text); }

@@ -12,9 +12,10 @@ import { bestPassages } from "./text-match";
 // - the page the visitor is on is read live (cached for 10 minutes);
 // - while the site is not studied yet, the home page is read live as well and a
 //   full study is queued once (the next replies use the whole site).
-// Budget per reply: one DB query + at most two page fetches.
+// Budget per reply: one DB query + at most three page fetches (current, home, and
+// while the site is not studied, the home-page link that best fits the question).
 
-type Page = { title: string; description: string; content: string };
+type Page = { title: string; description: string; content: string; links: Array<{ url: string; text: string }> };
 const cache = new Map<string, { at: number; page: Page | null }>();
 const TTL = 10 * 60_000;
 
@@ -27,7 +28,11 @@ async function readPage(url: string): Promise<Page | null> {
     if (!result.contentType || /html|xml/i.test(result.contentType)) {
       const meta = pageMeta(result.text, result.url);
       const content = cleanHtml(result.text).slice(0, 30_000);
-      if (content.length >= 30 || meta.description) page = { ...meta, content };
+      const links: Page["links"] = [];
+      for (const match of result.text.matchAll(/<a\b[^>]*href=["']([^"'#]+)["'][^>]*>([\s\S]*?)<\/a>/gi)) {
+        try { const link = new URL(match[1], result.url); link.hash = ""; if (link.origin === result.url.origin && links.length < 80) links.push({ url: link.href, text: cleanHtml(match[2]).slice(0, 80) }); } catch { /* bad href */ }
+      }
+      if (content.length >= 30 || meta.description) page = { ...meta, content, links };
     }
   } catch { /* unreachable page: answer from what we have */ }
   if (cache.size > 200) cache.clear();
@@ -65,16 +70,39 @@ export async function siteKnowledge(params: { workspaceId: string; query: string
   const weak = !params.retrieved.length || params.retrieved[0].score < 0.25;
   if (origin && (!studied || weak) && pageUrl !== `${origin}/`) reads.push(live(`${origin}/`, "site-page-home", ru ? "Главная страница сайта" : "Website home page"));
   for (const item of await Promise.all(reads)) if (item && !seenIds.has(item.id)) extra.push(item);
+  // Not studied yet: follow the home-page link that best fits the question (prices → «Тарифы»).
+  if (origin && !studied && weak) {
+    const home = cache.get(`${origin}/`)?.page;
+    const best = home ? pickLink(home.links, params.query, [pageUrl, `${origin}/`]) : null;
+    if (best) { const item = await live(best, "site-page-related", ru ? "Подходящая страница сайта" : "Related website page"); if (item) extra.push(item); }
+  }
 
   // First conversation on a site nobody studied: study it once in the background.
+  let studyQueued = sources.some(source => source.status === "PROCESSING");
   if (origin && !sources.length) {
     try {
       const limited = await checkRateLimit("site:auto-study", params.workspaceId, 1, 6 * 3600);
-      if (limited.allowed) await queueSiteStudy(params.workspaceId, origin, params.locale);
+      if (limited.allowed) { await queueSiteStudy(params.workspaceId, origin, params.locale); studyQueued = true; }
     } catch (error) { console.error("Auto site study failed", error instanceof Error ? error.message : error); }
   }
   const context = pageUrl ? (ru ? `Посетитель сейчас на странице ${pageUrl}.` : `The visitor is on the page ${pageUrl}.`) : "";
   // Pages are read but the AI overview is not written yet: the caller writes it after the reply.
   const needsOverview = Boolean(studied && !studied.documents.length);
-  return { extra, context, origin, needsOverview };
+  return { extra, context, origin, needsOverview, studyQueued };
+}
+
+const PRICE = /(цен|стои|стоит|сколько|тариф|прайс|оплат|price|pricing|cost|plan|tarif)/i;
+const LINK_PRICE = /(цен|стоим|тариф|прайс|price|pricing|plans?\b|tarif)/i;
+/** Same-site link whose text or address best matches the question; prices map to pricing pages. */
+export function pickLink(links: Array<{ url: string; text: string }>, query: string, skip: Array<string | undefined>) {
+  const words = (query.toLowerCase().replace(/ё/g, "е").match(/[a-zа-я0-9]{3,}/g) ?? []).map(word => word.slice(0, 4));
+  let best: { url: string; score: number } | null = null;
+  for (const link of links) {
+    if (skip.includes(link.url) || /\.(pdf|jpe?g|png|zip)$/i.test(link.url) || /(login|sign-?in|sign-?up|register|cart|account|dashboard)/i.test(link.url)) continue;
+    const hay = `${link.text} ${decodeURIComponent(new URL(link.url).pathname)}`.toLowerCase().replace(/ё/g, "е");
+    let score = words.filter(word => hay.includes(word)).length;
+    if (PRICE.test(query) && LINK_PRICE.test(hay)) score += 2;
+    if (score > 0 && (!best || score > best.score)) best = { url: link.url, score };
+  }
+  return best?.url ?? null;
 }

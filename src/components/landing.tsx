@@ -146,6 +146,7 @@ export function Landing({ locale, signedIn = false, openAccess = false }: { loca
         <div><Logo /><small>{c.footer.made}</small></div>
         <nav>{links}</nav>
         <small>{c.footer.rights} · {c.footer.ai}</small>
+        <nav className="lnLegal"><a href={`/legal/terms${locale === "en" ? "?lang=en" : ""}`}>{locale === "ru" ? "Условия" : "Terms"}</a><a href={`/legal/privacy${locale === "en" ? "?lang=en" : ""}`}>{locale === "ru" ? "Конфиденциальность" : "Privacy"}</a><a href={`/legal/refund${locale === "en" ? "?lang=en" : ""}`}>{locale === "ru" ? "Возвраты" : "Refunds"}</a></nav>
       </footer>
     </div>
   );

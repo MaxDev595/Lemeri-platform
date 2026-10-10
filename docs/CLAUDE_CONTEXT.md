@@ -50,13 +50,23 @@
   - изменить их без Custom нельзя — API отвечает 402 `PLAN_REQUIRED`.
 - `LEMIRI_COMP_WORKSPACES` — список id пространств с бесплатным Custom (для своих).
 
-### Биллинг (Stripe, единственный механизм)
-- **Цены:** env `STRIPE_STARTER_PRICE_ID` и `STRIPE_CUSTOM_PRICE_ID`. Фолбэк — старые `STRIPE_START_PRICE_ID` и `STRIPE_GROWTH_PRICE_ID`.
-- **`POST /api/billing {action:"checkout", plan}`:**
-  - если подписки нет — Checkout;
-  - если подписка живая — смена цены в существующей подписке с пропорциональным перерасчётом. Второй подписки не создаётся.
-- **`POST /api/billing {action:"portal"}`** — Stripe Customer Portal: карта, счета, отмена.
-- **Вебхук** `/api/webhooks/stripe` обновляет plan, status и период. Защищён от устаревших событий.
+### Что входит в тарифы — `src/lib/billing/features.ts`
+- `FEATURE_MATRIX` — единый список функций по тарифам. Из него рисуется таблица сравнения в «Тариф и оплата», по нему же проверяет сервер (`planAllows` / `planNumber`, ответ 402 `PLAN_REQUIRED` с `feature` и нужным `plan`). Открытый доступ = Custom.
+- Trial: 150 ответов ИИ, до 5 источников знаний, «Изучить сайт» до 10 страниц, без загрузки документов, менеджер не отвечает из кабинета, дизайн `basic`, подпись «Lemiri AI» в карточке.
+- Starter: 2000 ответов, 50 источников, 20 страниц, документы (PDF/DOCX/XLSX), ответы менеджера из кабинета (`/api/conversations/[id]/messages`), дизайн `standard`.
+- Custom: всё из Starter + визуальный редактор, «Подобрать под сайт», карточка без подписи «Lemiri AI» (остаётся «ИИ может ошибаться»).
+- Проверки на сервере: `api/knowledge` и `study-site` (число источников), `api/knowledge/documents`, `api/conversations/[id]/messages`, дизайн — как раньше (`designAllows`), страницы краулера — `site-jobs.ts`.
+
+### Биллинг — Paddle (по умолчанию), Stripe как запасной (`BILLING_PROVIDER=stripe`)
+- **Env:** `PADDLE_API_KEY`, `PADDLE_CLIENT_TOKEN`, `PADDLE_WEBHOOK_SECRET`, `PADDLE_ENVIRONMENT=sandbox|production`, `PADDLE_STARTER_PRICE_ID`, `PADDLE_CUSTOM_PRICE_ID` (`PADDLE_API_BASE` — только для локальных тестов). Модуль `src/lib/billing/paddle.ts`.
+- **Оформление:** «Выбрать Starter/Custom» → `/app/checkout?plan=…` (`components/billing/checkout-page.tsx`, рендерится только в браузере). Шаг 1 — ФИО, email, страна (без RU/BY/IR/KP/CU/SY — Paddle их не обслуживает), регион, город, индекс, адрес, компания и ИНН/БИН/VAT. `POST /api/billing {action:"checkout", plan, details}` → Paddle customer + address (+ business) → таблица `BillingProfile` (создаётся сама, raw SQL, `lib/billing/profile.ts`) → transaction с `custom_data {workspaceId, plan}`. Шаг 2 — карта вводится во встроенной форме Paddle (Paddle.js inline, `frameTarget: lemiri-paddle-frame`). Номер карты к Lemiri не попадает; API отвергает похожие на карту данные (`CARD_DATA_NOT_ACCEPTED`).
+- **Смена тарифа:** живая подписка Paddle меняется на месте (`PATCH /subscriptions/{id}`, `prorated_immediately`), вторая не создаётся. **Портал:** `POST /api/billing {action:"portal"}` → Paddle customer portal (карта, счета, отмена).
+- **Вебхук:** `/api/webhooks/paddle` (и `/api/webhooks/stripe`) — один маршрут `api/webhooks/[type]/route.ts`, обработчики `lib/billing/paddle-webhook.ts` / `stripe-webhook.ts`. Подпись `Paddle-Signature` (HMAC, 5 минут), события по порядку (advisory lock + последний событие), привязка к пространству по `custom_data`. `transaction.completed` связывает customer/subscription, `subscription.*` ставит план, статус (`active/trialing/past_due/paused/canceled`), период и `cancelAtPeriodEnd`.
+- В Paddle включить события: `transaction.completed`, `subscription.created`, `subscription.updated`, `subscription.activated`, `subscription.canceled`, `subscription.past_due`, `subscription.paused`, `subscription.resumed`. URL: `https://lemeriai.com/api/webhooks/paddle`. Домен lemeriai.com одобрить в Paddle (Checkout → Website approval), default payment link — `https://lemeriai.com/app/checkout`.
+- CSP разрешает `cdn.paddle.com` (скрипт) и `*.paddle.com` (frame, connect).
+
+### Юридические страницы
+- `/legal/terms`, `/legal/privacy`, `/legal/refund` (одна страница `app/legal/[doc]`, `/terms` и т. п. — редиректы). Тексты `src/lib/legal/texts.ts` (шаблоны, перед платным запуском — проверить юристом), реквизиты из env: `LEMIRI_LEGAL_ENTITY`, `LEMIRI_LEGAL_ID`, `LEMIRI_LEGAL_ADDRESS`, `LEMIRI_LEGAL_COUNTRY`, `LEMIRI_SUPPORT_EMAIL`. Ссылки: футер лендинга, регистрация, оформление оплаты. Возврат: 14 дней с любого платежа через Paddle.
 
 ### Лимиты и экономика
 - Лимит считается в **ответах ИИ за период**: событие `AnalyticsEvent` с типом `AI_RESPONSE`. Период — календарный месяц, внутри платного периода — с его начала.
@@ -81,9 +91,9 @@
 - **Форма заявки в карточке:** `POST /api/widget/[employeeId]/lead`. Требует согласие (`consent: true` и текст согласия). Сохраняет `consentAt` и `consentText` в `customFields.lead`.
 - **Сбор заявки — ненавязчиво** (`prompt.ts`, блок COLLECTING A REQUEST): сначала ответ на вопрос; просьба о контактах — максимум одно короткое предложение и только когда разговор к этому подводит (хочет купить/заказать, личная цена, доставка к нему, просит связаться). Не в каждом ответе, не подряд, не на общие вопросы; проигнорировал — не повторяем до нового интереса. Бюджет — только если меняет рекомендацию.
 - **ИИ изучает сайт сам** (`src/lib/knowledge/site-*.ts`, `page-read.ts`, `website.ts`):
-  - **Кнопка «Изучить сайт»** (`components/sales/site-study.tsx`) — вверху «Карточки и подключения» и «Базы знаний». `POST /api/knowledge/study-site {url?}` (адрес по умолчанию — из разрешённых сайтов карточки или где она замечена; 6 раз в час) → источник WEBSITE + задача `WEBSITE_INGEST` → краулер: robots.txt, sitemap.xml, сначала полезные страницы (цены, каталог, контакты, доставка, FAQ), без логина/корзины/кабинета, до 20 страниц, меню/футер вырезаются со 2-й страницы. Страницы сразу в базе знаний (status READY, лексический поиск). `GET` показывает прогресс: STUDYING → SUMMARIZING → READY.
+  - **Кнопка «Изучить сайт»** (`components/sales/site-study.tsx`) — вверху «Карточки и подключения» и «Базы знаний». `POST /api/knowledge/study-site {url?}` (адрес по умолчанию — из разрешённых сайтов карточки или где она замечена; 6 раз в час) → источник WEBSITE + задача `WEBSITE_INGEST`. Её выполняет **отдельный раннер** `site-jobs.ts` (общий `jobs/worker.ts` такие задачи не берёт: иначе краулер копировался в каждый маршрут, +60 KiB) — после ответа `study-site` (GET/POST), после ответа в чате и по cron. Краулер: robots.txt, sitemap.xml, сначала полезные страницы (цены, каталог, контакты, доставка, FAQ), без логина/корзины/кабинета, до 20 страниц, меню/футер вырезаются со 2-й страницы. Страницы сразу в базе знаний (status READY, лексический поиск). `GET` показывает прогресс: STUDYING → SUMMARIZING → READY.
   - **Обзор сайта (ИИ)** (`site-study.ts` → `ensureSiteOverview`) — отдельный документ «Обзор сайта (ИИ)»: компания, товары/тарифы с ценами как на сайте, условия, контакты, FAQ, ссылки только на этот сайт. Пишется не в очереди задач, а после ответа: по опросу `GET study-site` или после ответа в чате (`after()` в `widget/[id]/messages`). Без модели — список страниц.
-  - **Во время диалога** (`site-live.ts`, вызывается из оркестратора): в контекст всегда идут обзор сайта и страница, на которой сейчас посетитель (путь приходит из embed: `lemiri:configure {page}` / `lemiri:where`; кеш 10 мин); если сайт ещё не изучен или в знаниях нет ответа — ещё и главная. Первый диалог на неизученном сайте сам ставит изучение (раз в 6 ч на пространство). Онбординг с адресом сайта тоже запускает изучение.
+  - **Во время диалога** (`site-live.ts`, вызывается из оркестратора): в контекст всегда идут обзор сайта и страница, на которой сейчас посетитель (путь приходит из embed: `lemiri:configure {page}` / `lemiri:where`; кеш 10 мин); если сайт ещё не изучен или в знаниях нет ответа — ещё и главная, а пока сайт не изучен — и ссылка с главной, лучше всего подходящая к вопросу (`pickLink`: вопрос о цене → «Тарифы»). Первый диалог на неизученном сайте сам ставит изучение (раз в 6 ч на пространство). Онбординг с адресом сайта тоже запускает изучение.
   - Бюджет Worker: краулер, очередь и чат-часть подключаются через `await import()` — один общий чанк вместо копии в каждом маршруте (иначе +60 KiB gzip).
 - **Ответы в карточке** рендерятся безопасно (`RichText` в `website-widget.tsx`): только **жирный**, ссылки `https` и списки. HTML не вставляется.
 
@@ -102,7 +112,7 @@
 - **Workers Free:**
   - 10 ms CPU;
   - **50 subrequests на запрос** — каждый запрос к БД по HTTP считается;
-  - **3 MiB gzip** на бандл, сейчас ≈3045 KiB.
+  - **3 MiB gzip** на бандл, сейчас ≈3051 KiB. Каждый новый маршрут и всё, что импортирует `jobs/worker.ts`, копируется в чанки многих маршрутов — новые страницы лучше делать клиентскими (`dynamic(..., {ssr:false})`) или объединять в один динамический маршрут.
 
   Рекомендуется Workers Paid.
 - Продакшен-кабинет читает данные одним SQL-снимком: `getDirectAppSnapshot` в `src/lib/neon-direct.ts`. Новые поля для кабинета добавлять и туда, и в Prisma-путь `src/app/app/page.tsx`.

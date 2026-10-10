@@ -19,6 +19,7 @@ const ERRORS: Record<string, { ru: string; en: string }> = {
   INVALID_URL: { ru: "Похоже, адрес указан с ошибкой", en: "The address looks wrong" },
   RATE_LIMITED: { ru: "Слишком часто — попробуйте позже", en: "Too many tries — try again later" },
   FORBIDDEN: { ru: "Недостаточно прав", en: "Not allowed" },
+  PLAN_REQUIRED: { ru: "В вашем тарифе закончились источники знаний — смените тариф или удалите лишние", en: "No knowledge sources left on your plan — upgrade or remove some" },
 };
 
 export function SiteStudy({ locale, notify, onDone, compact }: { locale: string; notify: (text: string) => void; onDone?: () => void; compact?: boolean }) {

@@ -429,3 +429,5 @@
     right: 20px;
   }
 }
+.authLegal { color: var(--text-3); font-size: var(--fs-12); line-height: 1.5; text-align: center; }
+.authLegal a { color: var(--accent); }

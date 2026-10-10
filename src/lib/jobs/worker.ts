@@ -5,7 +5,6 @@ import { indexKnowledgeSource } from "@/lib/knowledge/index";
 import { decryptCredentials } from "@/lib/security/encryption";
 import { getConnector } from "@/lib/connectors/registry";
 import { deliverCrmWebhook, type WebhookCRMConfig } from "@/lib/integrations/webhook-crm";
-import { configuredEmbeddingProvider } from "@/lib/ai/embeddings";
 import { getWorkspaceTranslator } from "@/lib/workspace-locale";
 
 type JobPayload = Record<string, unknown>;
@@ -63,18 +62,6 @@ export async function runJobBatch(limit = 10) {
         if (!integration?.credentialsEncrypted) throw new Error("Connected CRM integration not found");
         await deliverCrmWebhook(decryptCredentials<WebhookCRMConfig>(integration.credentialsEncrypted), payload.event, payload.data, payload.idempotencyKey);
         await db.integration.update({ where: { id: integration.id }, data: { lastSyncAt: new Date(), lastError: null } });
-      } else if (job.type === "WEBSITE_INGEST") {
-        const payload = job.payload as { sourceId?: string; overview?: boolean };
-        if (!payload.sourceId) throw new Error("WEBSITE_INGEST requires sourceId");
-        const source = await db.knowledgeSource.findFirst({ where: { id: payload.sourceId, workspaceId: job.workspaceId } });
-        if (!source?.uri) throw new Error("Website source not found");
-        // Loaded on demand: one shared chunk instead of a copy in every route that kicks jobs.
-        const [{ crawlWebsite }, { saveSitePages }] = await Promise.all([import("@/lib/knowledge/website"), import("@/lib/knowledge/site-queue")]);
-        const pages = await crawlWebsite(source.uri);
-        const {t}=await getWorkspaceTranslator(job.workspaceId);
-        // The AI overview of the business is written afterwards (knowledge/site-study.ts).
-        await saveSitePages(source.id, pages, index => t("server.fragment",{index}));
-        if (configuredEmbeddingProvider()) await db.backgroundJob.create({ data: { workspaceId: job.workspaceId, type: "KNOWLEDGE_INDEX", payload: { sourceId: source.id } } });
       } else {
         throw new Error(`Unsupported job type: ${job.type}`);
       }

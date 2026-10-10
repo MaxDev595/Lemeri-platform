@@ -28,7 +28,7 @@ export async function handleIncomingMessage(params: { workspaceId: string; emplo
   const retrieved = await retrieveKnowledge(params.workspaceId, query);
   // The AI studies the website itself (overview, current page, home page) — see site-live.ts.
   const { siteKnowledge } = await import("@/lib/knowledge/site-live");
-  const site = await siteKnowledge({ workspaceId: params.workspaceId, query, locale: locale === "en" ? "en" : "ru", hint: params.site, fallbackRoot: params.siteRoot, retrieved }).catch(error => { console.error("Site knowledge failed", error instanceof Error ? error.message : error); return { extra: [], context: "", origin: undefined, needsOverview: false }; });
+  const site = await siteKnowledge({ workspaceId: params.workspaceId, query, locale: locale === "en" ? "en" : "ru", hint: params.site, fallbackRoot: params.siteRoot, retrieved }).catch(error => { console.error("Site knowledge failed", error instanceof Error ? error.message : error); return { extra: [], context: "", origin: undefined, needsOverview: false, studyQueued: false }; });
   const knowledge = [...retrieved, ...site.extra];
   const provider = params.provider ?? configuredAIProvider();
   const [conversation, workspace, settings] = await Promise.all([
@@ -62,7 +62,7 @@ export async function handleIncomingMessage(params: { workspaceId: string; emplo
       await tx.analyticsEvent.create({ data: { workspaceId: params.workspaceId, type: "HANDOFF_CREATED", payload: { conversationId: params.conversationId, reason: effectiveHandoffReason } } });
     }
     await tx.analyticsEvent.create({ data: { workspaceId: params.workspaceId, type: "AI_RESPONSE", payload: { provider: provider.name, confidence: result.confidence, citedChunks: result.usedSourceIds.length, handoff: Boolean(effectiveHandoffReason), actionKey:result.actionRequest?.key,actionStatus } } });
-    return { message, confidence: result.confidence, handoff: Boolean(effectiveHandoffReason), siteOverviewPending: site.needsOverview };
+    return { message, confidence: result.confidence, handoff: Boolean(effectiveHandoffReason), siteWork: site.needsOverview || site.studyQueued };
   });
   await triggerAutomations(effectiveHandoffReason?"HANDOFF_CREATED":"AI_RESPONSE",{workspaceId:params.workspaceId,employeeId:params.employeeId,conversationId:params.conversationId,data:{handoff:Boolean(effectiveHandoffReason),confidence:result.confidence}});
   return saved;
