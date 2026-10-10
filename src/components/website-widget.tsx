@@ -1,7 +1,7 @@
 "use client";
 
 import { CSSProperties, FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowUp, Check, ClipboardList, X } from "lucide-react";
+import { ArrowUp, Check, ClipboardList, SendHorizontal, Sparkles, X } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
 import { chatVars, fontHref, type ResolvedLook } from "@/lib/widget/design";
 import { LemiriGlyph } from "./logo";
@@ -95,6 +95,10 @@ export function WebsiteWidget({ locale, employeeId, employeeName, company = "", 
   const dark = previewDark ?? (theme === "dark" || (theme === "auto" && systemDark));
   const vars = useMemo(() => chatVars(design, dark), [design, dark]);
   const font = fontHref(design.font);
+  const headFont = design.headingFont !== "same" && design.headingFont !== design.font ? fontHref(design.headingFont) : "";
+  const SendIcon = design.composer.sendIcon === "send" ? SendHorizontal : design.composer.sendIcon === "sparkle" ? Sparkles : ArrowUp;
+  const classes = ["publicWidget", "lw", embedded && "embedded", preview && "preview", `bubbles-${design.bubbleStyle}`, `msg-${design.messages.animation}`, `typing-${design.messages.typing}`, `composer-${design.composer.style}`,
+    design.messages.shadow && "msg-shadow", design.effects.glass && "fx-glass", design.effects.pattern !== "none" && "fx-pattern"].filter(Boolean).join(" ");
 
   useEffect(() => { if (!preview) document.documentElement.lang = locale; }, [locale, preview]);
   useEffect(() => { if (!preview) document.documentElement.dataset.theme = theme === "auto" ? "" : theme; }, [theme, preview]);
@@ -216,13 +220,19 @@ export function WebsiteWidget({ locale, employeeId, employeeName, company = "", 
     ? <div className="lwWelcome hero"><span className="lwWelcomeAvatar" style={{ borderRadius: shape }}>{avatar(64)}</span><h1>{copy.hello}</h1><p>{copy.help}</p></div>
     : <div className="lwWelcome"><span className="lwWelcomeAvatar small" style={{ borderRadius: shape }}>{avatar(40)}</span><div className="lwBubble assistant"><b>{copy.hello}</b> {copy.help}</div></div>;
 
-  return <main className={`publicWidget lw${embedded ? " embedded" : ""}${preview ? " preview" : ""} bubbles-${design.bubbleStyle}`} data-dark={dark ? "true" : "false"} style={vars as CSSProperties}>
+  const bubble = (message: Message, index: number) => {
+    const node = <div className={`lwBubble ${message.role}`} key={index}><RichText text={message.text}/></div>;
+    return design.messages.avatar && message.role === "assistant" ? <div className="lwRowAi" key={index}><span className="lwMsgAvatar" style={{ borderRadius: shape }}>{avatar(26)}</span>{node}</div> : node;
+  };
+
+  return <main className={classes} data-dark={dark ? "true" : "false"} style={vars as CSSProperties}>
     {font && <link rel="stylesheet" href={font}/>}
+    {headFont && <link rel="stylesheet" href={headFont}/>}
     {!embedded && <header className={`lwHead ${design.header.style}`}>{design.header.showAvatar && <span className="lwHeadAvatar" style={{ borderRadius: shape }}>{avatar(38)}</span>}<div><b>{title}</b>{design.header.showStatus && <small>{copy.status}</small>}</div></header>}
     <section aria-live="polite" ref={streamRef}>
       {messages.length === 0 && welcome}
       {messages.length === 0 && design.welcome.showSuggestions && <div className="lwSuggestions">{copy.suggestions.map(item => <button type="button" key={item} disabled={busy || !ready} onClick={() => void send(item)}>{item}</button>)}</div>}
-      {messages.map((message, index) => <div className={`lwBubble ${message.role}`} key={index}><RichText text={message.text}/></div>)}
+      {messages.map(bubble)}
       {busy && <div className="lwBubble assistant typing" aria-label="…"><i/><i/><i/></div>}
       {leadOpen && <LeadForm copy={copy} company={company || title} privacyUrl={privacyUrl} onClose={() => setLeadOpen(false)} onSend={async values => {
         if (preview) { setLeadOpen(false); setMessages(value => [...value, { role: "assistant", text: copy.leadDone }]); return null; }
@@ -232,7 +242,7 @@ export function WebsiteWidget({ locale, employeeId, employeeName, company = "", 
       }}/>}
     </section>
     {look.leadForm && !leadOpen && <button type="button" className="lwLeadButton" disabled={!ready} onClick={() => setLeadOpen(true)}><ClipboardList size={14}/>{copy.lead}</button>}
-    <form className="lwComposer" onSubmit={submit}><input ref={inputRef} name="message" required maxLength={4000} autoComplete="off" placeholder={ready ? copy.message : copy.connecting} aria-label={copy.messageLabel}/><button disabled={busy || !ready} aria-label={copy.send}><ArrowUp size={18}/></button></form>
+    <form className="lwComposer" onSubmit={submit}><input ref={inputRef} name="message" required maxLength={4000} autoComplete="off" placeholder={ready ? (design.composer.placeholder || copy.message) : copy.connecting} aria-label={copy.messageLabel}/><button disabled={busy || !ready} aria-label={copy.send}><SendIcon size={18}/></button></form>
     <footer>{copy.powered}</footer>
   </main>;
 }

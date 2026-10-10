@@ -12,7 +12,7 @@ const featureIcons = [MessagesSquare, ShoppingBag, ClipboardList, Headset];
 const problemIcons = [MoonStar, Sparkles, X];
 const benefitIcons = [Clock3, Wrench, Settings2, BadgeCheck];
 
-export function Landing({ locale, signedIn = false }: { locale: Locale; signedIn?: boolean }) {
+export function Landing({ locale, signedIn = false, openAccess = false }: { locale: Locale; signedIn?: boolean; openAccess?: boolean }) {
   const c = landingCopy[locale];
   const plans = PLAN_OFFER[locale];
   const other = locale === "ru" ? "en" : "ru";
@@ -101,7 +101,7 @@ export function Landing({ locale, signedIn = false }: { locale: Locale; signedIn
 
         {/* Pricing */}
         <section className="lnSection" id="pricing">
-          <header className="lnHead lnHeadCenter reveal"><span className="lnKicker">{c.pricing.kicker}</span><h2>{c.pricing.title}</h2><p>{c.pricing.copy}</p></header>
+          <header className="lnHead lnHeadCenter reveal"><span className="lnKicker">{c.pricing.kicker}</span><h2>{c.pricing.title}</h2><p>{c.pricing.copy}</p>{openAccess && <span className="lnOpen"><Sparkles size={14} />{locale === "ru" ? "Сейчас идёт тестирование — все тарифы открыты бесплатно" : "We're testing — every plan is free right now"}</span>}</header>
           <div className="lnPlans lnPlans3" data-stagger>
             {(["TRIAL", "STARTER", "CUSTOM"] as const).map(key => {
               const plan = plans[key]; const featured = key === "CUSTOM";

@@ -6,6 +6,8 @@
 
 .publicWidget.lw {
   --lw-font: ui-sans-serif, system-ui, sans-serif;
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -28,10 +30,12 @@
   background: var(--lw-head-bg);
   color: var(--lw-head-text);
 }
-.lw .lwHead.accent { border-bottom: 0; background: var(--lw-accent); color: var(--lw-accent-text); }
+.lw .lwHead.accent { border-bottom: 0; background: var(--lw-accent-fill, var(--lw-accent)); color: var(--lw-accent-text); }
+.lw .lwHead.glass { background: color-mix(in srgb, var(--lw-head-bg) 62%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
 .lw .lwHead.gradient { background: radial-gradient(120% 140% at 0 0, color-mix(in srgb, var(--lw-accent) 16%, transparent), transparent 60%), var(--lw-head-bg); }
 .lw .lwHead.minimal { border-bottom: 0; background: transparent; }
 .lw .lwHead > div { display: grid; min-width: 0; line-height: 1.3; }
+.lw .lwHead b, .lw .lwWelcome.hero h1 { font-family: var(--lw-head-font, inherit); }
 .lw .lwHead b { overflow: hidden; font-size: 1.07em; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .lw .lwHead small { overflow: hidden; opacity: 0.72; font-size: 0.86em; text-overflow: ellipsis; white-space: nowrap; }
 .lw .lwHeadAvatar, .lw .lwWelcomeAvatar {
@@ -39,7 +43,7 @@
   flex: none;
   place-items: center;
   overflow: hidden;
-  background: var(--lw-accent);
+  background: var(--lw-accent-fill, var(--lw-accent));
   color: var(--lw-accent-text);
 }
 .lw .lwHeadAvatar { width: 38px; height: 38px; }
@@ -87,7 +91,7 @@
 .lw .lwBubble p + p, .lw .lwBubble ul + p, .lw .lwBubble p + ul { margin-top: 6px; }
 .lw .lwBubble ul { margin: 0; padding-left: 18px; }
 .lw .lwBubble a { color: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
-.lw .lwBubble.user { align-self: flex-end; border-bottom-right-radius: var(--lw-bubble-tail); background: var(--lw-user); color: var(--lw-user-text); }
+.lw .lwBubble.user { align-self: flex-end; border-bottom-right-radius: var(--lw-bubble-tail); background: var(--lw-user-fill, var(--lw-user)); color: var(--lw-user-text); }
 .lw .lwBubble.assistant { align-self: flex-start; border-bottom-left-radius: var(--lw-bubble-tail); background: var(--lw-bot); color: var(--lw-bot-text); }
 .lw .lwWelcome .lwBubble { max-width: calc(100% - 40px); }
 .lw .lwBubble.typing { display: inline-flex; gap: 4px; padding: 13px 15px; }
@@ -134,7 +138,7 @@
   height: 44px;
   border: 0;
   border-radius: var(--lw-btn-radius);
-  background: var(--lw-btn);
+  background: var(--lw-btn-fill, var(--lw-btn));
   color: var(--lw-btn-text);
   cursor: pointer;
   transition: transform .15s ease, opacity .15s ease;
@@ -167,6 +171,39 @@
 .lw .lwError { margin: 0; color: #d0424f; font-size: 0.86em; }
 .lw .lwPrimary { width: 100%; height: 40px; font: inherit; font-weight: 600; }
 
+/* ---- Premium look (Custom): texture, glass, message motion, typing, composer ---- */
+.lw.fx-pattern::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--lw-pattern);
+  opacity: var(--lw-pattern-o);
+  pointer-events: none;
+}
+.lw.fx-glass .lwBubble.assistant { background: color-mix(in srgb, var(--lw-bot) 78%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.lw.fx-glass .lwComposer input, .lw.fx-glass .lwSuggestions button, .lw.fx-glass .lwLead { background: color-mix(in srgb, var(--lw-surface) 70%, transparent); }
+.lw.msg-shadow .lwBubble { box-shadow: 0 1px 2px rgba(15, 18, 30, .06), 0 6px 18px -8px rgba(15, 18, 30, .22); }
+.lw.msg-shadow .lwBubble.user { box-shadow: 0 8px 22px -10px var(--lw-user); }
+.lw .lwRowAi { display: flex; align-items: flex-end; gap: 8px; max-width: 92%; }
+.lw .lwRowAi .lwBubble { max-width: none; }
+.lw .lwMsgAvatar { display: grid; flex: none; place-items: center; width: 26px; height: 26px; overflow: hidden; background: var(--lw-accent-fill, var(--lw-accent)); color: var(--lw-accent-text); }
+.lw.msg-pop .lwBubble { animation-name: lwPop; animation-duration: 340ms; animation-timing-function: cubic-bezier(.34, 1.5, .64, 1); }
+.lw.msg-fade .lwBubble { animation-name: lwFade; }
+.lw.msg-none .lwBubble, .lw.msg-none .lwWelcome { animation: none; }
+.lw.typing-wave .lwBubble.typing i { animation-name: lwWave; animation-duration: 1s; }
+.lw.typing-pulse .lwBubble.typing i { animation-name: lwPulseDot; animation-duration: 1.2s; }
+.lw .lwBubble.typing { animation: lwIn 300ms cubic-bezier(.16, 1, .3, 1) both; }
+.lw.composer-filled .lwComposer input { border-color: transparent; background: color-mix(in srgb, var(--lw-text) 6%, var(--lw-surface)); }
+.lw.composer-pill .lwComposer { margin: 0 12px 4px; padding: 6px; border: 1px solid var(--lw-border); border-radius: 999px; background: var(--lw-surface); box-shadow: 0 4px 16px -8px rgba(15, 18, 30, .2); }
+.lw.composer-pill .lwComposer input { min-height: 40px; border: 0; background: transparent; box-shadow: none !important; }
+.lw.composer-pill .lwComposer button { width: 40px; height: 40px; border-radius: 999px; }
+.lw.composer-pill .lwComposer:focus-within { border-color: var(--lw-accent); }
+
+@keyframes lwPop { from { opacity: 0; transform: translateY(8px) scale(.92); } to { opacity: 1; transform: none; } }
+@keyframes lwFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes lwWave { 0%, 60%, 100% { transform: translateY(0); opacity: .45; } 30% { transform: translateY(-5px); opacity: 1; } }
+@keyframes lwPulseDot { 0%, 100% { transform: scale(.7); opacity: .35; } 50% { transform: scale(1.15); opacity: 1; } }
 @keyframes lwIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes lwTyping { 0%, 80%, 100% { opacity: .3; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
 @media (prefers-reduced-motion: reduce) { .lw * { animation: none !important; transition: none !important; } }
@@ -176,4 +213,9 @@
 html:has(.publicWidget.embedded:not(.preview)),
 html:has(.publicWidget.embedded:not(.preview)) body {
   overflow: hidden;
+}
+/* Glass: the frame is transparent so the site shows (blurred) through the card. */
+html:has(.publicWidget.embedded.fx-glass:not(.preview)),
+html:has(.publicWidget.embedded.fx-glass:not(.preview)) body {
+  background: transparent !important;
 }

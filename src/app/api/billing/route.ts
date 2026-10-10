@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getApiWorkspace } from "@/lib/auth/api";
 import { db } from "@/lib/db";
 import { aiRepliesUsed, workspaceAccess } from "@/lib/billing/access";
-import { billingPlans } from "@/lib/billing/plans";
+import { billingPlans, openAccessEnabled } from "@/lib/billing/plans";
 import { billingPortalUrl, changeSubscriptionPrice, priceIdFor, StripeBillingProvider } from "@/lib/billing/stripe";
 
 // Trial / Starter ($19) / Custom ($29). The plan state shown here is computed by
@@ -41,6 +41,8 @@ export async function POST(request: Request) {
       if (!subscription?.externalCustomerId) return NextResponse.json({ error: "NO_SUBSCRIPTION" }, { status: 409 });
       return NextResponse.json({ url: await billingPortalUrl(subscription.externalCustomerId, `${base}/app?section=billing`) });
     }
+    // Nobody is charged while every plan is open for testing.
+    if (openAccessEnabled()) return NextResponse.json({ error: "OPEN_ACCESS" }, { status: 409 });
     const priceId = priceIdFor(parsed.data.plan);
     if (!priceId || !process.env.STRIPE_SECRET_KEY) return NextResponse.json({ error: "BILLING_PROVIDER_NOT_CONFIGURED" }, { status: 503 });
     // A live subscription is switched in place (prorated) — never a second checkout.

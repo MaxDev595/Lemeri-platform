@@ -26,3 +26,4 @@ import "./conversation-events.test.ts";
 import "./floating-card.test.ts";
 import "./widget-design.test.ts";
 import "./sales-profile.test.ts";
+import "./open-access-and-site-match.test.ts";

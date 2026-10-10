@@ -2,9 +2,9 @@
 
 import { ChangeEvent, CSSProperties, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { Check, Copy, Monitor, Moon, Palette, Plus, RotateCcw, Save, Smartphone, Sun, Trash2, Upload } from "lucide-react";
+import { Check, Copy, Gem, Megaphone, MessageSquareText, Monitor, Moon, Palette, Plus, RotateCcw, Save, Smartphone, Sun, Trash2, Type, Upload, Wand2 } from "lucide-react";
 import type { DesignTier } from "@/lib/billing/plans";
-import { DEFAULT_DESIGN, FONTS, READY_STYLES, resolveLook, shellConfig, type Colors, type Design, type DesignPreset, type StoredLook } from "@/lib/widget/design";
+import { DEFAULT_DESIGN, FONTS, normalizeDesign, READY_STYLES, resolveLook, shellConfig, type Colors, type Design, type DesignPreset, type StoredLook } from "@/lib/widget/design";
 import { WebsiteWidget } from "../website-widget";
 import { LemiriGlyph } from "../logo";
 import { Field, PlanLock, Section, Segmented, Toggle } from "./ui";
@@ -36,7 +36,14 @@ const T = {
     typography: "Шрифт", font: "Шрифт", fontSize: "Размер текста", sizeShape: "Размер и форма", width: "Ширина", height: "Высота", radius: "Скругление карточки", bubbleRadius: "Скругление сообщений", buttonRadius: "Скругление кнопок", border: "Рамка", shadow: "Тень", shadows: { none: "Без тени", soft: "Мягкая", medium: "Средняя", strong: "Сильная" }, opacity: "Непрозрачность фона",
     background: "Фон", bgTypes: { solid: "Сплошной", gradient: "Градиент" }, from: "Цвет 1", to: "Цвет 2", angle: "Угол",
     bubbles: "Сообщения", bubbleStyles: { tail: "С хвостиком", rounded: "Скруглённые", square: "Строгие" },
-    header: "Заголовок", headerStyles: { gradient: "Градиент", solid: "Сплошной", accent: "Цветной", minimal: "Минимальный" }, showAvatar: "Показывать аватар", showStatus: "Показывать подпись", avatarShape: "Форма аватара", shapes: { circle: "Круг", rounded: "Скругление", square: "Квадрат" },
+    header: "Заголовок", headerStyles: { gradient: "Градиент", solid: "Сплошной", accent: "Цветной", minimal: "Минимальный", glass: "Стекло" },
+    premium: "Премиум-эффекты", glass: "Матовое стекло", glassHint: "Карточка полупрозрачная, сайт за ней мягко размыт", blur: "Размытие", glow: "Свечение", glowHint: "Мягкий ореол цвета акцента вокруг карточки",
+    pattern: "Текстура фона", patterns: { none: "Без текстуры", dots: "Точки", grid: "Сетка", diagonal: "Штрих", aurora: "Аврора", noise: "Зерно" }, patternOpacity: "Интенсивность",
+    gradient: "Градиент акцента", gradientHint: "Кнопки, сообщения клиента и кнопка чата — переливом", gradientTo: "Второй цвет",
+    headingFont: "Шрифт заголовков", sameFont: "Как основной",
+    messageStyle: "Анимация сообщений", messageAnims: { rise: "Всплытие", pop: "Пружина", fade: "Проявление", none: "Без анимации" }, typing: "Индикатор «печатает»", typings: { dots: "Точки", wave: "Волна", pulse: "Пульс" }, msgAvatar: "Аватар рядом с ответами", msgShadow: "Тени у сообщений",
+    composer: "Поле ввода", composerStyles: { outlined: "Контур", filled: "Заливка", pill: "Капсула" }, sendIcon: "Иконка отправки", sendIcons: { arrow: "Стрелка", send: "Самолётик", sparkle: "Искра" }, placeholder: "Подсказка в поле", placeholderHint: "Например: «Спросите о товаре…»",
+    attention: "Привлечение внимания", pulse: "Пульсация кнопки", pulseHint: "Мягкая волна вокруг кнопки чата, пока чат закрыт", teaser: "Проактивное сообщение", teaserHint: "Всплывает рядом с кнопкой, один раз за визит. Например: «Подсказать с выбором?»", teaserDelay: "Показать через", showAvatar: "Показывать аватар", showStatus: "Показывать подпись", avatarShape: "Форма аватара", shapes: { circle: "Круг", rounded: "Скругление", square: "Квадрат" },
     launcher: "Кнопка открытия чата", icon: "Иконка", icons: { chat: "Чат", sparkles: "Искры", message: "Сообщение", help: "Вопрос", avatar: "Аватар" }, launcherSize: "Размер", launcherShape: "Форма кнопки", label: "Подсказка рядом", labelHint: "Например: «Помочь с выбором?»",
     welcome: "Приветственный экран", layouts: { bubble: "Сообщение", hero: "Крупно по центру" }, welcomeTitle: "Заголовок", welcomeText: "Текст", showSuggestions: "Показывать быстрые вопросы",
     animation: "Анимация", animations: { scale: "Увеличение", slide: "Выезд", fade: "Появление", none: "Без анимации" }, duration: "Длительность",
@@ -62,7 +69,14 @@ const T = {
     typography: "Font", font: "Font", fontSize: "Text size", sizeShape: "Size and shape", width: "Width", height: "Height", radius: "Card radius", bubbleRadius: "Message radius", buttonRadius: "Button radius", border: "Border", shadow: "Shadow", shadows: { none: "None", soft: "Soft", medium: "Medium", strong: "Strong" }, opacity: "Background opacity",
     background: "Background", bgTypes: { solid: "Solid", gradient: "Gradient" }, from: "Colour 1", to: "Colour 2", angle: "Angle",
     bubbles: "Messages", bubbleStyles: { tail: "With tail", rounded: "Rounded", square: "Strict" },
-    header: "Header", headerStyles: { gradient: "Gradient", solid: "Solid", accent: "Coloured", minimal: "Minimal" }, showAvatar: "Show avatar", showStatus: "Show subtitle", avatarShape: "Avatar shape", shapes: { circle: "Circle", rounded: "Rounded", square: "Square" },
+    header: "Header", headerStyles: { gradient: "Gradient", solid: "Solid", accent: "Coloured", minimal: "Minimal", glass: "Glass" },
+    premium: "Premium effects", glass: "Frosted glass", glassHint: "Translucent card with the site softly blurred behind it", blur: "Blur", glow: "Glow", glowHint: "Soft accent-coloured halo around the card",
+    pattern: "Background texture", patterns: { none: "None", dots: "Dots", grid: "Grid", diagonal: "Lines", aurora: "Aurora", noise: "Grain" }, patternOpacity: "Intensity",
+    gradient: "Accent gradient", gradientHint: "Buttons, visitor messages and the chat button as a gradient", gradientTo: "Second colour",
+    headingFont: "Heading font", sameFont: "Same as body",
+    messageStyle: "Message animation", messageAnims: { rise: "Rise", pop: "Spring", fade: "Fade", none: "None" }, typing: "Typing indicator", typings: { dots: "Dots", wave: "Wave", pulse: "Pulse" }, msgAvatar: "Avatar next to replies", msgShadow: "Message shadows",
+    composer: "Message field", composerStyles: { outlined: "Outlined", filled: "Filled", pill: "Pill" }, sendIcon: "Send icon", sendIcons: { arrow: "Arrow", send: "Plane", sparkle: "Sparkle" }, placeholder: "Field hint", placeholderHint: "e.g. “Ask about a product…”",
+    attention: "Attention", pulse: "Pulsing button", pulseHint: "A soft wave around the chat button while the chat is closed", teaser: "Proactive message", teaserHint: "Pops up next to the button once per visit, e.g. “Need help choosing?”", teaserDelay: "Show after", showAvatar: "Show avatar", showStatus: "Show subtitle", avatarShape: "Avatar shape", shapes: { circle: "Circle", rounded: "Rounded", square: "Square" },
     launcher: "Chat button", icon: "Icon", icons: { chat: "Chat", sparkles: "Sparkles", message: "Message", help: "Question", avatar: "Avatar" }, launcherSize: "Size", launcherShape: "Button shape", label: "Hint next to it", labelHint: "e.g. “Need help choosing?”",
     welcome: "Welcome screen", layouts: { bubble: "As a message", hero: "Large, centred" }, welcomeTitle: "Title", welcomeText: "Text", showSuggestions: "Show quick questions",
     animation: "Animation", animations: { scale: "Scale", slide: "Slide", fade: "Fade", none: "None" }, duration: "Duration",
@@ -105,7 +119,7 @@ function DesignEditor({ locale, channelId, employeeId, employeeName, company, no
   const [palette, setPalette] = useState<"colors" | "dark">("colors");
   const [device, setDevice] = useState<"desktop" | "phone">("desktop");
   const [previewDark, setPreviewDark] = useState(false);
-  const [previewScreen, setPreviewScreen] = useState<"dialog" | "welcome">("dialog");
+  const [previewScreen, setPreviewScreen] = useState<"dialog" | "welcome" | "closed">("dialog");
   const [presetName, setPresetName] = useState("");
   const load = useCallback(async () => {
     setFailed(false);
@@ -121,7 +135,8 @@ function DesignEditor({ locale, channelId, employeeId, employeeName, company, no
   const standardOk = tier !== "basic", customOk = tier === "custom";
   const update = (patch: Partial<StoredLook>) => { setLook(value => ({ ...value, ...patch })); setDirty(true); };
   // The editor always edits a full design: the stored one, or the ready style it started from.
-  const design: Design = look.design ?? READY_STYLES[look.style ?? "classic"]?.design ?? DEFAULT_DESIGN;
+  // normalizeDesign fills settings added later, so older saved designs open with defaults.
+  const design: Design = normalizeDesign(look.design ?? READY_STYLES[look.style ?? "classic"]?.design ?? DEFAULT_DESIGN);
   const setDesign = (patch: Partial<Design>) => update({ design: { ...design, ...patch } });
   const setColor = (key: keyof Colors, value: string) => setDesign({ [palette]: { ...design[palette], [key]: value } } as Partial<Design>);
   const save = async () => {
@@ -150,6 +165,9 @@ function DesignEditor({ locale, channelId, employeeId, employeeName, company, no
   return <div className="sxDesign">
     <div className="sxDesignForm">
       <p className="sxPlanNote">{c.planNote(state.plan === "CUSTOM" ? "Custom" : state.plan === "STARTER" ? "Starter" : "Trial")}</p>
+      <SiteMatch locale={locale} channelId={channelId} defaultUrl={state.allowedOrigins[0] ?? state.seen[0]?.origin ?? ""} locked={!customOk} onUpgrade={onUpgrade} notify={notify}
+        onApply={result => { const before = look; update({ design: result.design, theme: result.theme, accent: result.design.colors.accent }); return () => { setLook(before); }; }}/>
+
       <Section title={c.basics} copy={c.basicsCopy}>
         <div className="sxGrid">
           <Field label={c.title}><input value={look.title ?? ""} placeholder={employeeName} maxLength={60} onChange={e => update({ title: e.target.value })}/></Field>
@@ -179,6 +197,7 @@ function DesignEditor({ locale, channelId, employeeId, employeeName, company, no
         </fieldset>
       </Section>
 
+
       <Section title={c.custom} copy={c.customCopy} aside={!customOk ? <PlanLock plan="Custom" locale={locale} onUpgrade={onUpgrade}/> : <button type="button" className="linkButton" onClick={() => update({ design: undefined })}><RotateCcw size={13}/>{c.reset}</button>}>
         <fieldset disabled={!customOk} className={customOk ? "sxFieldset" : "sxFieldset locked"}>
           <Group title={c.colors} icon={<Palette size={14}/>}>
@@ -189,7 +208,20 @@ function DesignEditor({ locale, channelId, employeeId, employeeName, company, no
             <div className="sxGrid">
               <Field label={c.font}><select value={design.font} onChange={e => setDesign({ font: e.target.value as Design["font"] })}>{Object.entries(FONTS).map(([key, font]) => <option key={key} value={key}>{font.label}</option>)}</select></Field>
               {range(c.fontSize, design.fontSize, 12, 18, v => setDesign({ fontSize: v }))}
+              <Field label={c.headingFont}><select value={design.headingFont} onChange={e => setDesign({ headingFont: e.target.value as Design["headingFont"] })}><option value="same">{c.sameFont}</option>{Object.entries(FONTS).map(([key, font]) => <option key={key} value={key}>{font.label}</option>)}</select></Field>
             </div>
+          </Group>
+          <Group title={c.premium} icon={<Gem size={14}/>}>
+            <Toggle label={c.glass} hint={c.glassHint} checked={design.effects.glass} onChange={value => setDesign({ effects: { ...design.effects, glass: value }, ...(value && design.opacity > 80 ? { opacity: 74 } : {}), ...(!value && design.opacity < 85 ? { opacity: 100 } : {}) })}/>
+            {design.effects.glass && <div className="sxGrid">{range(c.blur, design.effects.blur, 4, 32, v => setDesign({ effects: { ...design.effects, blur: v } }))}</div>}
+            <Toggle label={c.glow} hint={c.glowHint} checked={design.effects.glow} onChange={value => setDesign({ effects: { ...design.effects, glow: value } })}/>
+            <Toggle label={c.gradient} hint={c.gradientHint} checked={design.accentGradient.enabled} onChange={value => setDesign({ accentGradient: { ...design.accentGradient, enabled: value } })}/>
+            {design.accentGradient.enabled && <div className="sxGrid">
+              <label className="sxColor"><input type="color" value={design.accentGradient.to} onChange={e => setDesign({ accentGradient: { ...design.accentGradient, to: e.target.value } })}/><span>{c.gradientTo}</span></label>
+              {range(c.angle, design.accentGradient.angle, 0, 360, v => setDesign({ accentGradient: { ...design.accentGradient, angle: v } }), "°")}
+            </div>}
+            <Field label={c.pattern}><div className="sxPatterns">{(["none", "dots", "grid", "diagonal", "aurora", "noise"] as const).map(key => <button type="button" key={key} className={design.effects.pattern === key ? "on" : ""} onClick={() => setDesign({ effects: { ...design.effects, pattern: key } })}><i className={`sxPat ${key}`}/><span>{c.patterns[key]}</span></button>)}</div></Field>
+            {design.effects.pattern !== "none" && <div className="sxGrid">{range(c.patternOpacity, design.effects.patternOpacity, 2, 40, v => setDesign({ effects: { ...design.effects, patternOpacity: v } }), "%")}</div>}
           </Group>
           <Group title={c.sizeShape}>
             <div className="sxGrid">
@@ -199,7 +231,7 @@ function DesignEditor({ locale, channelId, employeeId, employeeName, company, no
               {range(c.bubbleRadius, design.bubbleRadius, 2, 24, v => setDesign({ bubbleRadius: v }))}
               {range(c.buttonRadius, design.buttonRadius, 0, 24, v => setDesign({ buttonRadius: v }))}
               {range(c.border, design.borderWidth, 0, 3, v => setDesign({ borderWidth: v }))}
-              {range(c.opacity, design.opacity, 85, 100, v => setDesign({ opacity: v }), "%")}
+              {range(c.opacity, design.opacity, design.effects.glass ? 55 : 85, 100, v => setDesign({ opacity: v }), "%")}
               <Field label={c.shadow}><select value={design.shadow} onChange={e => setDesign({ shadow: e.target.value as Design["shadow"] })}>{(["none", "soft", "medium", "strong"] as const).map(key => <option key={key} value={key}>{c.shadows[key]}</option>)}</select></Field>
             </div>
           </Group>
@@ -211,9 +243,24 @@ function DesignEditor({ locale, channelId, employeeId, employeeName, company, no
               {range(c.angle, design.background.angle, 0, 360, v => setDesign({ background: { ...design.background, angle: v } }), "°")}
             </div>}
           </Group>
-          <Group title={c.bubbles}><Segmented label={c.bubbles} value={design.bubbleStyle} onChange={bubbleStyle => setDesign({ bubbleStyle })} options={(["tail", "rounded", "square"] as const).map(key => ({ value: key, label: c.bubbleStyles[key] }))}/></Group>
+          <Group title={c.bubbles} icon={<MessageSquareText size={14}/>}>
+            <Segmented label={c.bubbles} value={design.bubbleStyle} onChange={bubbleStyle => setDesign({ bubbleStyle })} options={(["tail", "rounded", "square"] as const).map(key => ({ value: key, label: c.bubbleStyles[key] }))}/>
+            <div className="sxGrid">
+              <Field label={c.messageStyle}><select value={design.messages.animation} onChange={e => setDesign({ messages: { ...design.messages, animation: e.target.value as Design["messages"]["animation"] } })}>{(["rise", "pop", "fade", "none"] as const).map(key => <option key={key} value={key}>{c.messageAnims[key]}</option>)}</select></Field>
+              <Field label={c.typing}><select value={design.messages.typing} onChange={e => setDesign({ messages: { ...design.messages, typing: e.target.value as Design["messages"]["typing"] } })}>{(["dots", "wave", "pulse"] as const).map(key => <option key={key} value={key}>{c.typings[key]}</option>)}</select></Field>
+              <Toggle label={c.msgAvatar} checked={design.messages.avatar} onChange={value => setDesign({ messages: { ...design.messages, avatar: value } })}/>
+              <Toggle label={c.msgShadow} checked={design.messages.shadow} onChange={value => setDesign({ messages: { ...design.messages, shadow: value } })}/>
+            </div>
+          </Group>
+          <Group title={c.composer} icon={<Type size={14}/>}>
+            <Segmented label={c.composer} value={design.composer.style} onChange={style => setDesign({ composer: { ...design.composer, style } })} options={(["outlined", "filled", "pill"] as const).map(key => ({ value: key, label: c.composerStyles[key] }))}/>
+            <div className="sxGrid">
+              <Field label={c.sendIcon}><select value={design.composer.sendIcon} onChange={e => setDesign({ composer: { ...design.composer, sendIcon: e.target.value as Design["composer"]["sendIcon"] } })}>{(["arrow", "send", "sparkle"] as const).map(key => <option key={key} value={key}>{c.sendIcons[key]}</option>)}</select></Field>
+              <Field label={c.placeholder} hint={c.placeholderHint}><input value={design.composer.placeholder} maxLength={60} onChange={e => setDesign({ composer: { ...design.composer, placeholder: e.target.value } })}/></Field>
+            </div>
+          </Group>
           <Group title={c.header}>
-            <Segmented label={c.header} value={design.header.style} onChange={style => setDesign({ header: { ...design.header, style } })} options={(["gradient", "solid", "accent", "minimal"] as const).map(key => ({ value: key, label: c.headerStyles[key] }))}/>
+            <Segmented label={c.header} value={design.header.style} onChange={style => setDesign({ header: { ...design.header, style } })} options={(["gradient", "solid", "accent", "minimal", "glass"] as const).map(key => ({ value: key, label: c.headerStyles[key] }))}/>
             <div className="sxGrid">
               <Toggle label={c.showAvatar} checked={design.header.showAvatar} onChange={value => setDesign({ header: { ...design.header, showAvatar: value } })}/>
               <Toggle label={c.showStatus} checked={design.header.showStatus} onChange={value => setDesign({ header: { ...design.header, showStatus: value } })}/>
@@ -226,6 +273,13 @@ function DesignEditor({ locale, channelId, employeeId, employeeName, company, no
               <Field label={c.launcherShape}><select value={design.launcher.shape} onChange={e => setDesign({ launcher: { ...design.launcher, shape: e.target.value as Design["launcher"]["shape"] } })}>{(["circle", "rounded", "square"] as const).map(key => <option key={key} value={key}>{c.shapes[key]}</option>)}</select></Field>
               {range(c.launcherSize, design.launcher.size, 44, 64, v => setDesign({ launcher: { ...design.launcher, size: v } }))}
               <Field label={c.label} hint={c.labelHint}><input value={design.launcher.label} maxLength={30} onChange={e => setDesign({ launcher: { ...design.launcher, label: e.target.value } })}/></Field>
+            </div>
+          </Group>
+          <Group title={c.attention} icon={<Megaphone size={14}/>}>
+            <Toggle label={c.pulse} hint={c.pulseHint} checked={design.attention.pulse} onChange={value => setDesign({ attention: { ...design.attention, pulse: value } })}/>
+            <div className="sxGrid">
+              <Field label={c.teaser} hint={c.teaserHint}><input value={design.attention.teaser} maxLength={90} onChange={e => setDesign({ attention: { ...design.attention, teaser: e.target.value } })}/></Field>
+              {design.attention.teaser && range(c.teaserDelay, design.attention.teaserDelay, 2, 60, v => setDesign({ attention: { ...design.attention, teaserDelay: v } }), locale === "en" ? "s" : " с")}
             </div>
           </Group>
           <Group title={c.welcome}>
@@ -259,9 +313,9 @@ function DesignEditor({ locale, channelId, employeeId, employeeName, company, no
 
     <aside className="sxPreview">
       <header><div><b>{c.preview}</b><small>{c.previewCopy}</small></div>
-        <div className="sxPreviewTools"><Segmented label={c.preview} value={device} onChange={setDevice} options={[{ value: "desktop", label: c.desktop }, { value: "phone", label: c.phone }]}/><Segmented label="screen" value={previewScreen} onChange={setPreviewScreen} options={[{ value: "dialog", label: locale === "en" ? "Dialog" : "Диалог" }, { value: "welcome", label: locale === "en" ? "Welcome" : "Приветствие" }]}/><button type="button" className="iconButton" aria-label="theme" onClick={() => setPreviewDark(value => !value)}>{previewDark ? <Sun size={15}/> : <Moon size={15}/>}</button></div>
+        <div className="sxPreviewTools"><Segmented label={c.preview} value={device} onChange={setDevice} options={[{ value: "desktop", label: c.desktop }, { value: "phone", label: c.phone }]}/><Segmented label="screen" value={previewScreen} onChange={setPreviewScreen} options={[{ value: "dialog", label: locale === "en" ? "Dialog" : "Диалог" }, { value: "welcome", label: locale === "en" ? "Welcome" : "Приветствие" }, { value: "closed", label: locale === "en" ? "Closed" : "Закрыта" }]}/><button type="button" className="iconButton" aria-label="theme" onClick={() => setPreviewDark(value => !value)}>{previewDark ? <Sun size={15}/> : <Moon size={15}/>}</button></div>
       </header>
-      <CardPreview locale={locale} employeeId={employeeId} employeeName={employeeName} company={company} look={resolved} device={device} dark={previewDark} sample={previewScreen === "dialog"}/>
+      <CardPreview locale={locale} employeeId={employeeId} employeeName={employeeName} company={company} look={resolved} device={device} dark={previewDark} sample={previewScreen === "dialog"} closed={previewScreen === "closed"}/>
     </aside>
   </div>;
 }
@@ -290,6 +344,57 @@ function ConnectionCheck({ locale, channelId, employeeActive, knowledgeReady, on
   </section>;
 }
 
+type MatchResult = { design: Design; theme: "auto" | "light" | "dark"; summary: string; notes: string[]; ai: boolean; found: { url: string; title: string; accent: string; palette: string[]; background: string; text: string; dark: boolean; bodyFont: string; headingFont: string; buttonRadius: number | null } };
+
+/** «Подобрать под сайт»: the AI reads the website and dresses the card in its style. */
+function SiteMatch({ locale, channelId, defaultUrl, locked, onUpgrade, notify, onApply }: { locale: string; channelId: string; defaultUrl: string; locked: boolean; onUpgrade: () => void; notify: (text: string) => void; onApply: (result: MatchResult) => () => void }) {
+  const ru = locale !== "en";
+  const [url, setUrl] = useState(defaultUrl);
+  const [busy, setBusy] = useState(false);
+  const [step, setStep] = useState(0);
+  const [result, setResult] = useState<MatchResult | null>(null);
+  const [undo, setUndo] = useState<(() => void) | null>(null);
+  const steps = ru ? ["Открываем сайт…", "Изучаем цвета и шрифты…", "ИИ собирает дизайн…"] : ["Opening the site…", "Reading colours and fonts…", "AI is composing the design…"];
+  const errors: Record<string, string> = ru
+    ? { URL_REQUIRED: "Укажите адрес сайта", INVALID_URL: "Похоже, адрес указан с ошибкой", PRIVATE_ADDRESS: "Нужен публичный адрес сайта (не localhost и не IP)", UNREACHABLE: "Не удалось открыть сайт. Проверьте адрес и что сайт доступен без пароля", NOT_HTML: "По этому адресу не веб-страница", RATE_LIMITED: "Слишком часто — попробуйте через пару минут", PLAN_REQUIRED: "Доступно в тарифе Custom" }
+    : { URL_REQUIRED: "Enter your website address", INVALID_URL: "The address looks wrong", PRIVATE_ADDRESS: "Use a public website address", UNREACHABLE: "Couldn't open the site. Check the address and that it's public", NOT_HTML: "That address isn't a web page", RATE_LIMITED: "Too many tries — wait a couple of minutes", PLAN_REQUIRED: "Available on Custom" };
+  const run = async () => {
+    setBusy(true); setStep(0); setResult(null);
+    const timer = window.setInterval(() => setStep(value => Math.min(2, value + 1)), 2200);
+    try {
+      const response = await fetch(`/api/channels/${channelId}/match-design`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ url, locale: ru ? "ru" : "en" }) });
+      const body = await response.json().catch(() => ({})) as MatchResult & { error?: string };
+      if (!response.ok) { notify(errors[body.error ?? ""] ?? (ru ? "Не удалось подобрать дизайн" : "Couldn't match the design")); return; }
+      const restore = onApply(body); setResult(body); setUndo(() => restore);
+    } catch { notify(ru ? "Не удалось подобрать дизайн" : "Couldn't match the design"); }
+    finally { window.clearInterval(timer); setBusy(false); }
+  };
+  return <section className={locked ? "sxMatch locked" : "sxMatch"}>
+    <div className="sxMatchHead">
+      <span className="sxMatchIcon"><Wand2 size={18}/></span>
+      <div><h3>{ru ? "ИИ подберёт дизайн под ваш сайт" : "AI matches the card to your site"}</h3><p>{ru ? "Укажите адрес — ИИ изучит цвета, шрифты, скругления и стиль сайта и оформит карточку так, будто она всегда там была. Вы увидите результат в предпросмотре и решите, сохранять ли." : "Enter the address — the AI studies colours, fonts, corners and style and dresses the card to look native. Review it in the preview before saving."}</p></div>
+      {locked && <PlanLock plan="Custom" locale={locale} onUpgrade={onUpgrade}/>}
+    </div>
+    <form className="sxMatchForm" onSubmit={event => { event.preventDefault(); if (!locked && !busy) void run(); }}>
+      <input value={url} onChange={event => setUrl(event.target.value)} placeholder="https://your-site.com" inputMode="url" autoComplete="url" disabled={locked || busy} aria-label={ru ? "Адрес сайта" : "Website address"}/>
+      <button className="primary" disabled={locked || busy || !url.trim()}><Wand2 size={15}/>{busy ? steps[step] : result ? (ru ? "Подобрать ещё раз" : "Try again") : (ru ? "Подобрать под сайт" : "Match my site")}</button>
+    </form>
+    {busy && <div className="sxMatchProgress" aria-live="polite"><i style={{ width: `${(step + 1) * 30}%` }}/></div>}
+    {result && !busy && <div className="sxMatchResult">
+      <div className="sxMatchFound">
+        <div className="sxMatchSwatches">{[result.design.colors.accent, ...(result.design.accentGradient.enabled ? [result.design.accentGradient.to] : []), result.found.background, result.found.text, ...result.found.palette.filter(item => item !== result.design.colors.accent).slice(0, 2)].map((color, index) => <i key={`${color}${index}`} style={{ background: color }} title={color}/>)}</div>
+        <small>{[result.found.bodyFont && `${ru ? "Шрифт сайта" : "Site font"}: ${result.found.bodyFont}`, result.found.buttonRadius !== null && `${ru ? "кнопки" : "buttons"} ${Math.min(result.found.buttonRadius, 99)}px`, result.found.dark ? (ru ? "тёмный сайт" : "dark site") : null].filter(Boolean).join(" · ")}</small>
+      </div>
+      <p><b>{result.summary}</b></p>
+      {result.notes.length > 0 && <ul>{result.notes.map(note => <li key={note}>{note}</li>)}</ul>}
+      <div className="sxMatchActions">
+        <span className="sxMuted">{ru ? "Дизайн уже в предпросмотре. Нажмите «Сохранить», чтобы он появился на сайте." : "It's in the preview. Press Save to publish it."}</span>
+        {undo && <button type="button" className="btn" onClick={() => { undo(); setUndo(null); setResult(null); }}><RotateCcw size={14}/>{ru ? "Вернуть как было" : "Undo"}</button>}
+      </div>
+    </div>}
+  </section>;
+}
+
 function Group({ title, icon, children }: { title: string; icon?: ReactNode; children: ReactNode }) {
   return <details className="sxGroup" open><summary>{icon}{title}</summary><div>{children}</div></details>;
 }
@@ -301,34 +406,43 @@ function StyleSwatch({ design }: { design: Design }) {
 }
 
 /** Mock website with the floating card: the shell header and launcher follow shellConfig, the chat is the real widget component. */
-function CardPreview({ locale, employeeId, employeeName, company, look, device, dark, sample }: { locale: string; employeeId: string; employeeName: string; company: string; look: ReturnType<typeof resolveLook>; device: "desktop" | "phone"; dark: boolean; sample: boolean }) {
+function CardPreview({ locale, employeeId, employeeName, company, look, device, dark, sample, closed }: { locale: string; employeeId: string; employeeName: string; company: string; look: ReturnType<typeof resolveLook>; device: "desktop" | "phone"; dark: boolean; sample: boolean; closed: boolean }) {
   const shell = shellConfig(look.design);
   const pal = dark ? shell.dark : shell.light;
   const phone = device === "phone";
   const radius = (shape: string, size: number) => shape === "circle" ? "50%" : shape === "square" ? Math.round(size * 0.12) : Math.round(size * 0.32);
   const side = (phone ? shell.mobilePosition : look.position) === "left" ? "left" : "right";
   const launcherSize = phone ? shell.mobileLauncherSize : shell.launcherSize;
-  const headBg = shell.headerStyle === "accent" ? pal.accent : shell.headerStyle === "gradient" ? `radial-gradient(120% 140% at 0 0, color-mix(in srgb, ${pal.accent} 14%, transparent), transparent 60%), ${pal.head}` : shell.headerStyle === "minimal" ? pal.bg : pal.head;
+  const fill = (base: string) => shell.gradTo ? `linear-gradient(${shell.gradAngle}deg, ${base}, ${shell.gradTo})` : base;
+  const glassBg = (base: string) => `color-mix(in srgb, ${base} ${Math.max(40, shell.opacity)}%, transparent)`;
+  const headBg = shell.headerStyle === "accent" ? fill(pal.accent) : shell.headerStyle === "gradient" ? `radial-gradient(120% 140% at 0 0, color-mix(in srgb, ${pal.accent} 14%, transparent), transparent 60%), ${pal.head}` : shell.headerStyle === "minimal" ? "transparent" : shell.headerStyle === "glass" ? glassBg(pal.head) : pal.head;
   const headText = shell.headerStyle === "accent" ? "#fff" : pal.headText;
   const hidden = phone && !shell.showOnMobile;
   const scale = phone ? 1 : Math.min(1, 520 / shell.height);
+  const glow = shell.glow ? `, 0 0 0 1px color-mix(in srgb, ${pal.accent} 22%, transparent), 0 24px 90px -24px ${pal.accent}` : "";
+  const glass: CSSProperties = shell.glass ? { backdropFilter: `blur(${shell.blur}px) saturate(1.6)`, WebkitBackdropFilter: `blur(${shell.blur}px) saturate(1.6)` } : {};
+  // "Closed" shows the site with the chat button only: pulse and the proactive message.
+  const showCard = !closed || phone;
+  const teaser = closed && !phone && Boolean(shell.teaser);
   const cardStyle: CSSProperties = phone
     ? { inset: 0, borderRadius: 0, border: 0 }
-    : { [side]: 16, bottom: 16 + launcherSize + 12 + (shell.launcherLabel ? 40 : 0), width: shell.width * scale, height: shell.height * scale, borderRadius: shell.radius, border: `${shell.border}px solid ${pal.line}`, boxShadow: shell.shadow };
+    : { [side]: 16, bottom: 16 + launcherSize + 12 + (shell.launcherLabel ? 40 : 0), width: shell.width * scale, height: shell.height * scale, borderRadius: shell.radius, border: `${shell.border}px solid ${pal.line}`, boxShadow: shell.shadow + glow };
   return <div className={phone ? "sxStage phone" : "sxStage"} data-dark={dark ? "true" : "false"}>
+    {shell.fontHref && <link rel="stylesheet" href={shell.fontHref}/>}{shell.headFontHref && <link rel="stylesheet" href={shell.headFontHref}/>}
     <div className="sxFakeSite" aria-hidden="true"><i/><i/><i/><b/><b/><b/></div>
     {hidden ? <p className="sxHiddenNote">{locale === "en" ? "The card is hidden on phones" : "На телефонах карточка скрыта"}</p> : <>
-      <div className="sxCard" style={{ ...cardStyle, fontFamily: shell.font, background: pal.bg }}>
+      {showCard && <div className="sxCard" style={{ ...cardStyle, ...glass, fontFamily: shell.font, background: shell.glass ? glassBg(pal.bg) : pal.bg }}>
         <div className="sxCardHead" style={{ background: headBg, color: headText, borderBottom: shell.headerStyle === "minimal" ? 0 : `1px solid ${pal.line}` }}>
-          {shell.showAvatar && <span className="sxCardAvatar" style={{ borderRadius: radius(shell.avatarShape, 34), background: shell.headerStyle === "accent" ? "rgba(255,255,255,.22)" : pal.accent }}>{look.avatarUrl ? <img src={look.avatarUrl} alt=""/> : (look.title || employeeName).trim()[0]?.toUpperCase()}</span>}
-          <span className="sxCardTitle"><b>{look.title || employeeName}</b>{shell.showStatus && <small style={{ color: shell.headerStyle === "accent" ? "rgba(255,255,255,.8)" : pal.text3 }}>{look.status || (locale === "en" ? "AI consultant · usually replies instantly" : "ИИ-консультант · обычно отвечает сразу")}</small>}</span>
+          {shell.showAvatar && <span className="sxCardAvatar" style={{ borderRadius: radius(shell.avatarShape, 34), background: shell.headerStyle === "accent" ? "rgba(255,255,255,.22)" : fill(pal.accent) }}>{look.avatarUrl ? <img src={look.avatarUrl} alt=""/> : (look.title || employeeName).trim()[0]?.toUpperCase()}</span>}
+          <span className="sxCardTitle"><b style={{ fontFamily: shell.headFont }}>{look.title || employeeName}</b>{shell.showStatus && <small style={{ color: shell.headerStyle === "accent" ? "rgba(255,255,255,.8)" : pal.text3 }}>{look.status || (locale === "en" ? "AI consultant · usually replies instantly" : "ИИ-консультант · обычно отвечает сразу")}</small>}</span>
           <span className="sxCardTools" style={{ color: headText }}><Monitor size={13}/><Smartphone size={13}/><Copy size={13}/></span>
         </div>
-        <div className="sxCardBody"><WebsiteWidget key={`${sample ? "s" : "w"}${dark ? "d" : "l"}`} previewSample={sample} locale={locale === "en" ? "en" : "ru"} employeeId={employeeId} employeeName={employeeName} company={company} embedded preview previewDark={dark} theme={dark ? "dark" : "light"} look={look}/></div>
-      </div>
-      {!phone && <span className="sxLauncher" style={{ [side]: 16, width: launcherSize, height: launcherSize, borderRadius: radius(shell.launcherShape, launcherSize), background: pal.launcher, color: pal.launcherIcon, boxShadow: shell.shadow }}>
+        <div className="sxCardBody" style={shell.glass ? { background: "transparent" } : undefined}><WebsiteWidget key={`${sample ? "s" : "w"}${dark ? "d" : "l"}`} previewSample={sample} locale={locale === "en" ? "en" : "ru"} employeeId={employeeId} employeeName={employeeName} company={company} embedded preview previewDark={dark} theme={dark ? "dark" : "light"} look={look}/></div>
+      </div>}
+      {!phone && <span className={shell.pulse && closed ? "sxLauncher pulse" : "sxLauncher"} style={{ [side]: 16, width: launcherSize, height: launcherSize, borderRadius: radius(shell.launcherShape, launcherSize), background: fill(pal.launcher), color: pal.launcherIcon, boxShadow: shell.shadow, ["--pulse" as string]: pal.launcher }}>
         {shell.launcherIcon === "avatar" && look.avatarUrl ? <img src={look.avatarUrl} alt=""/> : <LemiriGlyph size={Math.round(launcherSize * 0.42)}/>}
-        {shell.launcherLabel && <em className={side} style={{ background: pal.bg, color: pal.text, borderColor: pal.line }}>{shell.launcherLabel}</em>}
+        {teaser ? <em className={`${side} sxTeaser`} style={{ background: shell.glass ? glassBg(pal.bg) : pal.bg, color: pal.text, borderColor: pal.line, fontFamily: shell.font, ...glass }}>{shell.teaser}<i>×</i></em>
+          : (closed || !showCard) && shell.launcherLabel ? <em className={side} style={{ background: pal.bg, color: pal.text, borderColor: pal.line }}>{shell.launcherLabel}</em> : !closed && shell.launcherLabel ? <em className={side} style={{ background: pal.bg, color: pal.text, borderColor: pal.line }}>{shell.launcherLabel}</em> : null}
       </span>}
     </>}
   </div>;

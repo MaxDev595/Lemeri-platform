@@ -49,7 +49,19 @@ export type Access = {
   periodStart: string;
   periodEnd: string;
   messageLimit: number;
+  /** Testing period: every plan feature is unlocked for everyone (LEMIRI_OPEN_ACCESS). */
+  openAccess?: boolean;
 };
+
+/**
+ * While the product is being tested every workspace gets the full Custom plan for
+ * free. Switch off by removing LEMIRI_OPEN_ACCESS (wrangler.jsonc vars) — nothing in
+ * the database changes, so plans, trials and subscriptions resume as they were.
+ * The AI reply allowance still applies so tokens stay bounded.
+ */
+export function openAccessEnabled(env: Record<string, string | undefined> = typeof process !== "undefined" ? process.env : {}) {
+  return ["1", "true", "on", "yes"].includes(String(env.LEMIRI_OPEN_ACCESS ?? "").trim().toLowerCase());
+}
 
 const DAY = 86_400_000;
 const PAST_DUE_GRACE_DAYS = 7;
@@ -83,6 +95,7 @@ export function resolveAccess(input: { subscription: SubscriptionLike; ownerCrea
   // Complimentary access for the team's own and partner workspaces.
   const comp = (env.LEMIRI_COMP_WORKSPACES ?? "").split(",").map(item => item.trim()).filter(Boolean);
   if (input.workspaceId && comp.includes(input.workspaceId)) return make("CUSTOM", "active", monthStart, monthEnd);
+  if (openAccessEnabled(env)) return { ...make("CUSTOM", "active", monthStart, monthEnd), openAccess: true };
   const sub = input.subscription;
   const paid = sub ? normalizePlan(sub.plan) : "TRIAL";
   const status = String(sub?.status ?? "").toUpperCase();

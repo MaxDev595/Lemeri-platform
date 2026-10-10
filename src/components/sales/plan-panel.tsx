@@ -30,7 +30,8 @@ export function PlanPanel({ locale, notify, isOwner }: { locale: string; notify:
   const date = (iso: string) => new Date(iso).toLocaleDateString(ru ? "ru-RU" : "en-GB", { day: "numeric", month: "long" });
   const daysLeft = Math.max(0, Math.ceil((new Date(access.trialEndsAt).getTime() - Date.now()) / 86400_000));
   const share = Math.min(100, Math.round((data.used / Math.max(1, access.messageLimit)) * 100));
-  const stateText = access.state === "trial" ? (ru ? `Пробный период: осталось ${daysLeft} дн. (до ${date(access.trialEndsAt)})` : `Trial: ${daysLeft} days left (until ${date(access.trialEndsAt)})`)
+  const stateText = access.openAccess ? (ru ? "Идёт тестирование: все тарифы и функции открыты бесплатно. Об окончании предупредим заранее." : "Testing period: every plan and feature is free. We'll tell you before it ends.")
+    : access.state === "trial" ? (ru ? `Пробный период: осталось ${daysLeft} дн. (до ${date(access.trialEndsAt)})` : `Trial: ${daysLeft} days left (until ${date(access.trialEndsAt)})`)
     : access.state === "active" ? (data.subscription?.cancelAtPeriodEnd ? (ru ? `Активна до ${date(data.subscription.currentPeriodEnd)}, затем отменится` : `Active until ${date(data.subscription.currentPeriodEnd)}, then cancels`) : (ru ? `Подписка активна${data.subscription ? ` · продление ${date(data.subscription.currentPeriodEnd)}` : ""}` : `Subscription active${data.subscription ? ` · renews ${date(data.subscription.currentPeriodEnd)}` : ""}`))
     : access.state === "past_due" ? (ru ? "Не удалось списать оплату — обновите карту, иначе ИИ остановится" : "Payment failed — update your card or the AI will stop")
     : (ru ? "Нет активного тарифа: ИИ не отвечает посетителям, они могут оставить заявку" : "No active plan: the AI is paused, visitors can still leave requests");
@@ -53,14 +54,15 @@ export function PlanPanel({ locale, notify, isOwner }: { locale: string; notify:
 
   return <div className="sxPlans">
     <section className={`sxPlanNow ${access.state}`}>
-      <div><span className="pageKicker"><CreditCard size={13}/>{ru ? "Текущий тариф" : "Current plan"}</span><h2>{offer[access.plan].name}</h2><p>{stateText}</p></div>
+      <div><span className="pageKicker"><CreditCard size={13}/>{ru ? "Текущий тариф" : "Current plan"}</span><h2>{access.openAccess ? (ru ? "Всё открыто" : "Everything unlocked") : offer[access.plan].name}</h2><p>{stateText}</p></div>
       <div className="sxUsage"><span>{ru ? "Ответы ИИ в этом периоде" : "AI replies this period"}</span><strong>{data.used.toLocaleString(ru ? "ru-RU" : "en-US")} <small>/ {access.messageLimit.toLocaleString(ru ? "ru-RU" : "en-US")}</small></strong><i><b style={{ width: `${share}%` }} className={share >= 90 ? "warn" : ""}/></i><small>{ru ? `Период: ${date(access.periodStart)} — ${date(access.periodEnd)}` : `Period: ${date(access.periodStart)} — ${date(access.periodEnd)}`}</small></div>
       {data.subscription?.portal && isOwner && <button className="btn" disabled={busy === "portal"} onClick={portal}><ExternalLink size={14}/>{ru ? "Оплата и счета" : "Billing & invoices"}</button>}
     </section>
-    {!data.configured.stripe && <p className="sxNote">{ru ? "Онлайн-оплата пока не подключена: выбрать платный тариф можно будет после настройки Stripe." : "Online payments aren't set up yet."}</p>}
+    {access.openAccess && <p className="sxNote sxOpen"><Sparkles size={14}/>{ru ? "На время тестов вам доступно всё из Custom: полный редактор карточки, ИИ-подбор дизайна под сайт и повышенный лимит ответов. Оплата отключена." : "During testing you get everything in Custom: the full card editor, AI design matching and the higher reply limit. Payments are off."}</p>}
+    {!access.openAccess && !data.configured.stripe && <p className="sxNote">{ru ? "Онлайн-оплата пока не подключена: выбрать платный тариф можно будет после настройки Stripe." : "Online payments aren't set up yet."}</p>}
     <div className="sxPlanGrid">
       {(["TRIAL", "STARTER", "CUSTOM"] as const).map(key => {
-        const plan = offer[key]; const current = access.plan === key && (key === "TRIAL" ? access.state === "trial" : paidActive);
+        const plan = offer[key]; const current = !access.openAccess && access.plan === key && (key === "TRIAL" ? access.state === "trial" : paidActive);
         const configured = key === "STARTER" ? data.configured.starter : key === "CUSTOM" ? data.configured.custom : false;
         return <article key={key} className={`sxPlan${key === "CUSTOM" ? " featured" : ""}${current ? " current" : ""}`}>
           {key === "CUSTOM" && <span className="sxBadge"><Sparkles size={12}/>{ru ? "Свой дизайн" : "Own design"}</span>}
@@ -68,7 +70,8 @@ export function PlanPanel({ locale, notify, isOwner }: { locale: string; notify:
           <div className="sxPrice"><strong>{plan.price}</strong><small>{plan.period}</small></div>
           <p>{plan.copy}</p>
           <ul>{plan.features.map(feature => <li key={feature}><Check size={14}/>{feature}</li>)}</ul>
-          {key === "TRIAL" ? <button className="btn" disabled>{access.state === "trial" ? (ru ? "Сейчас активен" : "Active now") : (ru ? "Один раз на аккаунт" : "Once per account")}</button>
+          {access.openAccess ? <button className="btn" disabled><Check size={14}/>{ru ? "Открыто на время тестов" : "Unlocked for testing"}</button>
+            : key === "TRIAL" ? <button className="btn" disabled>{access.state === "trial" ? (ru ? "Сейчас активен" : "Active now") : (ru ? "Один раз на аккаунт" : "Once per account")}</button>
             : current ? <button className="btn" disabled><Check size={14}/>{ru ? "Ваш тариф" : "Your plan"}</button>
             : <button className={key === "CUSTOM" ? "primary" : "btn"} disabled={!isOwner || !configured || Boolean(busy)} onClick={() => void choose(key)}>{busy === key ? "…" : !configured ? (ru ? "Оплата скоро" : "Coming soon") : paidActive ? (ru ? `Перейти на ${plan.name}` : `Switch to ${plan.name}`) : (ru ? `Выбрать ${plan.name}` : `Choose ${plan.name}`)}</button>}
         </article>;
@@ -88,12 +91,13 @@ export function PlanBanner({ locale, onOpen }: { locale: string; onOpen: () => v
   const { access } = data;
   const share = data.used / Math.max(1, access.messageLimit);
   const days = Math.max(0, Math.ceil((new Date(access.trialEndsAt).getTime() - Date.now()) / 86400_000));
-  const text = access.state === "expired" ? (ru ? "Пробный период закончился — ИИ не отвечает посетителям. Выберите тариф, чтобы продолжить." : "Your trial ended — the AI is paused. Choose a plan to continue.")
+  const text = access.openAccess ? (share >= 0.8 ? (ru ? `Использовано ${Math.round(Math.min(1, share) * 100)}% ответов ИИ в этом периоде.` : `${Math.round(Math.min(1, share) * 100)}% of AI replies used.`) : (ru ? "Тестовый период: все тарифы и функции открыты бесплатно." : "Testing period: every plan and feature is free."))
+    : access.state === "expired" ? (ru ? "Пробный период закончился — ИИ не отвечает посетителям. Выберите тариф, чтобы продолжить." : "Your trial ended — the AI is paused. Choose a plan to continue.")
     : access.state === "past_due" ? (ru ? "Не удалось списать оплату. Обновите карту, чтобы ИИ не остановился." : "Payment failed. Update your card to keep the AI running.")
     : share >= 1 ? (ru ? "Лимит ответов ИИ в этом периоде исчерпан — посетители видят просьбу оставить контакты." : "AI reply limit reached — visitors are asked to leave contacts.")
     : share >= 0.8 ? (ru ? `Использовано ${Math.round(share * 100)}% ответов ИИ в этом периоде.` : `${Math.round(share * 100)}% of AI replies used this period.`)
     : access.state === "trial" ? (ru ? `Пробный период: осталось ${days} дн.` : `Trial: ${days} days left.`) : "";
   if (!text) return null;
-  const tone = access.state === "expired" || access.state === "past_due" || share >= 1 ? "bad" : "info";
+  const tone = access.openAccess ? (share >= 1 ? "bad" : "info") : access.state === "expired" || access.state === "past_due" || share >= 1 ? "bad" : "info";
   return <div className={`sxBanner ${tone}`} role="status"><span>{text}</span><button className={tone === "bad" ? "primary" : "btn"} onClick={onOpen}>{ru ? "Тарифы" : "Plans"}</button></div>;
 }
