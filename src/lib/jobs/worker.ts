@@ -5,8 +5,7 @@ import { indexKnowledgeSource } from "@/lib/knowledge/index";
 import { decryptCredentials } from "@/lib/security/encryption";
 import { getConnector } from "@/lib/connectors/registry";
 import { deliverCrmWebhook, type WebhookCRMConfig } from "@/lib/integrations/webhook-crm";
-import { crawlWebsite } from "@/lib/knowledge/website";
-import { chunkText } from "@/lib/knowledge/chunk";
+import { configuredEmbeddingProvider } from "@/lib/ai/embeddings";
 import { getWorkspaceTranslator } from "@/lib/workspace-locale";
 
 type JobPayload = Record<string, unknown>;
@@ -15,7 +14,8 @@ async function exposeTerminalFailure(job: { type: string; workspaceId: string; p
   const {t}=await getWorkspaceTranslator(job.workspaceId);
   const payload = job.payload as JobPayload;
   if ((job.type === "WEBSITE_INGEST" || job.type === "KNOWLEDGE_INDEX") && typeof payload.sourceId === "string") {
-    await db.knowledgeSource.updateMany({ where: { id: payload.sourceId, workspaceId: job.workspaceId }, data: { status: "FAILED" } });
+    // A source that already answers (READY) keeps its previous content.
+    await db.knowledgeSource.updateMany({ where: { id: payload.sourceId, workspaceId: job.workspaceId, status: { not: "READY" } }, data: { status: "FAILED" } });
   } else if (job.type === "CRM_EVENT" && typeof payload.integrationId === "string") {
     await db.integration.updateMany({ where: { id: payload.integrationId, workspaceId: job.workspaceId }, data: { status: "ERROR", lastError: message } });
   } else if (job.type === "OUTBOUND_CHANNEL_MESSAGE" && typeof payload.channelId === "string") {
@@ -64,17 +64,17 @@ export async function runJobBatch(limit = 10) {
         await deliverCrmWebhook(decryptCredentials<WebhookCRMConfig>(integration.credentialsEncrypted), payload.event, payload.data, payload.idempotencyKey);
         await db.integration.update({ where: { id: integration.id }, data: { lastSyncAt: new Date(), lastError: null } });
       } else if (job.type === "WEBSITE_INGEST") {
-        const payload = job.payload as { sourceId?: string };
+        const payload = job.payload as { sourceId?: string; overview?: boolean };
         if (!payload.sourceId) throw new Error("WEBSITE_INGEST requires sourceId");
         const source = await db.knowledgeSource.findFirst({ where: { id: payload.sourceId, workspaceId: job.workspaceId } });
         if (!source?.uri) throw new Error("Website source not found");
+        // Loaded on demand: one shared chunk instead of a copy in every route that kicks jobs.
+        const [{ crawlWebsite }, { saveSitePages }] = await Promise.all([import("@/lib/knowledge/website"), import("@/lib/knowledge/site-queue")]);
         const pages = await crawlWebsite(source.uri);
         const {t}=await getWorkspaceTranslator(job.workspaceId);
-        await db.$transaction(async (tx) => {
-          await tx.knowledgeDocument.deleteMany({ where: { sourceId: source.id } });
-          for (const page of pages) await tx.knowledgeDocument.create({ data: { sourceId: source.id, title: page.title, content: page.content, chunks: { create: chunkText(page.content).map((content, index) => ({ content, sourceLabel: `${page.title} · ${page.url} · ${t("server.fragment",{index:index+1})}` })) } } });
-          await tx.backgroundJob.create({ data: { workspaceId: job.workspaceId, type: "KNOWLEDGE_INDEX", payload: { sourceId: source.id } } });
-        });
+        // The AI overview of the business is written afterwards (knowledge/site-study.ts).
+        await saveSitePages(source.id, pages, index => t("server.fragment",{index}));
+        if (configuredEmbeddingProvider()) await db.backgroundJob.create({ data: { workspaceId: job.workspaceId, type: "KNOWLEDGE_INDEX", payload: { sourceId: source.id } } });
       } else {
         throw new Error(`Unsupported job type: ${job.type}`);
       }

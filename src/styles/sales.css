@@ -250,3 +250,12 @@ input[type=color] { width: 36px; height: 30px; padding: 2px; border: 1px solid v
 .sxMatchSwatches { display: flex; }
 .sxMatchSwatches i { width: 22px; height: 22px; margin-right: -6px; border: 2px solid var(--bg, #fff); border-radius: 50%; box-shadow: 0 1px 3px rgba(0, 0, 0, .15); }
 .sxMatchActions { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+/* «Изучить сайт» */
+.sxStudy { margin-bottom: 14px; }
+.sxStudy .sxMatchIcon { background: linear-gradient(135deg, #10b981, var(--accent)); }
+.sxStudy > small { font-size: var(--fs-12, 12px); line-height: 1.45; }
+.sxStudyToggle { display: flex; align-items: center; gap: 8px; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.sxStudyToggle b { flex: 1; }
+.sxStudyToggle svg.up { transform: rotate(180deg); }
+.sxStudyOverview { max-height: 360px; overflow: auto; padding-top: 6px; color: var(--text-2); line-height: 1.55; white-space: pre-wrap; }
+.sxStudyOverview ul { margin: 4px 0; padding-left: 18px; }

@@ -10,8 +10,11 @@ import { checkRateLimit, requestIp } from "@/lib/security/request";
 import { verifyWidgetToken } from "@/lib/security/widget-token";
 import { getWorkspaceTranslator } from "@/lib/workspace-locale";
 import { drainJobsAfterResponse } from "@/lib/jobs/kick";
+import { decryptCredentials } from "@/lib/security/encryption";
+import { pageUrlFor, siteRootFromConfig } from "@/lib/knowledge/site-basics";
+import { after } from "next/server";
 
-const payloadSchema = z.object({ conversationId: z.string().cuid().optional(), visitorId: z.string().min(8).max(128), messageId: z.string().uuid(), name: z.string().trim().min(2).max(80).optional(), message: z.string().trim().min(1).max(4000) });
+const payloadSchema = z.object({ conversationId: z.string().cuid().optional(), visitorId: z.string().min(8).max(128), messageId: z.string().uuid(), name: z.string().trim().min(2).max(80).optional(), message: z.string().trim().min(1).max(4000), page: z.string().max(300).optional() });
 
 export async function GET(request:Request,{params}:{params:Promise<{employeeId:string}>}){
   const {employeeId}=await params;const url=new URL(request.url);const conversationId=url.searchParams.get("conversationId")??"";const visitorId=url.searchParams.get("visitorId")??"";const after=url.searchParams.get("after");
@@ -87,8 +90,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ emp
     await db.notification.create({ data: { workspaceId: employee.workspaceId, type: "MESSAGE", title: t("server.managerMessageTitle"), body: parsed.data.message.slice(0, 1000) } });
     return NextResponse.json({ conversationId: conversation.id, message: t("server.messageToManager"), confidence: 1, handoff: true });
   }
-  const result = await handleIncomingMessage({ workspaceId: employee.workspaceId, employeeId, conversationId: conversation.id, content: parsed.data.message });
+  // Where the card is installed: the signed parent origin (not Lemiri's own hosted chat page) and the visitor's page.
+  const ownOrigins = [new URL(request.url).origin, process.env.PUBLIC_APP_URL ? new URL(process.env.PUBLIC_APP_URL).origin : ""];
+  const siteOrigin = signed && !ownOrigins.includes(origin) ? origin : undefined;
+  let siteRoot: string | null = null;
+  try { siteRoot = siteRootFromConfig(decryptCredentials<{ allowedOrigins?: unknown; seen?: unknown }>(website.configEncrypted)); } catch { /* unreadable config */ }
+  const result = await handleIncomingMessage({ workspaceId: employee.workspaceId, employeeId, conversationId: conversation.id, content: parsed.data.message, site: { origin: siteOrigin, page: pageUrlFor(siteOrigin, parsed.data.page) }, siteRoot });
   // Deliver CRM events (lead/appointment created by the AI) without waiting for the scheduler.
   drainJobsAfterResponse();
+  // The site was crawled but the AI overview is not written yet: write it after this reply.
+  if ("siteOverviewPending" in result && result.siteOverviewPending) { try { after(async () => { const { ensureSiteOverview } = await import("@/lib/knowledge/site-study"); const { locale } = await getWorkspaceTranslator(employee.workspaceId); await ensureSiteOverview(employee.workspaceId, locale === "en" ? "en" : "ru").catch(error => console.error("Site overview failed", error instanceof Error ? error.message : error)); }); } catch { /* outside a request scope */ } }
   return NextResponse.json({ conversationId: conversation.id, messageId:result.message.id, message: result.message.content, confidence: result.confidence, handoff: result.handoff });
 }

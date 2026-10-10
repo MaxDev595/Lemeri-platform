@@ -11,8 +11,9 @@ import { employeeRoleLabel, employeeToneLabel } from "@/lib/employee-domain";
 import { profileFromRules } from "./profile";
 import { aiReplyGate } from "@/lib/billing/access";
 import { featureEnabled } from "@/lib/features";
+import type { SiteHint } from "@/lib/knowledge/site-live";
 
-export async function handleIncomingMessage(params: { workspaceId: string; employeeId: string; conversationId: string; content: string; provider?: AIProvider }) {
+export async function handleIncomingMessage(params: { workspaceId: string; employeeId: string; conversationId: string; content: string; provider?: AIProvider; site?: SiteHint; siteRoot?: string | null }) {
   const employee = await db.aIEmployee.findFirst({ where: { id: params.employeeId, workspaceId: params.workspaceId }, include: { settings: true, permissions: { where: { enabled: true } } } });
   if (!employee?.settings) throw new Error("AI employee is not configured");
   const {locale,t}=await getWorkspaceTranslator(params.workspaceId);
@@ -21,14 +22,21 @@ export async function handleIncomingMessage(params: { workspaceId: string; emplo
   const gate=await aiReplyGate(params.workspaceId);
   if(!gate.ok)return limitedReply({...params,locale,employeeName:employee.name,reason:gate.reason});
   const history = await db.message.findMany({ where: { conversationId: params.conversationId }, orderBy: { createdAt: "desc" }, take: 20 });
-  const knowledge = await retrieveKnowledge(params.workspaceId, params.content);
+  // Short follow-ups («а сколько стоит?») are searched together with the previous question.
+  const previousQuestion = history.filter(item => item.direction === "INBOUND" && item.content !== params.content)[0]?.content ?? "";
+  const query = `${params.content} ${params.content.length < 60 ? previousQuestion.slice(0, 300) : ""}`.trim();
+  const retrieved = await retrieveKnowledge(params.workspaceId, query);
+  // The AI studies the website itself (overview, current page, home page) — see site-live.ts.
+  const { siteKnowledge } = await import("@/lib/knowledge/site-live");
+  const site = await siteKnowledge({ workspaceId: params.workspaceId, query, locale: locale === "en" ? "en" : "ru", hint: params.site, fallbackRoot: params.siteRoot, retrieved }).catch(error => { console.error("Site knowledge failed", error instanceof Error ? error.message : error); return { extra: [], context: "", origin: undefined, needsOverview: false }; });
+  const knowledge = [...retrieved, ...site.extra];
   const provider = params.provider ?? configuredAIProvider();
   const [conversation, workspace, settings] = await Promise.all([
     db.conversation.findFirst({ where: { id: params.conversationId, workspaceId: params.workspaceId }, select: { channelType: true, customer: { select: { name: true, phone: true, email: true } } } }),
     db.workspace.findUnique({ where: { id: params.workspaceId }, select: { name: true } }),
     db.workspaceSettings.findUnique({ where: { workspaceId: params.workspaceId }, select: { timezone: true, workingHours: true } }),
   ]);
-  const context = businessContext(settings?.timezone ?? "Europe/Moscow", settings?.workingHours, conversation);
+  const context = [businessContext(settings?.timezone ?? "Europe/Moscow", settings?.workingHours, conversation), site.context, site.origin ? `Company website: ${site.origin}. Knowledge marked as website pages and the website overview comes from this site and counts as verified.` : ""].filter(Boolean).join(" ");
   let result: Awaited<ReturnType<AIProvider["generateResponse"]>>;
   try {
     // Deferred modules (docs/FUTURE_FEATURES.md) never reach the model as actions.
@@ -54,7 +62,7 @@ export async function handleIncomingMessage(params: { workspaceId: string; emplo
       await tx.analyticsEvent.create({ data: { workspaceId: params.workspaceId, type: "HANDOFF_CREATED", payload: { conversationId: params.conversationId, reason: effectiveHandoffReason } } });
     }
     await tx.analyticsEvent.create({ data: { workspaceId: params.workspaceId, type: "AI_RESPONSE", payload: { provider: provider.name, confidence: result.confidence, citedChunks: result.usedSourceIds.length, handoff: Boolean(effectiveHandoffReason), actionKey:result.actionRequest?.key,actionStatus } } });
-    return { message, confidence: result.confidence, handoff: Boolean(effectiveHandoffReason) };
+    return { message, confidence: result.confidence, handoff: Boolean(effectiveHandoffReason), siteOverviewPending: site.needsOverview };
   });
   await triggerAutomations(effectiveHandoffReason?"HANDOFF_CREATED":"AI_RESPONSE",{workspaceId:params.workspaceId,employeeId:params.employeeId,conversationId:params.conversationId,data:{handoff:Boolean(effectiveHandoffReason),confidence:result.confidence}});
   return saved;

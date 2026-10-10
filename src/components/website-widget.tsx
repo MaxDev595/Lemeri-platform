@@ -87,6 +87,7 @@ export function WebsiteWidget({ locale, employeeId, employeeName, company = "", 
   const authRef = useRef<Auth>(undefined);
   const authWaiters = useRef<Array<(value: Auth) => void>>([]);
   const pollCursor = useRef(new Date(0).toISOString());
+  const pageRef = useRef("");
   const ready = preview || Boolean(visitorId && embedAuth);
 
   // Light / dark follows the card (or the visitor's system for "auto").
@@ -106,7 +107,7 @@ export function WebsiteWidget({ locale, employeeId, employeeName, company = "", 
   useEffect(() => {
     if (!embedded) return;
     const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") window.parent.postMessage({ type: "lemiri:close" }, "*"); };
-    const onMessage = (event: MessageEvent) => { if (event.source === window.parent && event.data?.type === "lemiri:focus") inputRef.current?.focus(); };
+    const onMessage = (event: MessageEvent) => { if (event.source === window.parent && event.data?.type === "lemiri:focus") { inputRef.current?.focus(); window.parent.postMessage({ type: "lemiri:where" }, "*"); } };
     addEventListener("keydown", onKey); addEventListener("message", onMessage);
     return () => { removeEventListener("keydown", onKey); removeEventListener("message", onMessage); };
   }, [embedded]);
@@ -142,6 +143,8 @@ export function WebsiteWidget({ locale, employeeId, employeeName, company = "", 
     const receive = (event: MessageEvent) => {
       if (event.source !== window.parent || event.data?.type !== "lemiri:configure" || typeof event.data.token !== "string") return;
       const next = { token: event.data.token, origin: event.origin };
+      if (typeof event.data.page === "string") pageRef.current = event.data.page.slice(0, 300);
+      if (authRef.current && authRef.current.token === next.token && authRef.current.origin === next.origin) return; // page update only
       authRef.current = next; setEmbedAuth(next);
       authWaiters.current.splice(0).forEach(resolve => resolve(next));
     };
@@ -202,7 +205,7 @@ export function WebsiteWidget({ locale, employeeId, employeeName, company = "", 
     if (preview) { setMessages(value => [...value, { role: "assistant", text: copy.preview }]); return; }
     setBusy(true);
     try {
-      const { response, json } = await authedFetch("messages", { visitorId, conversationId, messageId: crypto.randomUUID(), message: input });
+      const { response, json } = await authedFetch("messages", { visitorId, conversationId, messageId: crypto.randomUUID(), message: input, ...(pageRef.current ? { page: pageRef.current } : {}) });
       if (!response.ok) throw new Error(copy.sendFailed);
       setConversationId(json.conversationId as string);
       if (json.messageId) seenMessageIds.current.add(String(json.messageId));

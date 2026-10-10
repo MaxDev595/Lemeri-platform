@@ -8,6 +8,7 @@ import { DEFAULT_DESIGN, FONTS, normalizeDesign, READY_STYLES, resolveLook, shel
 import { WebsiteWidget } from "../website-widget";
 import { LemiriGlyph } from "../logo";
 import { Field, PlanLock, Section, Segmented, Toggle } from "./ui";
+import { SiteStudy } from "./site-study";
 
 const SiteInstall = dynamic(() => import("../site-install/site-install"), { ssr: false, loading: () => <p className="sxMuted">…</p> });
 
@@ -103,6 +104,7 @@ export function WidgetStudio({ locale, channels, employees, notify, refresh, onU
   };
   if (!site || !employee) return <section className="sxEmpty"><span className="sxEmptyIcon"><LemiriGlyph size={30}/></span><h2>{c.create}</h2><p>{c.createCopy}</p><button className="primary" disabled={creating || !employee} onClick={create}><Plus size={15}/>{creating ? c.creating : c.create}</button></section>;
   return <div className="sxWidget">
+    <SiteStudy locale={locale} notify={notify} onDone={refresh}/>
     <div className="sxTabs" role="tablist">{(["design", "install", "link"] as const).map(key => <button key={key} role="tab" aria-selected={tab === key} className={tab === key ? "on" : ""} onClick={() => setTab(key)}>{c.tabs[key]}</button>)}</div>
     {tab === "design" ? <DesignEditor locale={locale} channelId={site.id} employeeId={site.employeeId ?? employee.id} employeeName={employee.name} company={company} notify={notify} onUpgrade={onUpgrade}/>
       : <>{tab === "install" && <ConnectionCheck locale={locale} channelId={site.id} employeeActive={employee.status === "ACTIVE"} knowledgeReady={knowledgeReady} onNavigate={onNavigate}/>}<SiteInstall key={`${site.id}-${tab}`} locale={locale} channelId={site.id} employeeId={site.employeeId ?? employee.id} employeeName={employee.name} origin={origin} notify={notify} only={tab === "install" ? "install" : "link"}/></>}
@@ -332,7 +334,7 @@ function ConnectionCheck({ locale, channelId, employeeActive, knowledgeReady, on
   const planOk = state ? state.planState !== "expired" : true;
   const rows: Array<{ ok: boolean; title: string; fix: string; action?: () => void; actionLabel?: string }> = [
     { ok: employeeActive, title: ru ? "ИИ-продавец запущен" : "AI seller is running", fix: ru ? "Сотрудник на паузе — карточка не загрузится на сайте. Запустите его." : "The employee is paused — the card won't load. Start it.", action: () => onNavigate("employees"), actionLabel: ru ? "Открыть" : "Open" },
-    { ok: knowledgeReady, title: ru ? "База знаний заполнена" : "Knowledge base has content", fix: ru ? "Без знаний ИИ не сможет называть цены и товары — он будет передавать вопросы менеджеру." : "Without knowledge the AI can't name prices or products.", action: () => onNavigate("knowledge"), actionLabel: ru ? "Добавить" : "Add" },
+    { ok: knowledgeReady, title: ru ? "База знаний заполнена" : "Knowledge base has content", fix: ru ? "Нажмите «Изучить сайт» выше — ИИ сам прочитает сайт. Или добавьте информацию вручную." : "Press “Study the site” above — the AI reads it itself. Or add information manually.", action: () => onNavigate("knowledge"), actionLabel: ru ? "Добавить" : "Add" },
     { ok: planOk, title: ru ? "Тариф активен" : "Plan is active", fix: ru ? "Пробный период или подписка закончились: посетители видят просьбу оставить контакты вместо ответов ИИ." : "Trial or subscription ended: visitors are asked for contacts instead of AI answers.", action: () => onNavigate("billing"), actionLabel: ru ? "Тарифы" : "Plans" },
     { ok: Boolean(recent), title: ru ? (recent ? `Карточка работает на ${recent.origin}` : "Карточка замечена на сайте") : (recent ? `Card is live on ${recent.origin}` : "Card seen on your website"), fix: ru
       ? `Пока не видим карточку. Проверьте: код вставлен перед </body> на всех страницах; ${state?.allowedOrigins.length ? `адрес сайта есть в списке разрешённых (${state.allowedOrigins.join(", ")})` : "сайт открыт по https"}; очищен кеш сайта/плагина. Откройте сайт и нажмите «Проверить снова».`

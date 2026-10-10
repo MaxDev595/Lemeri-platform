@@ -66,5 +66,7 @@ export async function createEmployee(_: EmployeeState, formData: FormData): Prom
     result=process.env.NODE_ENV==="production"?await persistEmployee(db):await db.$transaction(persistEmployee);
   } catch(error) { if(error instanceof BillingLimitError)return{error:t("billing.employeeLimitReached")};throw error }
   if(result.sourceId){await enqueueJob(workspace.id,"KNOWLEDGE_INDEX",{sourceId:result.sourceId});drainJobsAfterResponse();}
+  // The site given during setup is studied by the AI right away («Изучить сайт»).
+  if(details?.websiteOrigin){try{const { queueSiteStudy }=await import("@/lib/knowledge/site-queue");await queueSiteStudy(workspace.id,details.websiteOrigin,raw.locale==="en"?"en":"ru");drainJobsAfterResponse()}catch(error){console.error("Site study after onboarding failed",error instanceof Error?error.message:error)}}
   revalidatePath("/app");redirect("/app");
 }

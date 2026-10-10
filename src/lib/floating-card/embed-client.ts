@@ -150,7 +150,8 @@ export function lemiriWidgetBootstrap(runtimeFactory: typeof floatingCardRuntime
   // The chat itself loads on first open, so the widget costs nothing until used.
   let frame: HTMLIFrameElement | null = null;
   let token = cfg.token;
-  const sendToken = () => frame?.contentWindow?.postMessage({ type: "lemiri:configure", token }, cfg.base);
+  // The page path lets the AI read the page the visitor is looking at.
+  const sendToken = () => frame?.contentWindow?.postMessage({ type: "lemiri:configure", token, page: (location.pathname + location.search).slice(0, 300) }, cfg.base);
   function ensureFrame() {
     if (frame) return;
     frame = d.createElement("iframe"); frame.className = "lemiri-frame"; frame.title = cfg.name; frame.allow = "clipboard-write";
@@ -178,7 +179,7 @@ export function lemiriWidgetBootstrap(runtimeFactory: typeof floatingCardRuntime
   addEventListener("message", (e: MessageEvent) => {
     if (e.origin !== cfg.base || !frame || e.source !== frame.contentWindow) return;
     const type = e.data?.type;
-    if (type === "lemiri:ready") sendToken();
+    if (type === "lemiri:ready" || type === "lemiri:where") sendToken();
     else if (type === "lemiri:refresh") fetch(cfg.tokenUrl, { credentials: "omit" }).then(r => (r.ok ? r.json() : null)).then(b => { if (b && b.token) { token = b.token; sendToken(); } }).catch(() => undefined);
     else if (type === "lemiri:close") { ctl.close(); launcher.focus(); }
     else if (type === "lemiri:message" && !ctl.getState().open) setUnread(unread + 1);

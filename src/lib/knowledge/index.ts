@@ -26,7 +26,9 @@ export async function indexKnowledgeSource(workspaceId: string, sourceId: string
     await db.knowledgeSource.update({ where: { id: sourceId }, data: { status: "READY" } });
     return { indexed, mode: "semantic" as const };
   } catch (error) {
-    await db.knowledgeSource.update({ where: { id: sourceId }, data: { status: "FAILED" } });
+    // Text with chunks still works through lexical search: a failed embedding run
+    // (provider outage, Workers subrequest budget) must not hide it from the AI.
+    await db.knowledgeSource.update({ where: { id: sourceId }, data: { status: chunks.length ? "READY" : "FAILED" } });
     throw error;
   }
 }

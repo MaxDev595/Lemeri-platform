@@ -3,7 +3,7 @@ import type { KnowledgeMatch } from "@/lib/ai/types";
 import { configuredEmbeddingProvider } from "@/lib/ai/embeddings";
 import { Prisma } from "@/generated/prisma/client";
 
-const words = (value: string) => new Set(value.toLowerCase().match(/[a-zа-яё0-9]{3,}/gi) ?? []);
+import { overlap, stems } from "./text-match";
 export async function retrieveKnowledge(workspaceId: string, query: string, limit = 5): Promise<KnowledgeMatch[]> {
   const provider = configuredEmbeddingProvider();
   if (provider) {
@@ -26,7 +26,7 @@ async function semanticSearch(provider: NonNullable<ReturnType<typeof configured
 
 // Also covers sources indexed before an embeddings key was configured (no vectors yet).
 async function lexicalSearch(workspaceId: string, query: string, limit: number): Promise<KnowledgeMatch[]> {
-  const queryWords = words(query);
-  const chunks = await db.knowledgeChunk.findMany({ where: { document: { source: { workspaceId, status: "READY" } } }, take: 250 });
-  return chunks.map(chunk => { const candidate = words(chunk.content); const overlap = [...queryWords].filter(word => candidate.has(word)).length; return { id: chunk.id, content: chunk.content, sourceLabel: chunk.sourceLabel, score: queryWords.size ? overlap / queryWords.size : 0 }; }).filter(item => item.score > 0).sort((a,b) => b.score-a.score).slice(0,limit);
+  const queryStems = stems(query);
+  const chunks = await db.knowledgeChunk.findMany({ where: { document: { source: { workspaceId, status: "READY" } } }, select: { id: true, content: true, sourceLabel: true }, take: 400 });
+  return chunks.map(chunk => ({ id: chunk.id, content: chunk.content, sourceLabel: chunk.sourceLabel, score: overlap(queryStems, `${chunk.sourceLabel} ${chunk.content}`) })).filter(item => item.score > 0).sort((a,b) => b.score-a.score).slice(0,limit);
 }

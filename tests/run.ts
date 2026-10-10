@@ -27,3 +27,4 @@ import "./floating-card.test.ts";
 import "./widget-design.test.ts";
 import "./sales-profile.test.ts";
 import "./open-access-and-site-match.test.ts";
+import "./site-study.test.ts";
