@@ -5,7 +5,8 @@ import { getApiWorkspace } from "@/lib/auth/api";
 import { getSessionUser } from "@/lib/auth/session";
 import { checkRateLimit, validateRequestOrigin } from "@/lib/security/request";
 import { positionByKey, templateByKey } from "@/lib/team/catalog";
-import { assistReport, runTeamAssistant, type OpenTask, type TeamMember } from "@/lib/team/ai";
+import { assistReport, draftFromActivity, nameStem, runTeamAssistant, summarizeThread, type OpenTask, type TeamMember } from "@/lib/team/ai";
+import { activityFacts, customerCard, findCustomers, monthlyLimit, recordUsage, usageFor, workContext, type Viewer } from "@/lib/team/copilot";
 
 // Team hub: messenger between teammates, report requests (tasks) and the team AI.
 // Served through the CRM route (/api/crm/team/...) so it shares that route's bundle
@@ -32,6 +33,20 @@ async function aiAllowed(auth: Auth) {
   if (isAdmin(auth)) return true;
   const rows = await q<{ aiSeat: boolean }>(`SELECT "aiSeat" FROM "WorkspaceMember" WHERE "id" = $1`, auth.membership.id);
   return Boolean(rows[0]?.aiSeat);
+}
+const viewer = (auth: Auth): Viewer => ({ workspaceId: auth.workspaceId, memberId: auth.membership.id, userId: auth.user.id, role: auth.membership.role });
+/**
+ * Seat check plus the monthly allowance. Returns a meter that adds up the tokens
+ * of every model call in this request; call done() once at the end to save them.
+ */
+async function aiAccess(auth: Auth) {
+  const v = viewer(auth);
+  const [seat, usage] = await Promise.all([isAdmin(auth) ? Promise.resolve(true) : aiAllowed(auth), q<{ tokens: number }>(`SELECT "tokens" FROM "TeamAiUsage" WHERE "memberId" = $1 AND "month" = $2`, v.memberId, new Date().toISOString().slice(0, 7))]);
+  if (!seat) throw new HttpError(402, "AI_SEAT_REQUIRED");
+  // Seat holders get a monthly allowance; owners and admins are on the main plan.
+  if (!isAdmin(auth) && Number(usage[0]?.tokens ?? 0) >= monthlyLimit()) throw new HttpError(429, "AI_LIMIT_REACHED");
+  let tokens = 0;
+  return { v, meter: (n: number) => { tokens += n; }, done: () => recordUsage(v, tokens) };
 }
 /** A thread the current member may read: the general chat or a direct chat they take part in. */
 async function threadFor(auth: Auth, thread: string) {
@@ -60,16 +75,23 @@ async function task(auth: Auth, id: string) {
 // ------------------------------------------------------------------ handlers
 async function bootstrap(auth: Auth) {
   const me = auth.membership.id;
-  const [team, unread, last, tasks, allowed] = await Promise.all([
+  const [team, unread, last, tasks, allowed, usage] = await Promise.all([
     members(auth.workspaceId),
     q<{ thread: string; unread: number }>(`SELECT msg."thread", COUNT(*)::int AS "unread" FROM "TeamMessage" msg LEFT JOIN "TeamRead" r ON r."memberId" = $2 AND r."thread" = msg."thread"
       WHERE msg."workspaceId" = $1 AND (msg."thread" = 'general' OR msg."thread" LIKE '%' || $2 || '%') AND msg."senderMemberId" IS DISTINCT FROM $2 AND (r."readAt" IS NULL OR msg."createdAt" > r."readAt") GROUP BY msg."thread"`, auth.workspaceId, me),
     q(`SELECT DISTINCT ON ("thread") "thread", "body", "kind", "createdAt", "senderMemberId" FROM "TeamMessage" WHERE "workspaceId" = $1 AND ("thread" = 'general' OR "thread" LIKE '%' || $2 || '%') ORDER BY "thread", "createdAt" DESC`, auth.workspaceId, me),
     q(`${taskSelect} WHERE "workspaceId" = $1 AND ("assigneeMemberId" = $2 OR "requesterMemberId" = $2) AND ("status" = 'OPEN' OR "createdAt" > CURRENT_TIMESTAMP - INTERVAL '30 days') ORDER BY "createdAt" DESC LIMIT 200`, auth.workspaceId, me),
     aiAllowed(auth),
+    usageFor(auth.workspaceId),
     x(`UPDATE "WorkspaceMember" SET "lastSeenAt" = CURRENT_TIMESTAMP WHERE "id" = $1`, me).catch(() => undefined),
   ]);
-  return { me: { id: me, role: auth.membership.role, ai: allowed, name: auth.user.name ?? auth.user.email }, members: team.map(({ userId: _u, ...m }) => { void _u; return m; }), unread, last, tasks };
+  const admin = isAdmin(auth), limit = monthlyLimit();
+  return {
+    me: { id: me, role: auth.membership.role, ai: allowed, name: auth.user.name ?? auth.user.email, usage: { tokens: usage.get(me)?.tokens ?? 0, requests: usage.get(me)?.requests ?? 0, limit: admin ? null : limit } },
+    // Teammates' AI usage is visible to owners and admins only (Team → Manage).
+    members: team.map(({ userId: _u, ...m }) => { void _u; return admin ? { ...m, usage: usage.get(m.id) ?? { tokens: 0, requests: 0 } } : m; }),
+    unread, last, tasks, ...(admin ? { seatLimit: limit } : {}),
+  };
 }
 
 async function messages(auth: Auth, url: URL) {
@@ -137,32 +159,84 @@ async function submitReport(auth: Auth, id: string, body: Row) {
   return { ok: true };
 }
 
+const timezoneOf = async (workspaceId: string) => (await q<{ timezone: string }>(`SELECT "timezone" FROM "WorkspaceSettings" WHERE "workspaceId" = $1`, workspaceId))[0]?.timezone || "UTC";
+
 async function aiChat(auth: Auth, body: Row) {
-  if (!(await aiAllowed(auth))) throw new HttpError(402, "AI_SEAT_REQUIRED");
+  const access = await aiAccess(auth);
   const text = str(body.text, 2000);
   if (!text) throw new HttpError(400, "EMPTY_MESSAGE");
   const history = Array.isArray(body.history) ? (body.history as Row[]).slice(-10).map(t => ({ role: t.role === "assistant" ? "assistant" as const : "user" as const, content: str(t.content, 2000) })).filter(t => t.content) : [];
-  const team = await members(auth.workspaceId);
-  const me = team.find(m => m.id === auth.membership.id) ?? { id: auth.membership.id, name: auth.user.name ?? auth.user.email, email: auth.user.email, role: auth.membership.role, position: null };
-  const [settings, open] = await Promise.all([
-    q<{ timezone: string }>(`SELECT "timezone" FROM "WorkspaceSettings" WHERE "workspaceId" = $1`, auth.workspaceId),
+  const [team, timezone, open, mine, work] = await Promise.all([
+    members(auth.workspaceId),
+    timezoneOf(auth.workspaceId),
     q<{ title: string; assigneeMemberId: string; dueAt: Date | null }>(`SELECT "title", "assigneeMemberId", "dueAt" FROM "TeamTask" WHERE "workspaceId" = $1 AND "requesterMemberId" = $2 AND "status" = 'OPEN' ORDER BY "createdAt" ASC LIMIT 30`, auth.workspaceId, auth.membership.id),
+    q<{ id: string; title: string; requesterMemberId: string; dueAt: Date | null }>(`SELECT "id", "title", "requesterMemberId", "dueAt" FROM "TeamTask" WHERE "workspaceId" = $1 AND "assigneeMemberId" = $2 AND "status" = 'OPEN' ORDER BY "dueAt" ASC NULLS LAST LIMIT 20`, auth.workspaceId, auth.membership.id),
+    workContext(access.v),
   ]);
-  const tasks: OpenTask[] = open.map(t => ({ title: t.title, assignee: team.find(m => m.id === t.assigneeMemberId)?.name ?? "—", dueAt: t.dueAt ? new Date(t.dueAt).toISOString() : null, overdue: Boolean(t.dueAt && new Date(t.dueAt) < new Date()) }));
-  return runTeamAssistant({ text, history, members: team, me, locale: auth.locale, timezone: settings[0]?.timezone || "UTC", tasks });
+  const me = team.find(m => m.id === auth.membership.id) ?? { id: auth.membership.id, name: auth.user.name ?? auth.user.email, email: auth.user.email, role: auth.membership.role, position: null };
+  const nameOf = (id: string) => team.find(m => m.id === id)?.name ?? "—";
+  const tasks: OpenTask[] = open.map(t => ({ title: t.title, assignee: nameOf(t.assigneeMemberId), dueAt: t.dueAt ? new Date(t.dueAt).toISOString() : null, overdue: Boolean(t.dueAt && new Date(t.dueAt) < new Date()) }));
+  const myTasks = mine.map(t => ({ id: t.id, title: t.title, requester: nameOf(t.requesterMemberId), dueAt: t.dueAt ? new Date(t.dueAt).toISOString() : null }));
+  const lookup = async (query: string) => {
+    let found = await findCustomers(auth.workspaceId, query);
+    if (!found.length && nameStem(query) !== query) found = await findCustomers(auth.workspaceId, nameStem(query));
+    const exact = found.filter(c => c.name.toLowerCase() === query.toLowerCase());
+    const pick = exact.length === 1 ? exact[0] : found.length === 1 ? found[0] : undefined;
+    return { card: pick ? await customerCard(auth.workspaceId, pick.id) : null, candidates: found.map(c => ({ id: c.id, name: [c.name, c.phone, c.email].filter(Boolean).join(" · ") })) };
+  };
+  try {
+    return await runTeamAssistant({ text, history, members: team, me, locale: auth.locale, timezone, tasks, myTasks, work, canWrite: auth.membership.role !== "VIEWER", lookup, meter: access.meter });
+  } finally { await access.done(); }
 }
 
 async function aiReport(auth: Auth, body: Row) {
-  if (!(await aiAllowed(auth))) throw new HttpError(402, "AI_SEAT_REQUIRED");
+  const access = await aiAccess(auth);
   const t = await task(auth, str(body.taskId, 64));
   if (t.assigneeMemberId !== auth.membership.id) throw new HttpError(403, "ONLY_ASSIGNEE_CAN_REPORT");
   const draft = str(body.draft, 12000);
   const raw = (body.fields && typeof body.fields === "object" ? body.fields : {}) as Record<string, unknown>;
   const fields = Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, str(v, 6000)]));
   if (!draft && !Object.values(fields).some(Boolean)) throw new HttpError(400, "EMPTY_DRAFT");
-  const result = await assistReport({ template: templateByKey(t.template), draft, fields, title: t.title, note: t.note, author: auth.user.name ?? auth.user.email, locale: auth.locale });
-  if (result.mode === "model") await x(`UPDATE "TeamTask" SET "viaAi" = true WHERE "id" = $1`, t.id);
-  return result;
+  try {
+    const result = await assistReport({ template: templateByKey(t.template), draft, fields, title: t.title, note: t.note, author: auth.user.name ?? auth.user.email, locale: auth.locale, meter: access.meter });
+    if (result.mode === "model") await x(`UPDATE "TeamTask" SET "viaAi" = true WHERE "id" = $1`, t.id);
+    return result;
+  } finally { await access.done(); }
+}
+
+/** Report on autopilot: a draft built from what the person did in CRM and chats during the period. */
+async function aiAutodraft(auth: Auth, body: Row) {
+  const access = await aiAccess(auth);
+  const t = await task(auth, str(body.taskId, 64));
+  if (t.assigneeMemberId !== auth.membership.id) throw new HttpError(403, "ONLY_ASSIGNEE_CAN_REPORT");
+  const period = ["day", "week", "month"].includes(String(body.period)) ? String(body.period) : ["weekly", "project", "marketing", "finance"].includes(t.template) ? "week" : "day";
+  const since = new Date(Date.now() - (period === "month" ? 30 : period === "week" ? 7 : 1) * 86400_000);
+  const [facts, timezone] = await Promise.all([activityFacts(access.v, since), timezoneOf(auth.workspaceId)]);
+  const label = auth.locale === "ru" ? { day: "последние 24 часа", week: "последние 7 дней", month: "последние 30 дней" }[period]! : { day: "last 24 hours", week: "last 7 days", month: "last 30 days" }[period]!;
+  try {
+    const result = await draftFromActivity({ template: templateByKey(t.template), facts, extra: str(body.extra, 6000), title: t.title, note: t.note, author: auth.user.name ?? auth.user.email, period: label, locale: auth.locale, timezone, meter: access.meter });
+    if (result.mode === "model") await x(`UPDATE "TeamTask" SET "viaAi" = true WHERE "id" = $1`, t.id);
+    return { ...result, period, facts: { activities: facts.activities.length, tasksDone: facts.tasksDone.length, deals: facts.dealsCreated.length + facts.dealsWon.length + facts.dealsLost.length, replies: facts.replies } };
+  } finally { await access.done(); }
+}
+
+/** Summary of a chat: what was discussed and decided, and what is expected from me. */
+async function aiSummary(auth: Auth, body: Row) {
+  const access = await aiAccess(auth);
+  const thread = await threadFor(auth, str(body.thread, 200));
+  const days = Math.min(30, Math.max(1, Number(body.days) || 7));
+  const [rows, team, timezone] = await Promise.all([
+    q<{ senderMemberId: string | null; body: string; kind: string; createdAt: Date }>(`SELECT "senderMemberId", "body", "kind", "createdAt" FROM "TeamMessage" WHERE "workspaceId" = $1 AND "thread" = $2 AND "createdAt" > CURRENT_TIMESTAMP - make_interval(days => $3::int) ORDER BY "createdAt" DESC LIMIT 200`, auth.workspaceId, thread, days),
+    members(auth.workspaceId),
+    timezoneOf(auth.workspaceId),
+  ]);
+  if (!rows.length) return { summary: auth.locale === "ru" ? "За этот период сообщений нет." : "No messages in this period.", decisions: [], forMe: [], questions: [], mode: "rules", count: 0 };
+  const nameOf = (id: string | null) => (id ? team.find(m => m.id === id)?.name ?? "—" : "Lemiri");
+  const messages = rows.reverse().map(m => ({ sender: nameOf(m.senderMemberId), mine: m.senderMemberId === auth.membership.id, text: m.body, kind: m.kind, at: new Date(m.createdAt).toISOString() }));
+  const title = thread === "general" ? (auth.locale === "ru" ? "Общий чат" : "General") : nameOf(thread.replace(/^dm:/, "").split(":").find(id => id !== auth.membership.id) ?? null);
+  try {
+    return { ...(await summarizeThread({ messages, me: auth.user.name ?? auth.user.email, title, locale: auth.locale, timezone, meter: access.meter })), count: messages.length };
+  } finally { await access.done(); }
 }
 
 // ------------------------------------------------------------------ admin: seats, positions, joining
@@ -252,6 +326,8 @@ const routes: Array<[string, RegExp, Handler]> = [
   ["POST", /^tasks\/([\w-]+)\/report$/, (a, c) => submitReport(a, c.params[0]!, c.body)],
   ["POST", /^ai\/chat$/, (a, c) => aiChat(a, c.body)],
   ["POST", /^ai\/report$/, (a, c) => aiReport(a, c.body)],
+  ["POST", /^ai\/autodraft$/, (a, c) => aiAutodraft(a, c.body)],
+  ["POST", /^ai\/summary$/, (a, c) => aiSummary(a, c.body)],
   ["PATCH", /^members\/([\w-]+)$/, (a, c) => updateMember(a, c.params[0]!, c.body)],
   ["GET", /^join$/, a => joinAdmin(a)],
   ["POST", /^join\/rotate$/, a => rotateCode(a)],

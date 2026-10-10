@@ -242,7 +242,47 @@
   .teamHub.pane-list > .thSide, .teamHub.pane-chat > .thChat, .teamHub.pane-ai > .thAi { display: flex; }
   .thBack { display: inline-grid; }
 }
-@media (prefers-reduced-motion: reduce) { .thMsg, .thAiTurn, .joinWaitIcon { animation: none; } }
+
+/* Personal AI: usage meter, perks, client link, compact chips, danger proposals */
+.thUsage { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; margin: 0 14px; padding: 6px 0 2px; color: var(--text-3); font-size: 11px; }
+.thUsage i { height: 5px; overflow: hidden; border-radius: 99px; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line-soft); }
+.thUsage i b { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: width .3s ease; }
+.thUsage em { font-style: normal; font-variant-numeric: tabular-nums; }
+.thUsage.warn i b { background: var(--bad); }
+.thUsage.warn em { color: var(--bad); }
+.thLimitNote { margin: 0 14px 8px; padding: 8px 10px; border-radius: 10px; background: var(--bad-soft); color: var(--text); font-size: var(--fs-12); line-height: 1.4; }
+.thAiPerks { display: grid; gap: 6px; margin: 2px 0; padding: 0; list-style: none; color: var(--text-2); text-align: left; }
+.thAiPerks li { display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; }
+.thAiPerks svg { flex: none; margin-top: 2px; color: var(--ok, #2ea66d); }
+.thClientLink { display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; color: var(--accent-text, var(--accent)); font-size: var(--fs-12); font-weight: 600; text-decoration: none; }
+.thClientLink:hover { text-decoration: underline; }
+.thChips.compact { justify-content: flex-start; margin: 0 14px 8px; }
+.thChips.compact button { padding: 4px 9px; font-size: 11px; }
+.thChips button:disabled { opacity: .5; cursor: default; }
+.thProposal.danger { border-color: color-mix(in srgb, var(--bad) 45%, var(--line)); }
+.thProposal.danger header svg { color: var(--bad); }
+
+/* Chat recap */
+.thSummaryBtn { margin-left: auto; flex: none; }
+.thSummary { display: grid; gap: 8px; margin: 10px 14px 0; padding: 12px 14px; border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--line)); border-radius: 14px; background: color-mix(in srgb, var(--accent) 5%, var(--surface)); font-size: var(--fs-13); max-height: 42%; overflow-y: auto; animation: thIn .2s ease; }
+.thSummary > header { display: flex; align-items: center; gap: 6px; color: var(--accent-text, var(--accent)); }
+.thSummary > header b { margin-right: auto; }
+.thSummary select { flex: none; width: auto; min-width: 0; padding: 3px 6px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--text-2); font-size: var(--fs-12); }
+.thSummaryGroup h6 { margin: 0 0 4px; color: var(--text-3); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
+.thSummaryGroup ul { margin: 0; padding-left: 18px; }
+.thSummaryGroup.me { padding: 8px 10px; border-radius: 10px; background: var(--surface); box-shadow: 0 0 0 1px var(--line-soft); }
+.thSummaryGroup.me h6 { color: var(--accent-text, var(--accent)); }
+
+/* Report on autopilot */
+.thAutoRow { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 8px; padding: 10px; border-radius: 12px; background: var(--surface); box-shadow: 0 0 0 1px var(--line-soft); }
+.thAutoRow > div { display: grid; min-width: 0; }
+.thAutoRow b { font-size: var(--fs-13); }
+.thAutoRow small { color: var(--text-3); font-size: var(--fs-12); }
+.thAutoRow select { width: auto; padding: 6px 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text); font-size: var(--fs-13); }
+.thFound { display: block; }
+@media (max-width: 560px) { .thAutoRow { grid-template-columns: 1fr 1fr; } .thAutoRow > div { grid-column: 1 / -1; } .thSummaryBtn span { display: none; } }
+
+@media (prefers-reduced-motion: reduce) { .thMsg, .thAiTurn, .joinWaitIcon, .thSummary { animation: none; } }
 .employeePlans { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; margin-top: 16px; }
 @media (max-width: 720px) { .employeePlans { grid-template-columns: 1fr !important; } }
 .joinShell { width: min(560px, calc(100vw - 32px)); margin: 32px auto 48px; padding: 28px; border: 1px solid var(--line); border-radius: 22px; background: var(--surface); box-shadow: var(--e-1); }

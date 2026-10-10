@@ -97,3 +97,8 @@ export const REPORT_TEMPLATES: ReportTemplate[] = [
   { key: "free", ru: "Свободная форма", en: "Free form", fields: [f("text", "Отчёт", "Report", "Опишите своими словами", "Describe in your own words", true)] },
 ];
 export const templateByKey = (key?: string | null) => REPORT_TEMPLATES.find(t => t.key === key) ?? REPORT_TEMPLATES[0]!;
+
+// "Employee+ AI" seat. The price covers model costs with a margin: the monthly
+// token allowance below costs a few dollars at current Groq/OpenAI-mini rates.
+export const AI_SEAT_PRICE_USD = 59;
+export const AI_SEAT_MONTHLY_TOKENS = 5_000_000;

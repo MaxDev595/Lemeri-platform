@@ -18,6 +18,10 @@ export const TEAM_SCHEMA_STATEMENTS: string[] = [
   `CREATE INDEX IF NOT EXISTS "TeamTask_requester_idx" ON "TeamTask" ("workspaceId", "requesterMemberId", "status")`,
   `CREATE TABLE IF NOT EXISTS "WorkspaceJoinCode" ("workspaceId" TEXT NOT NULL PRIMARY KEY, "code" TEXT NOT NULL UNIQUE, "createdAt" ${ts})`,
   `CREATE TABLE IF NOT EXISTS "JoinRequest" ("id" TEXT NOT NULL PRIMARY KEY, "workspaceId" TEXT NOT NULL, "userId" TEXT NOT NULL, "position" TEXT, "status" TEXT NOT NULL DEFAULT 'PENDING', "createdAt" ${ts}, "decidedAt" TIMESTAMP(3), UNIQUE ("workspaceId", "userId"))`,
+  // AI usage per teammate per calendar month (UTC), so seat pricing covers model costs.
+  `CREATE TABLE IF NOT EXISTS "TeamAiUsage" ("memberId" TEXT NOT NULL, "month" TEXT NOT NULL, "workspaceId" TEXT NOT NULL, "tokens" INTEGER NOT NULL DEFAULT 0, "requests" INTEGER NOT NULL DEFAULT 0, "updatedAt" ${ts}, PRIMARY KEY ("memberId", "month"))`,
+  `CREATE INDEX IF NOT EXISTS "TeamAiUsage_workspace_idx" ON "TeamAiUsage" ("workspaceId", "month")`,
+  cascade("TeamAiUsage", "workspaceId", "Workspace"),
   cascade("TeamMessage", "workspaceId", "Workspace"),
   cascade("TeamRead", "workspaceId", "Workspace"),
   cascade("TeamTask", "workspaceId", "Workspace"),

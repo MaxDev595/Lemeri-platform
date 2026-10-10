@@ -6,7 +6,7 @@ export { schemaStatus };
 // Bumped from crm-1: databases that already had tables named like the CRM's
 // (from an earlier experiment) kept their old shape, because CREATE TABLE IF NOT
 // EXISTS skipped them. The reconcile pass below brings such tables in line.
-export const CRM_SCHEMA_VERSION = "crm-3";
+export const CRM_SCHEMA_VERSION = "crm-4";
 
 /**
  * For every CRM table: add any missing column (nullable when it has no default,

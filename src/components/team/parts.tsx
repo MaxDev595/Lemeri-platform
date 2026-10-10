@@ -5,10 +5,26 @@ import { Ban, CheckCircle2, Clock3, FileText, Sparkles, TriangleAlert, Wand2 } f
 import { Modal } from "../crm/core";
 import { templateByKey } from "@/lib/team/catalog";
 
-export type Member = { id: string; name: string; email: string; role: string; position: string | null; aiSeat: boolean; lastSeenAt: string | null };
+export type Usage = { tokens: number; requests: number };
+export type Member = { id: string; name: string; email: string; role: string; position: string | null; aiSeat: boolean; lastSeenAt: string | null; usage?: Usage };
 export type Task = { id: string; title: string; note: string | null; template: string; requesterMemberId: string; assigneeMemberId: string; status: "OPEN" | "DONE" | "CANCELLED"; dueAt: string | null; report: { template: string; fields: Record<string, string> } | null; aiAssisted: boolean; createdAt: string; completedAt: string | null; cancelledAt: string | null; cancelReason: string | null };
 export type Message = { id: string; thread: string; senderMemberId: string | null; kind: "TEXT" | "REPORT_REQUEST" | "REPORT" | "TASK_CANCELLED" | "SYSTEM"; body: string; taskId: string | null; aiAssisted: boolean; meta: Record<string, unknown> | null; createdAt: string };
-export type Me = { id: string; role: string; ai: boolean; name: string };
+export type Me = { id: string; role: string; ai: boolean; name: string; usage?: Usage & { limit: number | null } };
+
+/** Short Russian/English message for AI errors (no seat, monthly limit, anything else). */
+export function aiError(error: unknown, locale: string) {
+  const ru = locale !== "en";
+  if (error instanceof HubError && error.code === "AI_SEAT_REQUIRED") return ru ? "ИИ доступен на тарифе «Сотрудник+ ИИ». Попросите руководителя включить его." : "AI requires the Employee+ AI plan. Ask your manager to enable it.";
+  if (error instanceof HubError && error.code === "AI_LIMIT_REACHED") return ru ? "Месячный лимит ИИ исчерпан. Он обновится 1-го числа — или руководитель может связаться с поддержкой." : "Your monthly AI allowance is used up. It resets on the 1st.";
+  return ru ? "Не получилось — попробуйте ещё раз." : "Something went wrong — try again.";
+}
+/** CRM calls made from team AI cards (same permissions as the CRM screens). */
+export async function crm<T>(path: string, method: string, body?: unknown): Promise<T> {
+  const response = await fetch(`/api/crm/${path}`, { method, cache: "no-store", headers: body === undefined ? undefined : { "content-type": "application/json" }, body: body === undefined ? undefined : JSON.stringify(body) });
+  const out = await response.json().catch(() => ({}));
+  if (!response.ok) throw new HubError(response.status, (out as { error?: string }).error ?? String(response.status));
+  return out as T;
+}
 
 export class HubError extends Error { constructor(public status: number, public code: string, public detail?: string) { super(code); } }
 export async function hub<T>(path: string, init?: { method?: string; body?: unknown }): Promise<T> {
@@ -108,7 +124,22 @@ export function ReportComposer({ task, me, locale, onClose, onSent, notify }: { 
   const [draft, setDraft] = useState("");
   const [issues, setIssues] = useState<string[]>([]);
   const [usedAi, setUsedAi] = useState(false);
-  const [busy, setBusy] = useState<"" | "ai" | "send">("");
+  const [busy, setBusy] = useState<"" | "ai" | "auto" | "send">("");
+  const [period, setPeriod] = useState<"day" | "week" | "month">(["weekly", "project", "marketing", "finance"].includes(tpl.key) ? "week" : "day");
+  const [found, setFound] = useState<string>("");
+  // Report on autopilot: the AI collects what you did in the CRM and chats and drafts the report.
+  const runAuto = async () => {
+    setBusy("auto");
+    try {
+      const out = await hub<{ fields: Record<string, string>; issues: string[]; mode: string; facts: { activities: number; tasksDone: number; deals: number; replies: number } }>("ai/autodraft", { method: "POST", body: { taskId: task.id, period, extra: draft } });
+      setFields(prev => ({ ...prev, ...Object.fromEntries(Object.entries(out.fields).filter(([, v]) => typeof v === "string" && v.trim())) }));
+      setIssues(out.issues); if (out.mode === "model") setUsedAi(true);
+      const f = out.facts;
+      setFound(ru ? `Найдено: записей в CRM — ${f.activities}, закрытых задач — ${f.tasksDone}, сделок — ${f.deals}, ответов клиентам — ${f.replies}.` : `Found: ${f.activities} CRM notes, ${f.tasksDone} tasks done, ${f.deals} deals, ${f.replies} client replies.`);
+      notify(out.mode === "model" ? (ru ? "Черновик собран из вашей работы — проверьте и дополните" : "Draft built from your work — review and add details") : (ru ? "ИИ недоступен — данные перенесены в форму как есть" : "AI unavailable — data moved into the form as is"));
+    } catch (error) { notify(aiError(error, locale)); }
+    finally { setBusy(""); }
+  };
   const missing = tpl.fields.filter(f => f.required && !fields[f.key]?.trim());
   const runAi = async () => {
     setBusy("ai");
@@ -117,7 +148,7 @@ export function ReportComposer({ task, me, locale, onClose, onSent, notify }: { 
       setFields(prev => ({ ...prev, ...Object.fromEntries(Object.entries(out.fields).filter(([, v]) => typeof v === "string")) }));
       setIssues(out.issues); if (out.mode === "model") setUsedAi(true);
       notify(out.mode === "model" ? (ru ? "ИИ проверил и оформил отчёт — проверьте перед отправкой" : "AI checked and formatted the report — review before sending") : (ru ? "ИИ сейчас недоступен — текст перенесён в форму" : "AI is unavailable — the text was moved into the form"));
-    } catch (error) { notify(error instanceof HubError && error.code === "AI_SEAT_REQUIRED" ? (ru ? "ИИ доступен на тарифе «Сотрудник+ ИИ»" : "AI requires the Employee+ AI plan") : (ru ? "Не удалось обработать отчёт" : "Couldn't process the report")); }
+    } catch (error) { notify(aiError(error, locale)); }
     finally { setBusy(""); }
   };
   const send = async (event: FormEvent) => {
@@ -135,9 +166,15 @@ export function ReportComposer({ task, me, locale, onClose, onSent, notify }: { 
     <form id="thReportForm" className="thReportForm" onSubmit={send}>
       {task.note && <p className="thCardNote">{task.note}</p>}
       <section className={`thAiDraft${me.ai ? "" : " locked"}`}>
-        <header><Wand2 size={15}/><b>{ru ? "Написать через ИИ" : "Write with AI"}</b></header>
+        <header><Wand2 size={15}/><b>{ru ? "Отчёт с ИИ" : "Report with AI"}</b></header>
         {me.ai ? <>
-          <textarea rows={4} value={draft} onChange={e => setDraft(e.target.value)} placeholder={ru ? "Расскажите своими словами, как прошёл день: что сделали, цифры, проблемы, планы. ИИ исправит ошибки и разложит по форме." : "Describe your day in your own words: what you did, numbers, problems, plans. The AI fixes mistakes and fills the form."}/>
+          <div className="thAutoRow">
+            <div><b>{ru ? "Собрать из моей работы" : "Build from my work"}</b><small>{ru ? "ИИ возьмёт ваши звонки, заметки, задачи и сделки в CRM и ответы клиентам" : "AI uses your CRM calls, notes, tasks, deals and client replies"}</small></div>
+            <select value={period} onChange={e => setPeriod(e.target.value as "day" | "week" | "month")} aria-label={ru ? "Период" : "Period"}><option value="day">{ru ? "за сутки" : "last day"}</option><option value="week">{ru ? "за неделю" : "last week"}</option><option value="month">{ru ? "за месяц" : "last month"}</option></select>
+            <button type="button" className="thBtn primary" onClick={runAuto} disabled={busy !== ""}><Wand2 size={14}/>{busy === "auto" ? (ru ? "Собираем…" : "Building…") : (ru ? "Собрать" : "Build")}</button>
+          </div>
+          {found && <small className="thMuted thFound">{found}</small>}
+          <textarea rows={3} value={draft} onChange={e => setDraft(e.target.value)} placeholder={ru ? "Или расскажите своими словами: что сделали, цифры, проблемы, планы. ИИ исправит ошибки и разложит по форме. Эти заметки учитываются и при сборке." : "Or describe it in your own words: what you did, numbers, problems, plans. The AI fixes mistakes and fills the form. These notes are also used when building."}/>
           <div className="thRow"><small className="thMuted">{ru ? "ИИ может ошибаться — проверьте текст перед отправкой." : "AI can make mistakes — review before sending."}</small><button type="button" className="thBtn" onClick={runAi} disabled={busy !== "" || (!draft.trim() && !Object.values(fields).some(v => v.trim()))}><Sparkles size={14}/>{busy === "ai" ? (ru ? "Проверяем…" : "Checking…") : (ru ? "Проверить и оформить" : "Check & format")}</button></div>
         </> : <p className="thMuted">{ru ? "ИИ для отчётов доступен на тарифе «Сотрудник+ ИИ». Попросите руководителя включить его — или заполните форму вручную ниже." : "AI reports are available on the Employee+ AI plan. Ask your manager to enable it — or fill in the form below."}</p>}
       </section>

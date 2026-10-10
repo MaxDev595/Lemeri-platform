@@ -3,12 +3,12 @@
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { Check, Copy, RefreshCw, Sparkles, UserPlus, X } from "lucide-react";
 import { Drawer } from "../crm/core";
-import { POSITION_GROUPS, positionLabel } from "@/lib/team/catalog";
+import { AI_SEAT_PRICE_USD, POSITION_GROUPS, positionLabel } from "@/lib/team/catalog";
 import { hub, TeamAvatar, when, type Member } from "./parts";
 
 type JoinState = { code: string; requests: Array<{ id: string; name: string; email: string; position: string | null; createdAt: string }> };
 
-export function ManageTeam({ members, me, locale, notify, onClose, onChanged, children }: { members: Member[]; me: string; locale: string; notify: (text: string) => void; onClose: () => void; onChanged: () => void; children: ReactNode }) {
+export function ManageTeam({ members, me, locale, notify, onClose, onChanged, children, seatLimit }: { members: Member[]; me: string; locale: string; notify: (text: string) => void; onClose: () => void; onChanged: () => void; children: ReactNode; seatLimit?: number }) {
   const ru = locale !== "en";
   const [join, setJoin] = useState<JoinState | null>(null);
   const [roles, setRoles] = useState<Record<string, string>>({});
@@ -33,12 +33,12 @@ export function ManageTeam({ members, me, locale, notify, onClose, onChanged, ch
 
       <section className="thManageCard">
         <h4><Sparkles size={16}/>{ru ? "Должности и ИИ для сотрудников" : "Positions and AI for teammates"}</h4>
-        <p className="thMuted">{ru ? <>Базовый доступ сотрудника бесплатный: мессенджер, задания и отчёты. «Сотрудник+ ИИ» добавляет помощника, который пишет и проверяет отчёты. Владелец и администраторы пользуются ИИ всегда. Сейчас включено мест: <b>{seats}</b>.</> : <>Basic employee access is free: messenger, tasks and reports. Employee+ AI adds an assistant that writes and checks reports. Owners and admins always have AI. Seats enabled: <b>{seats}</b>.</>}</p>
-        <div className="thSeats">{members.map(m => { const admin = ["OWNER", "ADMIN"].includes(m.role); return <div key={m.id} className="thSeat"><TeamAvatar name={m.name} size={32}/><div><b>{m.name}{m.id === me && <small> · {ru ? "вы" : "you"}</small>}</b><small>{m.email}</small></div>
+        <p className="thMuted">{ru ? <>Базовый доступ сотрудника бесплатный: мессенджер, задания и отчёты. «Сотрудник+ ИИ» (${AI_SEAT_PRICE_USD} в месяц за человека) добавляет личного ИИ: план на день, клиенты и сделки из CRM, сводки переписки и отчёты на автопилоте. Владелец и администраторы пользуются ИИ всегда. Включено мест: <b>{seats}</b>{seats > 0 && <> · ${seats * AI_SEAT_PRICE_USD} в месяц</>}.</> : <>Basic employee access is free: messenger, tasks and reports. Employee+ AI (${AI_SEAT_PRICE_USD}/month per person) adds a personal AI: day plan, CRM clients and deals, chat recaps and reports on autopilot. Owners and admins always have AI. Seats enabled: <b>{seats}</b>.</>}</p>
+        <div className="thSeats">{members.map(m => { const admin = ["OWNER", "ADMIN"].includes(m.role); return <div key={m.id} className="thSeat"><TeamAvatar name={m.name} size={32}/><div><b>{m.name}{m.id === me && <small> · {ru ? "вы" : "you"}</small>}</b><small>{m.email}{m.usage && m.usage.requests > 0 && <> · {ru ? `ИИ: ${m.usage.requests} запросов` : `AI: ${m.usage.requests} requests`}{seatLimit && !admin ? ` · ${Math.min(100, Math.round(m.usage.tokens / seatLimit * 100))}%` : ""}</>}</small></div>
           <select value={m.position ?? ""} onChange={e => patch(m.id, { position: e.target.value })} aria-label={ru ? "Должность" : "Position"}><option value="">{ru ? "Должность…" : "Position…"}</option>{POSITION_GROUPS.map(g => <optgroup key={g.key} label={ru ? g.ru : g.en}>{g.items.map(i => <option key={i.key} value={i.key}>{ru ? i.ru : i.en}</option>)}</optgroup>)}</select>
           {admin ? <span className="thPill ok"><Sparkles size={11}/>{ru ? "ИИ включён" : "AI on"}</span> : <button type="button" role="switch" aria-checked={m.aiSeat} className={m.aiSeat ? "switch on" : "switch"} onClick={() => patch(m.id, { aiSeat: !m.aiSeat })} aria-label={ru ? "ИИ для сотрудника" : "AI for teammate"}><i/></button>}
         </div>; })}</div>
-        <p className="thDisclaimer">{ru ? "Оплата мест «Сотрудник+ ИИ» подключится вместе с платёжной системой; сейчас места включаются бесплатно." : "Billing for Employee+ AI seats will start once payments are connected; seats are free for now."}</p>
+        <p className="thDisclaimer">{ru ? `Цена учитывает расход ИИ: в место входит ${seatLimit ? Math.round(seatLimit / 1e6) : 5} млн токенов в месяц — этого хватает на активную ежедневную работу. Оплата подключится вместе с платёжной системой; пока места включаются бесплатно.` : `Each seat includes ${seatLimit ? Math.round(seatLimit / 1e6) : 5}M AI tokens per month. Billing starts once payments are connected; seats are free for now.`}</p>
       </section>
 
       <section className="thManageCard legacy"><h4>{ru ? "Участники и приглашения по email" : "Members and email invitations"}</h4>{children}</section>

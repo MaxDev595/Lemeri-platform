@@ -4,14 +4,14 @@
 // middle and the team AI assistant on the right. Loaded client-only.
 
 import { FormEvent, KeyboardEvent, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowUp, Check, CheckCheck, ClipboardList, Hash, MessageSquare, Search, Settings2, Sparkles, Users } from "lucide-react";
+import { ArrowUp, Check, CheckCheck, ClipboardList, Hash, ListChecks, MessageSquare, Search, Settings2, Sparkles, Users, X } from "lucide-react";
 import { positionLabel } from "@/lib/team/catalog";
 import { CrmFailure, CrmSkeleton } from "../crm/loader";
 import { TeamAiPanel } from "./ai-panel";
 import { ManageTeam } from "./manage";
-import { dayLabel, hub, isOnline, ReportComposer, StatusPill, TaskCard, TeamAvatar, when, type Me, type Member, type Message, type Task } from "./parts";
+import { aiError, dayLabel, hub, isOnline, ReportComposer, Rich, StatusPill, TaskCard, TeamAvatar, when, type Me, type Member, type Message, type Task } from "./parts";
 
-type Boot = { me: Me; members: Member[]; unread: Array<{ thread: string; unread: number }>; last: Array<{ thread: string; body: string; kind: string; createdAt: string; senderMemberId: string | null }>; tasks: Task[] };
+type Boot = { me: Me; members: Member[]; seatLimit?: number; unread: Array<{ thread: string; unread: number }>; last: Array<{ thread: string; body: string; kind: string; createdAt: string; senderMemberId: string | null }>; tasks: Task[] };
 const dmKey = (a: string, b: string) => `dm:${[a, b].sort().join(":")}`;
 
 export default function TeamHub({ locale, notify, manage }: { locale: string; notify: (text: string) => void; manage: ReactNode }) {
@@ -89,7 +89,7 @@ export default function TeamHub({ locale, notify, manage }: { locale: string; no
 
     {reporting && <ReportComposer task={reporting} me={me} locale={locale} notify={notify} onClose={() => setReporting(null)} onSent={load}/>}
     {cancelling && <CancelDialog task={cancelling} locale={locale} onClose={() => setCancelling(null)} onDone={() => { setCancelling(null); void load(); notify(ru ? "Запрос отменён" : "Request cancelled"); }} notify={notify}/>}
-    {managing && <ManageTeam members={boot.members} me={me.id} locale={locale} notify={notify} onClose={() => setManaging(false)} onChanged={load}>{manage}</ManageTeam>}
+    {managing && <ManageTeam members={boot.members} me={me.id} locale={locale} notify={notify} onClose={() => setManaging(false)} onChanged={load} seatLimit={boot.seatLimit}>{manage}</ManageTeam>}
   </div>;
 }
 
@@ -117,6 +117,12 @@ function ChatPane({ thread, me, peer, members, tasksById, locale, notify, onActi
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+  const [summary, setSummary] = useState<{ days: number; busy: boolean; data?: { summary: string; decisions: string[]; forMe: string[]; questions: string[]; count: number; mode: string } } | null>(null);
+  const summarize = async (days: number) => {
+    setSummary({ days, busy: true });
+    try { setSummary({ days, busy: false, data: await hub("ai/summary", { method: "POST", body: { thread, days } }) }); }
+    catch (error) { setSummary(null); notify(aiError(error, locale)); }
+  };
   const cursor = useRef<string | null>(null);
   const stick = useRef(true);
   const general = thread === "general";
@@ -151,7 +157,18 @@ function ChatPane({ thread, me, peer, members, tasksById, locale, notify, onActi
       <button type="button" className="thIcon thBack" onClick={onBack} aria-label={ru ? "К списку" : "Back"}>‹</button>
       <TeamAvatar name={title} general={general} online={isOnline(peer)} size={38}/>
       <div><b>{general && <Hash size={14}/>}{title}</b><small>{subtitle}</small></div>
+      {me.ai && (messages?.length ?? 0) > 0 && <button type="button" className="thBtn ghost thSummaryBtn" disabled={summary?.busy} onClick={() => summarize(summary?.days ?? 7)} title={ru ? "ИИ кратко перескажет переписку" : "AI recap of this chat"}><ListChecks size={15}/><span>{ru ? "Сводка" : "Recap"}</span></button>}
     </header>
+    {summary && <section className="thSummary" aria-live="polite">
+      <header><Sparkles size={14}/><b>{ru ? "Сводка переписки" : "Chat recap"}</b>
+        <select value={summary.days} disabled={summary.busy} onChange={e => summarize(Number(e.target.value))} aria-label={ru ? "Период" : "Period"}><option value={1}>{ru ? "за сутки" : "last day"}</option><option value={7}>{ru ? "за неделю" : "last week"}</option><option value={30}>{ru ? "за месяц" : "last month"}</option></select>
+        <button type="button" className="thIcon" onClick={() => setSummary(null)} aria-label={ru ? "Закрыть" : "Close"}><X size={14}/></button></header>
+      {summary.busy || !summary.data ? <div className="thAiTurn assistant typing"><i/><i/><i/></div> : <>
+        <Rich text={summary.data.summary}/>
+        {([[ru ? "Ждут от вас" : "Expected from you", summary.data.forMe, "me"], [ru ? "Решили" : "Decided", summary.data.decisions, ""], [ru ? "Без ответа" : "Unanswered", summary.data.questions, ""]] as const).map(([label, items, cls]) => items.length ? <div key={label} className={`thSummaryGroup ${cls}`}><h6>{label}</h6><ul>{items.map((item, i) => <li key={i}>{item}</li>)}</ul></div> : null)}
+        <small className="thMuted">{ru ? `${summary.data.count} сообщений · ИИ может ошибаться` : `${summary.data.count} messages · AI can make mistakes`}</small>
+      </>}
+    </section>}
     <div className="thMessages" ref={listRef} onScroll={e => { const n = e.currentTarget; stick.current = n.scrollHeight - n.scrollTop - n.clientHeight < 80; }}>
       {messages === null ? <CrmSkeleton locale={locale} variant="list" label={ru ? "Загружаем переписку…" : "Loading messages…"}/>
         : messages.length === 0 ? <div className="thEmptyChat"><MessageSquare size={26}/><p>{general ? (ru ? "Здесь общается вся команда. Напишите первое сообщение." : "This is where the whole team talks. Say hi.") : (ru ? `Начните переписку с ${title}. Задания и отчёты тоже появятся здесь.` : `Start a conversation with ${title}. Tasks and reports show up here too.`)}</p></div>
