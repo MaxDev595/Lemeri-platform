@@ -1,4 +1,4 @@
-// Lemiri AI plans: Trial ($0, 14 days) → Starter ($19) → Custom ($29).
+// Lemeri AI plans: Trial ($0, 14 days) → Starter ($19) → Custom ($29).
 // Paid plans are billed monthly or yearly; yearly costs 20% less (YEARLY_DISCOUNT).
 // Starter and Custom have the same AI sales assistant; Custom adds the advanced
 // visual editor for the website card. Nothing else differs (see docs/CLAUDE_CONTEXT.md).

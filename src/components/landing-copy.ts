@@ -9,7 +9,7 @@ export const landingCopy = {
     hero: {
       pill: "ИИ-продавец для сайта",
       title: "Ваш сайт получает продавца, который работает 24/7.",
-      copy: "Lemiri AI консультирует посетителей, помогает выбрать товары и услуги, отвечает на вопросы и собирает заявки — автоматически.",
+      copy: "Lemeri AI консультирует посетителей, помогает выбрать товары и услуги, отвечает на вопросы и собирает заявки — автоматически.",
       primary: "Попробовать бесплатно",
       secondary: "Как это работает",
       note: "14 дней бесплатно · без карты · подключение без программиста",
@@ -95,14 +95,14 @@ export const landingCopy = {
       ],
     },
     cta: { title: "Подключите ИИ-продавца к своему сайту", copy: "14 дней бесплатно, без привязки карты.", primary: "Попробовать бесплатно", secondary: "Написать нам" },
-    footer: { rights: "© 2026 Lemiri AI", made: "ИИ-продавец для сайта", ai: "ИИ может ошибаться. Проверяйте важную информацию." },
+    footer: { rights: "© 2026 Lemeri AI", made: "ИИ-продавец для сайта", ai: "ИИ может ошибаться. Проверяйте важную информацию." },
   },
   en: {
     nav: { features: "Features", how: "Setup", cases: "Use cases", pricing: "Pricing", faq: "FAQ", login: "Sign in", start: "Try free", cabinet: "Open dashboard" },
     hero: {
       pill: "AI seller for your website",
       title: "Your website gets a salesperson who works 24/7.",
-      copy: "Lemiri AI consults visitors, helps them choose products and services, answers questions and collects requests — automatically.",
+      copy: "Lemeri AI consults visitors, helps them choose products and services, answers questions and collects requests — automatically.",
       primary: "Try for free",
       secondary: "How it works",
       note: "14 days free · no card · no developer needed",
@@ -188,6 +188,6 @@ export const landingCopy = {
       ],
     },
     cta: { title: "Connect an AI seller to your website", copy: "14 days free, no card required.", primary: "Try for free", secondary: "Contact us" },
-    footer: { rights: "© 2026 Lemiri AI", made: "AI seller for websites", ai: "AI can make mistakes. Check important information." },
+    footer: { rights: "© 2026 Lemeri AI", made: "AI seller for websites", ai: "AI can make mistakes. Check important information." },
   },
 } satisfies Record<Locale, unknown>;

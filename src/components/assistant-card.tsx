@@ -16,7 +16,7 @@ type Msg = { id: string; role: "user" | "assistant"; text: string; sections?: Se
 
 const copy = {
   ru: {
-    title: "Lemiri Помощник", status: "Видит данные вашего пространства", open: "Открыть помощника (Ctrl+J)", collapse: "Свернуть", pin: "Закрепить положение", unpin: "Открепить", maximize: "Развернуть", restore: "Вернуть размер", reset: "Новый диалог",
+    title: "Lemeri Помощник", status: "Видит данные вашего пространства", open: "Открыть помощника (Ctrl+J)", collapse: "Свернуть", pin: "Закрепить положение", unpin: "Открепить", maximize: "Развернуть", restore: "Вернуть размер", reset: "Новый диалог",
     hello: "Чем помочь?", intro: "Спросите про функции платформы, соберу данные по клиентам, диалогам и CRM, открою нужный раздел или подготовлю изменение — вы подтвердите его кнопкой.",
     placeholder: "Спросите что угодно…", send: "Отправить", thinking: "Думаю", failed: "Не получилось ответить. Попробуйте ещё раз.", rateLimited: "Слишком много запросов, подождите минуту.",
     confirm: "Подтвердить", cancel: "Отмена", done: "Выполнено", cancelled: "Отменено", running: "Выполняю…", actionFailed: "Не удалось выполнить", openSection: "Открыть", hint: "Enter — отправить · Shift+Enter — новая строка",
@@ -24,7 +24,7 @@ const copy = {
     sections: { overview: "Обзор", widget: "Карточка и подключение", employees: "Сотрудники", conversations: "Диалоги", leads: "Лиды", appointments: "Записи", knowledge: "Знания", actions: "Действия", rules: "Правила", channels: "Каналы", integrations: "Интеграции", analytics: "Аналитика", team: "Команда", billing: "Тариф", settings: "Настройки", notifications: "Уведомления", testing: "Тестирование", deals: "Сделки", contacts: "Контакты", companies: "Компании", tasks: "Задачи", products: "Товары", reports: "Отчёты", crmSettings: "Настройки CRM" },
   },
   en: {
-    title: "Lemiri Assistant", status: "Sees your workspace data", open: "Open assistant (Ctrl+J)", collapse: "Collapse", pin: "Lock position", unpin: "Unlock", maximize: "Maximize", restore: "Restore size", reset: "New chat",
+    title: "Lemeri Assistant", status: "Sees your workspace data", open: "Open assistant (Ctrl+J)", collapse: "Collapse", pin: "Lock position", unpin: "Unlock", maximize: "Maximize", restore: "Restore size", reset: "New chat",
     hello: "How can I help?", intro: "Ask about platform features, I can collect data on customers, conversations and CRM, open a section or prepare a change for you to confirm.",
     placeholder: "Ask anything…", send: "Send", thinking: "Thinking", failed: "Could not answer. Please try again.", rateLimited: "Too many requests, wait a minute.",
     confirm: "Confirm", cancel: "Cancel", done: "Done", cancelled: "Cancelled", running: "Running…", actionFailed: "Failed", openSection: "Open", hint: "Enter to send · Shift+Enter for a new line",

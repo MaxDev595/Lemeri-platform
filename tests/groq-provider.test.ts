@@ -7,7 +7,7 @@ test("Groq provider uses GPT-OSS reasoning and validates structured output",asyn
   const payload={text:"Стоимость 3000",confidence:.9,usedSourceIds:["chunk-1"],handoffReason:null,actionRequest:null};
   const fetcher=async(_url:string|URL|Request,init?:RequestInit)=>{requestBody=JSON.parse(String(init?.body));return new Response(JSON.stringify({choices:[{message:{content:JSON.stringify(payload)}}]}),{status:200})};
   const provider=new GroqProvider("test-key","openai/gpt-oss-120b",fetcher as typeof fetch);
-  const result=await provider.generateResponse({employeeName:"Lemiri",role:"sales",goal:"help",tone:"warm",messages:[{role:"user",content:"price?"}],knowledge:[{id:"chunk-1",content:"Стоимость 3000",sourceLabel:"Price",score:.9}]});
+  const result=await provider.generateResponse({employeeName:"Lemeri",role:"sales",goal:"help",tone:"warm",messages:[{role:"user",content:"price?"}],knowledge:[{id:"chunk-1",content:"Стоимость 3000",sourceLabel:"Price",score:.9}]});
   assert.equal(requestBody?.model,"openai/gpt-oss-120b");
   assert.equal(requestBody?.reasoning_effort,"medium");
   assert.equal(requestBody?.max_completion_tokens,2048);assert.ok(Number(requestBody?.temperature)<=1);
@@ -19,7 +19,7 @@ test("Groq provider rejects unknown knowledge citations",async()=>{
   const payload={text:"Invented",confidence:.9,usedSourceIds:["unknown"],handoffReason:null,actionRequest:null};
   const fetcher=async()=>new Response(JSON.stringify({choices:[{message:{content:JSON.stringify(payload)}}]}),{status:200});
   const provider=new GroqProvider("test-key","openai/gpt-oss-120b",fetcher as typeof fetch);
-  await assert.rejects(()=>provider.generateResponse({employeeName:"Lemiri",role:"sales",goal:"help",tone:"warm",messages:[{role:"user",content:"price?"}],knowledge:[]}),/unknown knowledge source id/);
+  await assert.rejects(()=>provider.generateResponse({employeeName:"Lemeri",role:"sales",goal:"help",tone:"warm",messages:[{role:"user",content:"price?"}],knowledge:[]}),/unknown knowledge source id/);
 });
 
 test("Groq provider retries in JSON mode after a failed structured generation",async()=>{
@@ -27,7 +27,7 @@ test("Groq provider retries in JSON mode after a failed structured generation",a
   const formats:string[]=[];
   const fetcher=async(_url:string|URL|Request,init?:RequestInit)=>{const body=JSON.parse(String(init?.body));formats.push(body.response_format.type);return formats.length===1?new Response(JSON.stringify({error:{message:"Failed to generate JSON"}}),{status:400}):new Response(JSON.stringify({choices:[{message:{content:JSON.stringify(payload)}}]}),{status:200})};
   const provider=new GroqProvider("test-key","openai/gpt-oss-120b",fetcher as typeof fetch);
-  const result=await provider.generateResponse({employeeName:"Lemiri",role:"sales",goal:"help",tone:"warm",messages:[{role:"user",content:"price?"}],knowledge:[{id:"chunk-1",content:"Стоимость 3000",sourceLabel:"Price",score:.9}]});
+  const result=await provider.generateResponse({employeeName:"Lemeri",role:"sales",goal:"help",tone:"warm",messages:[{role:"user",content:"price?"}],knowledge:[{id:"chunk-1",content:"Стоимость 3000",sourceLabel:"Price",score:.9}]});
   assert.deepEqual(formats,["json_schema","json_object"]);
   assert.equal(result.text,"Стоимость 3000");
 });

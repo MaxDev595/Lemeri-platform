@@ -17,7 +17,15 @@ import "@/styles/team.css";
 import "@/styles/sales.css";
 import "@/styles/landing.css";
 
-export const metadata: Metadata = { title: "Lemiri AI — ИИ-продавец для вашего сайта", description: "ИИ-продавец на сайте: консультирует посетителей, помогает выбрать товары и услуги и собирает заявки 24/7." };
+const description = "ИИ-продавец на сайте: консультирует посетителей, помогает выбрать товары и услуги и собирает заявки 24/7.";
+export const metadata: Metadata = {
+  metadataBase: new URL("https://lemeriai.com"),
+  title: "Lemeri AI — ИИ-продавец для вашего сайта",
+  description,
+  applicationName: "Lemeri AI",
+  openGraph: { type: "website", siteName: "Lemeri AI", title: "Lemeri AI — ИИ-продавец для вашего сайта", description, url: "/", locale: "ru_RU" },
+  twitter: { card: "summary", title: "Lemeri AI — ИИ-продавец для вашего сайта", description },
+};
 export const viewport: Viewport = { themeColor: [{ media: "(prefers-color-scheme: light)", color: "#fbfbfd" }, { media: "(prefers-color-scheme: dark)", color: "#0e0f13" }] };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

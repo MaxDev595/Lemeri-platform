@@ -1,4 +1,4 @@
-# Lemiri AI — AI seller for websites
+# Lemeri AI — AI seller for websites
 
 One product: an AI sales assistant shown as a chat card on the customer's website. It consults visitors, recommends products and services from the business knowledge base, and collects requests (with consent). Plans: Trial ($0, 14 days), Starter ($19), Custom ($29, advanced card editor). AI can make mistakes.
 

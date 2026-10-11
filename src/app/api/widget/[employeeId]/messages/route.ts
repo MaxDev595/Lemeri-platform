@@ -90,7 +90,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ emp
     await db.notification.create({ data: { workspaceId: employee.workspaceId, type: "MESSAGE", title: t("server.managerMessageTitle"), body: parsed.data.message.slice(0, 1000) } });
     return NextResponse.json({ conversationId: conversation.id, message: t("server.messageToManager"), confidence: 1, handoff: true });
   }
-  // Where the card is installed: the signed parent origin (not Lemiri's own hosted chat page) and the visitor's page.
+  // Where the card is installed: the signed parent origin (not Lemeri's own hosted chat page) and the visitor's page.
   const ownOrigins = [new URL(request.url).origin, process.env.PUBLIC_APP_URL ? new URL(process.env.PUBLIC_APP_URL).origin : ""];
   const siteOrigin = signed && !ownOrigins.includes(origin) ? origin : undefined;
   let siteRoot: string | null = null;

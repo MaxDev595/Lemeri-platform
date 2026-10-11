@@ -231,7 +231,7 @@ async function aiSummary(auth: Auth, body: Row) {
     timezoneOf(auth.workspaceId),
   ]);
   if (!rows.length) return { summary: auth.locale === "ru" ? "За этот период сообщений нет." : "No messages in this period.", decisions: [], forMe: [], questions: [], mode: "rules", count: 0 };
-  const nameOf = (id: string | null) => (id ? team.find(m => m.id === id)?.name ?? "—" : "Lemiri");
+  const nameOf = (id: string | null) => (id ? team.find(m => m.id === id)?.name ?? "—" : "Lemeri");
   const messages = rows.reverse().map(m => ({ sender: nameOf(m.senderMemberId), mine: m.senderMemberId === auth.membership.id, text: m.body, kind: m.kind, at: new Date(m.createdAt).toISOString() }));
   const title = thread === "general" ? (auth.locale === "ru" ? "Общий чат" : "General") : nameOf(thread.replace(/^dm:/, "").split(":").find(id => id !== auth.membership.id) ?? null);
   try {

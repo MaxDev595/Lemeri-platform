@@ -45,7 +45,7 @@ console.log(JSON.stringify({ step: "onboarding", status: onboarding.status, loca
 
 const configuration = {
   locale: "en",
-  name: "Lemiri Smoke",
+  name: "Lemeri Smoke",
   role: "SALES",
   goal: "Explain services, qualify customer interest and book consultations.",
   tone: "WARM_PROFESSIONAL",

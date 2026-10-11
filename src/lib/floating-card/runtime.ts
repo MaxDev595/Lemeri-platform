@@ -1,4 +1,4 @@
-// Floating card runtime shared by the in-app Lemiri assistant and the customer
+// Floating card runtime shared by the in-app Lemeri assistant and the customer
 // website widget (embed.js). It owns geometry and interaction only: dragging,
 // resizing from every edge/corner, docking to edges/corners, pinning,
 // maximizing, collapsing into a launcher that attaches to the nearest screen

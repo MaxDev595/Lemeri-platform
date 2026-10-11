@@ -1,4 +1,4 @@
-# Lemiri AI — Codex handoff
+# Lemeri AI — Codex handoff
 
 Дата фиксации: 2026-08-11  
 Рабочий каталог: `C:\Users\pc\Documents\Codex\2026-08-11\pnpm-dev`
@@ -7,7 +7,7 @@
 
 ### Финальный brand/UI/UX блок 2026-08-11
 
-- Подключены локальные `Lemiri Sans` Regular/Medium/SemiBold/Bold (400/500/600/700) из `public/fonts`; старые семейства шрифтов удалены из CSS.
+- Подключены локальные `Lemeri Sans` Regular/Medium/SemiBold/Bold (400/500/600/700) из `public/fonts`; старые семейства шрифтов удалены из CSS.
 - Подключены предоставленные логотипы: полный wordmark и компактный знак в `public/brand`; компонент `Logo` использует оптимизированный `next/image`.
 - Финальная палитра приведена к `#17191f`, `#6f7482`, `#f3f4f7`, `#fafaff`, `#eeecff`, `#5546dc`, `#e4e6ec`, `#6254e8`, `#7163f3`, `#ffffff`.
 - Реализованы премиальные поверхности, скругления, состояния кнопок/полей/select, плавные переходы, появление секций, hover/press-анимации и `prefers-reduced-motion`.
@@ -184,7 +184,7 @@
 - Для channel/integration secrets отключено browser autocomplete; добавлены явные состояния отсутствия AI-сотрудников/действий и ошибки update/delete.
 - После всех изменений продолжения: `npm run typecheck` — PASS; `npm test` — PASS, 27/27.
 
-Создан работающий фундамент production SaaS-платформы Lemiri AI на Next.js 16, React 19, TypeScript, Prisma и PostgreSQL/pgvector. Это не набор mock-страниц: основные пользовательские операции выполняются через реальные API, транзакции и persistent-модели.
+Создан работающий фундамент production SaaS-платформы Lemeri AI на Next.js 16, React 19, TypeScript, Prisma и PostgreSQL/pgvector. Это не набор mock-страниц: основные пользовательские операции выполняются через реальные API, транзакции и persistent-модели.
 
 Полная цель мастер-промпта ещё не доказана как завершённая. Главные незакрытые пункты: применение initial migration на живом PostgreSQL, production-provider smoke с настоящими credentials и финальный requirement-by-requirement runtime-аудит.
 

@@ -1,4 +1,4 @@
-/** Vector redraw of the Lemiri mark: the "L" stem, the dialogue dot and the answering half-moon. */
+/** Vector redraw of the Lemeri mark: the "L" stem, the dialogue dot and the answering half-moon. */
 export function LemiriGlyph({ size = 28, className = "" }: { size?: number; className?: string }) {
   return (
     <svg className={`lemiriGlyph ${className}`} width={size} height={size} viewBox="0 0 40 40" aria-hidden="true">
@@ -12,11 +12,11 @@ export function LemiriGlyph({ size = 28, className = "" }: { size?: number; clas
 
 export function Logo({ compact = false }: { compact?: boolean }) {
   return (
-    <div className={compact ? "logo compact" : "logo"} aria-label="Lemiri AI" role="img">
+    <div className={compact ? "logo compact" : "logo"} aria-label="Lemeri AI" role="img">
       <LemiriGlyph size={compact ? 30 : 28} />
       {!compact && (
         <span className="logoWord" aria-hidden="true">
-          Lemiri<em>AI</em>
+          Lemeri<em>AI</em>
         </span>
       )}
     </div>

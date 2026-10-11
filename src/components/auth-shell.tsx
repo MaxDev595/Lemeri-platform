@@ -12,7 +12,7 @@ export function AuthShell({ locale, path, title, copy, footer, children, compact
       <Logo/>
       <div className="authHero"><span className="authPill"><i/>{t("auth.pill")}</span><h1>{hero[0]}<br/><span>{hero[1]}</span></h1><p>{t("auth.heroCopy")}</p></div>
       <AuthDemo locale={locale}/>
-      <small>© 2026 Lemiri AI · r0817</small>
+      <small>© 2026 Lemeri AI · r0817</small>
     </section>
     <section className="authPanel"><Link className="authLanguage" href={localeHref(path,nextLocale)} hrefLang={nextLocale}><span className={locale==="ru"?"on":""}>RU</span><span className={locale==="en"?"on":""}>EN</span></Link><div className="authBox"><div className="authMobileLogo"><Logo/></div><h2>{title}</h2><p>{copy}</p>{children}<div className="authFooter">{footer}</div></div></section>
   </main>;

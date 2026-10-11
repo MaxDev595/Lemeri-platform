@@ -1,12 +1,12 @@
 <?php
 /**
- * Plugin Name:       Lemiri AI — чат с ИИ-сотрудником
+ * Plugin Name:       Lemeri AI — чат с ИИ-сотрудником
  * Plugin URI:        https://lemeriai.com
- * Description:       Добавляет на сайт чат с ИИ-сотрудником Lemiri AI. Подключение в один клик, без кода.
+ * Description:       Добавляет на сайт чат с ИИ-сотрудником Lemeri AI. Подключение в один клик, без кода.
  * Version:           1.0.0
  * Requires at least: 5.8
  * Requires PHP:      7.4
- * Author:            Lemiri AI
+ * Author:            Lemeri AI
  * License:           GPL-2.0-or-later
  * Text Domain:       lemiri-ai
  */
@@ -63,7 +63,7 @@ add_action( 'wp_footer', function () {
 /* ---------- Admin ---------- */
 
 add_action( 'admin_menu', function () {
-	add_options_page( 'Lemiri AI', 'Lemiri AI', 'manage_options', LEMIRI_AI_PAGE, 'lemiri_ai_render_page' );
+	add_options_page( 'Lemeri AI', 'Lemeri AI', 'manage_options', LEMIRI_AI_PAGE, 'lemiri_ai_render_page' );
 } );
 
 add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), function ( $links ) {
@@ -77,18 +77,18 @@ add_action( 'admin_notices', function () {
 		return;
 	}
 	if ( empty( lemiri_ai_settings()['embed_url'] ) ) {
-		echo '<div class="notice notice-info"><p><b>Lemiri AI:</b> ' . esc_html__( 'подключите ИИ-сотрудника к сайту — это займёт минуту.', 'lemiri-ai' ) . ' <a href="' . esc_url( lemiri_ai_admin_url() ) . '">' . esc_html__( 'Подключить', 'lemiri-ai' ) . '</a></p></div>';
+		echo '<div class="notice notice-info"><p><b>Lemeri AI:</b> ' . esc_html__( 'подключите ИИ-сотрудника к сайту — это займёт минуту.', 'lemiri-ai' ) . ' <a href="' . esc_url( lemiri_ai_admin_url() ) . '">' . esc_html__( 'Подключить', 'lemiri-ai' ) . '</a></p></div>';
 	}
 } );
 
-/** Handles the connect/disconnect buttons, the manual form and the return from Lemiri. */
+/** Handles the connect/disconnect buttons, the manual form and the return from Lemeri. */
 add_action( 'admin_init', function () {
 	if ( ! current_user_can( 'manage_options' ) || ( $_GET['page'] ?? '' ) !== LEMIRI_AI_PAGE ) {
 		return;
 	}
 	$user_key = 'lemiri_ai_state_' . get_current_user_id();
 
-	// 1. "Подключить к Lemiri": remember a one-time state and go to the platform.
+	// 1. "Подключить к Lemeri": remember a one-time state and go to the platform.
 	if ( isset( $_GET['lemiri_connect'] ) ) {
 		check_admin_referer( 'lemiri_ai_connect' );
 		$state = wp_generate_password( 32, false, false );
@@ -102,7 +102,7 @@ add_action( 'admin_init', function () {
 		exit;
 	}
 
-	// 2. Back from Lemiri with the embed URL.
+	// 2. Back from Lemeri with the embed URL.
 	if ( isset( $_GET['lemiri_embed'], $_GET['lemiri_state'] ) ) {
 		$expected = get_transient( $user_key );
 		delete_transient( $user_key );
@@ -157,15 +157,15 @@ function lemiri_ai_render_page() {
 	$result  = sanitize_key( $_GET['lemiri_result'] ?? '' );
 	$notices = array(
 		'connected'    => array( 'success', 'Готово! ИИ-сотрудник подключён и уже отвечает на сайте.' ),
-		'failed'       => array( 'error', 'Не удалось завершить подключение. Нажмите «Подключить к Lemiri» ещё раз.' ),
+		'failed'       => array( 'error', 'Не удалось завершить подключение. Нажмите «Подключить к Lemeri» ещё раз.' ),
 		'saved'        => array( 'success', 'Настройки сохранены.' ),
-		'invalid'      => array( 'error', 'Не похоже на код Lemiri. Скопируйте код в кабинете: Каналы → Чат на сайте.' ),
+		'invalid'      => array( 'error', 'Не похоже на код Lemeri. Скопируйте код в кабинете: Каналы → Чат на сайте.' ),
 		'disconnected' => array( 'warning', 'Чат отключён от сайта.' ),
 	);
 	$connect = wp_nonce_url( lemiri_ai_admin_url( array( 'lemiri_connect' => 1 ) ), 'lemiri_ai_connect' );
 	?>
 	<div class="wrap">
-		<h1>Lemiri AI</h1>
+		<h1>Lemeri AI</h1>
 		<?php if ( isset( $notices[ $result ] ) ) : ?>
 			<div class="notice notice-<?php echo esc_attr( $notices[ $result ][0] ); ?> is-dismissible"><p><?php echo esc_html( $notices[ $result ][1] ); ?></p></div>
 		<?php endif; ?>
@@ -173,13 +173,13 @@ function lemiri_ai_render_page() {
 		<div style="max-width:720px;padding:20px 24px;margin:16px 0;background:#fff;border:1px solid #dcdcde;border-radius:10px">
 			<?php if ( $s['embed_url'] ) : ?>
 				<h2 style="margin-top:0">✅ Чат подключён</h2>
-				<p>Виджет показывается на всех страницах сайта<?php echo $s['enabled'] ? '' : ' — <b>сейчас выключен</b>'; ?>. Внешний вид, приветствие и цвет меняются в кабинете Lemiri — код менять не нужно.</p>
-				<p><a class="button button-primary" href="<?php echo esc_url( lemiri_ai_base() . '/app' ); ?>" target="_blank" rel="noopener">Открыть кабинет Lemiri</a>
+				<p>Виджет показывается на всех страницах сайта<?php echo $s['enabled'] ? '' : ' — <b>сейчас выключен</b>'; ?>. Внешний вид, приветствие и цвет меняются в кабинете Lemeri — код менять не нужно.</p>
+				<p><a class="button button-primary" href="<?php echo esc_url( lemiri_ai_base() . '/app' ); ?>" target="_blank" rel="noopener">Открыть кабинет Lemeri</a>
 				<a class="button" href="<?php echo esc_url( home_url( '/' ) ); ?>" target="_blank" rel="noopener">Посмотреть на сайте</a></p>
 			<?php else : ?>
 				<h2 style="margin-top:0">Подключите ИИ-сотрудника за минуту</h2>
-				<p>Нажмите кнопку, войдите в Lemiri и выберите сотрудника. Плагин сам добавит чат на все страницы сайта.</p>
-				<p><a class="button button-primary button-hero" href="<?php echo esc_url( $connect ); ?>">Подключить к Lemiri</a></p>
+				<p>Нажмите кнопку, войдите в Lemeri и выберите сотрудника. Плагин сам добавит чат на все страницы сайта.</p>
+				<p><a class="button button-primary button-hero" href="<?php echo esc_url( $connect ); ?>">Подключить к Lemeri</a></p>
 			<?php endif; ?>
 		</div>
 
@@ -190,7 +190,7 @@ function lemiri_ai_render_page() {
 				<tr>
 					<th scope="row"><label for="lemiri-embed">Код виджета</label></th>
 					<td><textarea id="lemiri-embed" name="embed" rows="3" class="large-text code" placeholder="<script src=&quot;https://lemeriai.com/api/widget/…/embed.js&quot; async></script>"><?php echo esc_textarea( $s['embed_url'] ); ?></textarea>
-					<p class="description">Вставьте код из кабинета Lemiri (Каналы → Чат на сайте) — подойдёт и весь тег, и только ссылка.</p></td>
+					<p class="description">Вставьте код из кабинета Lemeri (Каналы → Чат на сайте) — подойдёт и весь тег, и только ссылка.</p></td>
 				</tr>
 				<tr>
 					<th scope="row">Показывать чат</th>
@@ -199,7 +199,7 @@ function lemiri_ai_render_page() {
 				<tr>
 					<th scope="row"><label for="lemiri-base">Адрес платформы</label></th>
 					<td><input id="lemiri-base" name="base" type="url" class="regular-text" value="<?php echo esc_attr( $s['base'] ); ?>">
-					<p class="description">Меняйте, только если вам дали другой адрес Lemiri.</p></td>
+					<p class="description">Меняйте, только если вам дали другой адрес Lemeri.</p></td>
 				</tr>
 			</table>
 			<p>

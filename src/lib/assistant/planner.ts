@@ -149,8 +149,8 @@ export async function planWithoutModel(ctx: AssistantContext, history: ChatTurn[
   if (section) return { reply: t(ctx, `Открываю «${SECTION_TITLES[section].ru}».`, `Opening “${SECTION_TITLES[section].en}”.`), sections: [], navigate: section, proposals: [] };
   return {
     reply: t(ctx,
-      "Я помощник Lemiri. Могу:\n- объяснить любой раздел и помочь с настройкой каналов, CRM и знаний;\n- собрать информацию о клиентах, диалогах из Telegram, WhatsApp, Email и сайта, лидах и записях;\n- открыть нужный раздел;\n- подготовить изменение (этап лида, пауза сотрудника, тема, знания) — вы подтверждаете его кнопкой.\nНапример: «Покажи новые лиды», «Что пишут в Telegram?», «Как подключить WhatsApp?».",
-      "I am the Lemiri assistant. I can:\n- explain any section and help set up channels, CRM and knowledge;\n- collect information about customers, conversations from Telegram, WhatsApp, Email and the website, leads and appointments;\n- open a section;\n- prepare a change (lead stage, pausing an employee, theme, knowledge) that you confirm with a button.\nFor example: “Show new leads”, “What's new in Telegram?”, “How do I connect WhatsApp?”."),
+      "Я помощник Lemeri. Могу:\n- объяснить любой раздел и помочь с настройкой каналов, CRM и знаний;\n- собрать информацию о клиентах, диалогах из Telegram, WhatsApp, Email и сайта, лидах и записях;\n- открыть нужный раздел;\n- подготовить изменение (этап лида, пауза сотрудника, тема, знания) — вы подтверждаете его кнопкой.\nНапример: «Покажи новые лиды», «Что пишут в Telegram?», «Как подключить WhatsApp?».",
+      "I am the Lemeri assistant. I can:\n- explain any section and help set up channels, CRM and knowledge;\n- collect information about customers, conversations from Telegram, WhatsApp, Email and the website, leads and appointments;\n- open a section;\n- prepare a change (lead stage, pausing an employee, theme, knowledge) that you confirm with a button.\nFor example: “Show new leads”, “What's new in Telegram?”, “How do I connect WhatsApp?”."),
     sections: page && page !== "overview" ? [page] : [], proposals: [],
   };
 }

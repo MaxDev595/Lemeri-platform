@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { MockAIProvider } from "../src/lib/ai/providers/mock.ts";
 
-const base = { employeeName: "Lemiri", role: "Администратор", goal: "Помогать клиентам", tone: "Тёплый", messages: [{ role: "user" as const, content: "Сколько стоит консультация?" }] };
+const base = { employeeName: "Lemeri", role: "Администратор", goal: "Помогать клиентам", tone: "Тёплый", messages: [{ role: "user" as const, content: "Сколько стоит консультация?" }] };
 
 test("provider hands off instead of inventing without knowledge", async () => {
   const result = await new MockAIProvider().generateResponse({ ...base, knowledge: [] });

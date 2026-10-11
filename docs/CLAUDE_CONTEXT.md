@@ -1,4 +1,4 @@
-# Lemiri AI — актуальный контекст для Claude
+# Lemeri AI — актуальный контекст для Claude
 
 > Читай этот файл перед любой работой с репозиторием. Это источник правды о продукте.
 > Если чат-память расходится с этим файлом, верь файлу и обнови его после изменений.
@@ -8,7 +8,7 @@
 
 - **Проблема:** бизнес теряет клиентов, потому что посетители сайта не получают своевременную консультацию.
 - **Решение:** ИИ-продавец (консультант) в виде карточки чата на сайте. Он круглосуточно консультирует, продаёт, рекомендует товары и собирает заявки.
-- Lemiri **не позиционируется** как CRM-платформа, корпоративный инструмент или мультиканальный сервис.
+- Lemeri **не позиционируется** как CRM-платформа, корпоративный инструмент или мультиканальный сервис.
 - Не обещаем гарантированного роста продаж или конверсии.
 - «ИИ может ошибаться» — пишем на лендинге, в карточке, в кабинете и в документации.
 
@@ -53,15 +53,15 @@
 
 ### Что входит в тарифы — `src/lib/billing/features.ts`
 - `FEATURE_MATRIX` — единый список функций по тарифам. Из него рисуется таблица сравнения в «Тариф и оплата», по нему же проверяет сервер (`planAllows` / `planNumber`, ответ 402 `PLAN_REQUIRED` с `feature` и нужным `plan`). Открытый доступ = Custom.
-- Trial: 150 ответов ИИ, до 5 источников знаний, «Изучить сайт» до 10 страниц, без загрузки документов, менеджер не отвечает из кабинета, дизайн `basic`, подпись «Lemiri AI» в карточке.
+- Trial: 150 ответов ИИ, до 5 источников знаний, «Изучить сайт» до 10 страниц, без загрузки документов, менеджер не отвечает из кабинета, дизайн `basic`, подпись «Lemeri AI» в карточке.
 - Starter: 2000 ответов, 50 источников, 20 страниц, документы (PDF/DOCX/XLSX), ответы менеджера из кабинета (`/api/conversations/[id]/messages`), дизайн `standard`.
-- Custom: всё из Starter + визуальный редактор, «Подобрать под сайт», карточка без подписи «Lemiri AI» (остаётся «ИИ может ошибаться»).
+- Custom: всё из Starter + визуальный редактор, «Подобрать под сайт», карточка без подписи «Lemeri AI» (остаётся «ИИ может ошибаться»).
 - Проверки на сервере: `api/knowledge` и `study-site` (число источников), `api/knowledge/documents`, `api/conversations/[id]/messages`, дизайн — как раньше (`designAllows`), страницы краулера — `site-jobs.ts`.
 
 ### Биллинг — Paddle (по умолчанию), Stripe как запасной (`BILLING_PROVIDER=stripe`)
 - **Env:** `PADDLE_API_KEY`, `PADDLE_CLIENT_TOKEN`, `PADDLE_WEBHOOK_SECRET`, `PADDLE_ENVIRONMENT=sandbox|production`, `PADDLE_STARTER_PRICE_ID`, `PADDLE_CUSTOM_PRICE_ID` (помесячно, обязательны), `PADDLE_STARTER_YEARLY_PRICE_ID`, `PADDLE_CUSTOM_YEARLY_PRICE_ID` (за год, необязательны — без них вариант «За год» показывает «Оплата скоро»; `PADDLE_API_BASE` — только для локальных тестов). Stripe: `STRIPE_*_YEARLY_PRICE_ID`. Модуль `src/lib/billing/paddle.ts`.
 - **Период оплаты:** переключатель «Помесячно / За год» над тарифами в кабинете и в форме оплаты; `/app/checkout?plan=…&interval=year`, `POST /api/billing {…, interval: "month"|"year"}`, в `custom_data` транзакции пишется `interval`. Смена месяц ⇄ год у живой подписки — тот же `PATCH` (`prorated_immediately`), при `past_due` — 409 `PAST_DUE`.
-- **Оформление:** «Выбрать Starter/Custom» → `/app/checkout?plan=…` (`components/billing/checkout-page.tsx`, рендерится только в браузере). Шаг 1 — ФИО, email, страна (без RU/BY/IR/KP/CU/SY — Paddle их не обслуживает), регион, город, индекс, адрес, компания и ИНН/БИН/VAT. `POST /api/billing {action:"checkout", plan, details}` → Paddle customer + address (+ business) → таблица `BillingProfile` (создаётся сама, raw SQL, `lib/billing/profile.ts`) → transaction с `custom_data {workspaceId, plan}`. Шаг 2 — карта вводится во встроенной форме Paddle (Paddle.js inline, `frameTarget: lemiri-paddle-frame`). Номер карты к Lemiri не попадает; API отвергает похожие на карту данные (`CARD_DATA_NOT_ACCEPTED`).
+- **Оформление:** «Выбрать Starter/Custom» → `/app/checkout?plan=…` (`components/billing/checkout-page.tsx`, рендерится только в браузере). Шаг 1 — ФИО, email, страна (без RU/BY/IR/KP/CU/SY — Paddle их не обслуживает), регион, город, индекс, адрес, компания и ИНН/БИН/VAT. `POST /api/billing {action:"checkout", plan, details}` → Paddle customer + address (+ business) → таблица `BillingProfile` (создаётся сама, raw SQL, `lib/billing/profile.ts`) → transaction с `custom_data {workspaceId, plan}`. Шаг 2 — карта вводится во встроенной форме Paddle (Paddle.js inline, `frameTarget: lemiri-paddle-frame`). Номер карты к Lemeri не попадает; API отвергает похожие на карту данные (`CARD_DATA_NOT_ACCEPTED`).
 - **Смена тарифа:** живая подписка Paddle меняется на месте (`PATCH /subscriptions/{id}`, `prorated_immediately`), вторая не создаётся. **Портал:** `POST /api/billing {action:"portal"}` → Paddle customer portal (карта, счета, отмена).
 - **Вебхук:** `/api/webhooks/paddle` (и `/api/webhooks/stripe`) — один маршрут `api/webhooks/[type]/route.ts`, обработчики `lib/billing/paddle-webhook.ts` / `stripe-webhook.ts`. Подпись `Paddle-Signature` (HMAC, 5 минут), события по порядку (advisory lock + последний событие), привязка к пространству по `custom_data`. `transaction.completed` связывает customer/subscription, `subscription.*` ставит план, статус (`active/trialing/past_due/paused/canceled`), период и `cancelAtPeriodEnd`.
 - В Paddle включить события: `transaction.completed`, `subscription.created`, `subscription.updated`, `subscription.activated`, `subscription.canceled`, `subscription.past_due`, `subscription.paused`, `subscription.resumed`. URL: `https://lemeriai.com/api/webhooks/paddle`. Домен lemeriai.com одобрить в Paddle (Checkout → Website approval), default payment link — `https://lemeriai.com/app/checkout`.

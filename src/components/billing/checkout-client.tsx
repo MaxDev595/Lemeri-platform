@@ -9,7 +9,7 @@ import { LemiriGlyph } from "../logo";
 // size-limited Worker bundle, like the cabinet (platform-client.tsx).
 const CheckoutPage = dynamic(() => import("./checkout-page").then(m => m.CheckoutPage), {
   ssr: false,
-  loading: () => <div className="appBoot" role="status" aria-label="Lemiri AI"><LemiriGlyph size={40}/><span/></div>,
+  loading: () => <div className="appBoot" role="status" aria-label="Lemeri AI"><LemiriGlyph size={40}/><span/></div>,
 });
 
 export function CheckoutClient(props: ComponentProps<typeof CheckoutPageType>) {

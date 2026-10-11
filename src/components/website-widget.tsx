@@ -12,7 +12,7 @@ const widgetCopy = {
   ru: {
     status: "ИИ-консультант · обычно отвечает сразу", hello: "Здравствуйте!", help: "Помогу выбрать и отвечу на вопросы.",
     message: "Напишите сообщение…", connecting: "Подключение…", messageLabel: "Сообщение", send: "Отправить",
-    powered: "Lemiri AI · ИИ может ошибаться", disclaimer: "ИИ может ошибаться", sendFailed: "Не удалось отправить сообщение", connectionFailed: "Ошибка соединения",
+    powered: "Lemeri AI · ИИ может ошибаться", disclaimer: "ИИ может ошибаться", sendFailed: "Не удалось отправить сообщение", connectionFailed: "Ошибка соединения",
     suggestions: ["Помогите выбрать", "Сколько стоит?", "Доставка и оплата"],
     lead: "Оставить заявку", leadTitle: "Заявка", leadCopy: "Оставьте контакты — менеджер свяжется с вами.",
     name: "Имя", phone: "Телефон", email: "Email", interest: "Что вас интересует", budget: "Бюджет", comment: "Комментарий",
@@ -25,7 +25,7 @@ const widgetCopy = {
   en: {
     status: "AI consultant · usually replies instantly", hello: "Hello!", help: "I'll help you choose and answer your questions.",
     message: "Type a message…", connecting: "Connecting…", messageLabel: "Message", send: "Send",
-    powered: "Lemiri AI · AI can make mistakes", disclaimer: "AI can make mistakes", sendFailed: "Could not send the message", connectionFailed: "Connection error",
+    powered: "Lemeri AI · AI can make mistakes", disclaimer: "AI can make mistakes", sendFailed: "Could not send the message", connectionFailed: "Connection error",
     suggestions: ["Help me choose", "How much is it?", "Delivery & payment"],
     lead: "Leave a request", leadTitle: "Request", leadCopy: "Leave your contacts and a manager will get back to you.",
     name: "Name", phone: "Phone", email: "Email", interest: "What are you interested in", budget: "Budget", comment: "Comment",
@@ -127,7 +127,7 @@ export function WebsiteWidget({ locale, employeeId, employeeName, company = "", 
     try { localStorage.setItem(key, created); } catch { /* storage blocked: one visitor id per page view */ }
     setVisitorId(created);
   }, [employeeId, preview]);
-  // Hosted chat page (a direct link, no website): Lemiri's own origin issues the token.
+  // Hosted chat page (a direct link, no website): Lemeri's own origin issues the token.
   const hostedToken = async () => {
     try { const response = await fetch(`/api/widget/${employeeId}/token`, { method: "POST" }); const body = await response.json() as { token?: string }; if (!body.token) return undefined; const next = { token: body.token, origin: window.location.origin }; authRef.current = next; setEmbedAuth(next); return next; } catch { return undefined; }
   };

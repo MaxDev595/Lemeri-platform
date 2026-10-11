@@ -9,7 +9,7 @@ import { LemiriGlyph } from "./logo";
 // keeping it out of server rendering keeps the size-limited Worker bundle small.
 const Platform = dynamic(() => import("./platform").then(m => m.Platform), {
   ssr: false,
-  loading: () => <div className="appBoot" role="status" aria-label="Lemiri AI"><LemiriGlyph size={40}/><span/></div>,
+  loading: () => <div className="appBoot" role="status" aria-label="Lemeri AI"><LemiriGlyph size={40}/><span/></div>,
 });
 
 export function PlatformClient(props: ComponentProps<typeof PlatformType>) {

@@ -1,6 +1,6 @@
 /* ==========================================================================
    AI seller cabinet: AI employee, card studio, plans, inbox tabs (sx*)
-   Uses the shared design tokens, so it follows the Lemiri look and dark mode.
+   Uses the shared design tokens, so it follows the Lemeri look and dark mode.
    ========================================================================== */
 
 .sxState { display: flex; align-items: center; gap: 10px; padding: 28px; border: 1px dashed var(--line); border-radius: var(--r-lg); color: var(--text-3); }

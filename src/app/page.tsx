@@ -6,8 +6,10 @@ import { getPublicLocale } from "@/lib/public-locale";
 import { openAccessEnabled } from "@/lib/billing/plans";
 
 export const metadata: Metadata = {
-  title: "Lemiri AI — ИИ-продавец для сайта, который работает 24/7",
+  title: "Lemeri AI — ИИ-продавец для сайта, который работает 24/7",
   description: "ИИ-продавец консультирует посетителей сайта, помогает выбрать товары и услуги, отвечает на вопросы и собирает заявки — автоматически.",
+  alternates: { canonical: "/" },
+  openGraph: { type: "website", siteName: "Lemeri AI", url: "/", title: "Lemeri AI — ИИ-продавец для сайта, который работает 24/7", description: "ИИ-продавец консультирует посетителей сайта, помогает выбрать товары и услуги, отвечает на вопросы и собирает заявки — автоматически.", locale: "ru_RU" },
 };
 
 // lemeriai.com: signed-in users go straight to the platform, everyone else sees the landing.

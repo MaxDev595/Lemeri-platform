@@ -8,7 +8,7 @@ import { getPublicLocale } from "@/lib/public-locale";
 // /legal/terms, /legal/privacy, /legal/refund (/terms, /privacy, /refund redirect here).
 // One route for the three documents keeps the Worker bundle small.
 const DOCS = { terms: termsText, privacy: privacyText, refund: refundText } as const;
-export const metadata: Metadata = { title: "Lemiri AI — legal" };
+export const metadata: Metadata = { title: "Lemeri AI — legal" };
 
 export default async function Page({ params, searchParams }: { params: Promise<{ doc: string }>; searchParams: Promise<{ lang?: string }> }) {
   const { doc } = await params;

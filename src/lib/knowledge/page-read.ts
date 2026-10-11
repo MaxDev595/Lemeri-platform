@@ -6,7 +6,7 @@ import { assertPublicHttpsUrl } from "../integrations/url-security.ts";
 // LEMIRI_ALLOW_PRIVATE_SITE_FETCH=1 lifts the address check for local tests only.
 
 const maxBytes = 2_000_000;
-const crawlerAgent = "LemiriKnowledgeBot";
+const crawlerAgent = "LemeriKnowledgeBot";
 
 export type SitePage = { url: string; title: string; description: string; content: string };
 

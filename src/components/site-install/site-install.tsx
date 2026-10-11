@@ -22,7 +22,7 @@ const dict = {
     save: "Сохранить", saved: "Сохранено — изменения уже на сайте, код менять не нужно", saveFailed: "Не удалось сохранить", preview: "Так чат увидят посетители", defaults: { hello: "Здравствуйте!", help: "Чем я могу помочь?", status: "AI-сотрудник · обычно отвечает сразу", suggestions: ["Сколько стоят услуги?", "Хочу записаться", "Связаться с менеджером"], input: "Напишите сообщение…" },
     whereTitle: "Где сделан ваш сайт?", whereCopy: "Выберите конструктор — покажем, как подключить чат. Там, где написано «Без кода», вставлять ничего не нужно.",
     noCode: "Без кода", minute: "1 минута", code: "Ваш код", copy: "Копировать", copied: "Скопировано",
-    dev: "Отправить инструкцию разработчику", devSubject: "Установка чата Lemiri AI на сайт",
+    dev: "Отправить инструкцию разработчику", devSubject: "Установка чата Lemeri AI на сайт",
     check: "Проверка установки", checkCopy: "Откройте свой сайт в браузере — через минуту здесь появится отметка.", found: "Виджет работает на", notFound: "Пока не видим виджет на сайтах", recheck: "Проверить",
     sites: "Разрешённые сайты", sitesCopy: "Если список пуст, чат работает на любом сайте. Добавьте адреса, чтобы код нельзя было использовать на чужих сайтах.", addSite: "Добавить", saveSites: "Сохранить список",
     linkTitle: "Чат без сайта", linkCopy: "Отправляйте ссылку в соцсетях, мессенджерах, в шапке профиля или печатайте QR на визитках и в зале.", open: "Открыть", downloadQr: "Скачать QR", linkOn: "Ссылка включена", linkOff: "Ссылка выключена — страница не откроется",
@@ -37,7 +37,7 @@ const dict = {
     save: "Save", saved: "Saved — changes are live, no need to touch the code", saveFailed: "Could not save", preview: "What visitors will see", defaults: { hello: "Hello!", help: "How can I help?", status: "AI employee · usually replies immediately", suggestions: ["What are your prices?", "I want to book", "Talk to a manager"], input: "Type a message…" },
     whereTitle: "Where is your website built?", whereCopy: "Pick your builder and we'll show how to add the chat. “No code” options need nothing pasted.",
     noCode: "No code", minute: "1 minute", code: "Your code", copy: "Copy", copied: "Copied",
-    dev: "Send instructions to a developer", devSubject: "Installing the Lemiri AI chat",
+    dev: "Send instructions to a developer", devSubject: "Installing the Lemeri AI chat",
     check: "Install check", checkCopy: "Open your website in a browser — a checkmark appears here within a minute.", found: "Widget is live on", notFound: "We haven't seen the widget on any site yet", recheck: "Check",
     sites: "Allowed websites", sitesCopy: "Empty list means the chat works on any site. Add addresses so nobody can reuse your code elsewhere.", addSite: "Add", saveSites: "Save list",
     linkTitle: "Chat without a website", linkCopy: "Share the link in social profiles and messengers, or print the QR code on cards and in your store.", open: "Open", downloadQr: "Download QR", linkOn: "Link enabled", linkOff: "Link disabled — the page won't open",
@@ -49,8 +49,8 @@ const dict = {
 type Platform = { id: string; name: string; noCode?: boolean; steps: { ru: string[]; en: string[] }; action?: "wordpress" | "gtm" };
 const PLATFORMS: Platform[] = [
   { id: "wordpress", name: "WordPress", noCode: true, action: "wordpress", steps: {
-    ru: ["Скачайте плагин Lemiri AI (кнопка ниже).", "В админке WordPress: Плагины → Добавить новый → Загрузить плагин → выберите файл → Установить → Активировать.", "Откройте Настройки → Lemiri AI и нажмите «Подключить к Lemiri».", "Войдите в Lemiri и выберите сотрудника — чат появится на всех страницах сам."],
-    en: ["Download the Lemiri AI plugin (button below).", "In WordPress admin: Plugins → Add New → Upload Plugin → choose the file → Install → Activate.", "Open Settings → Lemiri AI and press “Connect to Lemiri”.", "Sign in to Lemiri and pick the employee — the chat appears on every page automatically."] } },
+    ru: ["Скачайте плагин Lemeri AI (кнопка ниже).", "В админке WordPress: Плагины → Добавить новый → Загрузить плагин → выберите файл → Установить → Активировать.", "Откройте Настройки → Lemeri AI и нажмите «Подключить к Lemeri».", "Войдите в Lemeri и выберите сотрудника — чат появится на всех страницах сам."],
+    en: ["Download the Lemeri AI plugin (button below).", "In WordPress admin: Plugins → Add New → Upload Plugin → choose the file → Install → Activate.", "Open Settings → Lemeri AI and press “Connect to Lemeri”.", "Sign in to Lemeri and pick the employee — the chat appears on every page automatically."] } },
   { id: "gtm", name: "Google Tag Manager", noCode: true, action: "gtm", steps: {
     ru: ["Скачайте готовый контейнер (кнопка ниже).", "В Google Tag Manager: Администрирование → Импорт контейнера → выберите файл.", "Рабочая область — текущая, вариант — «Объединить» → Подтвердить.", "Нажмите «Отправить» → «Опубликовать». Чат появится на всех страницах, где стоит GTM."],
     en: ["Download the ready-made container (button below).", "In Google Tag Manager: Admin → Import Container → choose the file.", "Workspace: existing, option: Merge → Confirm.", "Press Submit → Publish. The chat appears on every page that has GTM."] } },
@@ -85,7 +85,7 @@ function download(name: string, content: BlobPart, type: string) {
 
 function gtmContainer(code: string) {
   const ids = { accountId: "0", containerId: "0" };
-  return JSON.stringify({ exportFormatVersion: 2, exportTime: new Date().toISOString().replace("T", " ").slice(0, 19), containerVersion: { path: "accounts/0/containers/0/versions/0", ...ids, containerVersionId: "0", container: { path: "accounts/0/containers/0", ...ids, name: "Lemiri AI", publicId: "GTM-LEMIRI", usageContext: ["WEB"] }, tag: [{ ...ids, tagId: "1", name: "Lemiri AI — чат", type: "html", parameter: [{ type: "TEMPLATE", key: "html", value: code }, { type: "BOOLEAN", key: "supportDocumentWrite", value: "false" }], firingTriggerId: ["2147479553"], tagFiringOption: "ONCE_PER_EVENT" }] } }, null, 2);
+  return JSON.stringify({ exportFormatVersion: 2, exportTime: new Date().toISOString().replace("T", " ").slice(0, 19), containerVersion: { path: "accounts/0/containers/0/versions/0", ...ids, containerVersionId: "0", container: { path: "accounts/0/containers/0", ...ids, name: "Lemeri AI", publicId: "GTM-LEMIRI", usageContext: ["WEB"] }, tag: [{ ...ids, tagId: "1", name: "Lemeri AI — чат", type: "html", parameter: [{ type: "TEMPLATE", key: "html", value: code }, { type: "BOOLEAN", key: "supportDocumentWrite", value: "false" }], firingTriggerId: ["2147479553"], tagFiringOption: "ONCE_PER_EVENT" }] } }, null, 2);
 }
 
 export default function SiteInstall({ locale, channelId, employeeId, employeeName, origin, notify, only }: Props) {
@@ -134,7 +134,7 @@ export default function SiteInstall({ locale, channelId, employeeId, employeeNam
   const suggestions = look.suggestions?.length ? look.suggestions : l.defaults.suggestions;
   const previewDark = look.theme === "dark";
   const selected = PLATFORMS.find(p => p.id === platform) ?? PLATFORMS[0]!;
-  const mail = `mailto:?subject=${encodeURIComponent(l.devSubject)}&body=${encodeURIComponent(`${lang === "ru" ? "Привет! Нужно добавить чат Lemiri AI на все страницы сайта перед </body>:" : "Hi! Please add the Lemiri AI chat to every page before </body>:"}\n\n${code}\n\n${lang === "ru" ? "Больше ничего делать не нужно — внешний вид настраивается в кабинете Lemiri." : "Nothing else is needed — the look is managed in the Lemiri cabinet."}`)}`;
+  const mail = `mailto:?subject=${encodeURIComponent(l.devSubject)}&body=${encodeURIComponent(`${lang === "ru" ? "Привет! Нужно добавить чат Lemeri AI на все страницы сайта перед </body>:" : "Hi! Please add the Lemeri AI chat to every page before </body>:"}\n\n${code}\n\n${lang === "ru" ? "Больше ничего делать не нужно — внешний вид настраивается в кабинете Lemeri." : "Nothing else is needed — the look is managed in the Lemeri cabinet."}`)}`;
   const minutesAgo = (iso: string) => Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
 
   return <section className="siteInstall">

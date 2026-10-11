@@ -1,6 +1,6 @@
 export type RobotsRule = { allow: boolean; path: string };
 
-export function parseRobots(text: string, agent = "LemiriKnowledgeBot") {
+export function parseRobots(text: string, agent = "LemeriKnowledgeBot") {
   const groups: Array<{ agents: string[]; rules: RobotsRule[] }> = [];
   let group: { agents: string[]; rules: RobotsRule[] } | undefined;
   let sawRule = false;

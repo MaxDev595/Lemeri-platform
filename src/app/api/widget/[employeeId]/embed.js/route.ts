@@ -15,12 +15,12 @@ export async function GET(request:Request,{params}:{params:Promise<{employeeId:s
   const {employeeId}=await params;
   const js={"content-type":"application/javascript; charset=utf-8"};
   const widget=await loadWebsiteWidget(employeeId);
-  if(!widget)return new NextResponse("/* Lemiri widget is unavailable */",{status:404,headers:js});
+  if(!widget)return new NextResponse("/* Lemeri widget is unavailable */",{status:404,headers:js});
   const base=new URL(request.url).origin;
   let parentOrigin:string|undefined;try{const referer=request.headers.get("referer");parentOrigin=referer?new URL(referer).origin:undefined}catch{}
-  // Lemiri's own pages (preview, hosted chat) may always load the widget.
+  // Lemeri's own pages (preview, hosted chat) may always load the widget.
   const own=parentOrigin===base;
-  if(!own&&!originAllowed(widget.config.allowedOrigins,parentOrigin))return new NextResponse("/* Lemiri widget is not allowed on this origin */",{status:403,headers:js});
+  if(!own&&!originAllowed(widget.config.allowedOrigins,parentOrigin))return new NextResponse("/* Lemeri widget is not allowed on this origin */",{status:403,headers:js});
   if(parentOrigin&&!own&&/^https?:/.test(parentOrigin)){const channelId=widget.channelId,config=widget.config,origin=parentOrigin;after(()=>recordWidgetSeen(channelId,config,origin).catch(()=>undefined))}
   const token=createWidgetToken({employeeId,origin:parentOrigin??"*",expiresAt:Date.now()+WIDGET_TOKEN_TTL_MS});
   const frameUrl=`${base}/widget/${employeeId}`;

@@ -4,7 +4,7 @@
 export function legalCompany() {
   const e = process.env;
   return {
-    entity: e.LEMIRI_LEGAL_ENTITY?.trim() || "Lemiri AI",
+    entity: e.LEMIRI_LEGAL_ENTITY?.trim() || "Lemeri AI",
     id: e.LEMIRI_LEGAL_ID?.trim() || "",
     address: e.LEMIRI_LEGAL_ADDRESS?.trim() || "",
     country: e.LEMIRI_LEGAL_COUNTRY?.trim() || "",

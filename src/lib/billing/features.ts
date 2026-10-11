@@ -29,7 +29,7 @@ export const FEATURE_MATRIX: FeatureRow[] = [
   { key: "readyStyles", group: "card", label: { ru: "Аватар, быстрые вопросы, 12 готовых стилей", en: "Avatar, quick questions, 12 ready styles" }, values: { TRIAL: false, STARTER: true, CUSTOM: true } },
   { key: "visualEditor", group: "card", label: { ru: "Визуальный редактор и премиум-эффекты", en: "Visual editor and premium effects" }, values: { TRIAL: false, STARTER: false, CUSTOM: true } },
   { key: "matchDesign", group: "card", label: { ru: "ИИ подбирает дизайн под сайт", en: "AI matches the design to your site" }, values: { TRIAL: false, STARTER: false, CUSTOM: true } },
-  { key: "hideBranding", group: "card", label: { ru: "Без подписи «Lemiri AI» в карточке", en: "No “Lemiri AI” label in the card" }, values: { TRIAL: false, STARTER: false, CUSTOM: true } },
+  { key: "hideBranding", group: "card", label: { ru: "Без подписи «Lemeri AI» в карточке", en: "No “Lemeri AI” label in the card" }, values: { TRIAL: false, STARTER: false, CUSTOM: true } },
 ];
 
 const byKey = new Map(FEATURE_MATRIX.map(row => [row.key, row]));

@@ -29,7 +29,7 @@ export function Landing({ locale, signedIn = false, openAccess = false }: { loca
     <div className="landing" lang={locale}>
       <SmoothScroll />
       <LandingNav menu={<nav className="lnSheetLinks">{links}{!signedIn && <Link href={login}>{c.nav.login}</Link>}<Link className="primary" href={register}>{signedIn ? c.nav.cabinet : c.nav.start}</Link></nav>}>
-        <Link href={localeHref("/", locale)} className="lnBrand" aria-label="Lemiri AI"><Logo /></Link>
+        <Link href={localeHref("/", locale)} className="lnBrand" aria-label="Lemeri AI"><Logo /></Link>
         <nav className="lnLinks">{links}</nav>
         <div className="lnNavActions">
           <Link className="lnLang" href={localeHref("/", other)} hrefLang={other}><span className={locale === "ru" ? "on" : ""}>RU</span><span className={locale === "en" ? "on" : ""}>EN</span></Link>
@@ -138,7 +138,7 @@ export function Landing({ locale, signedIn = false, openAccess = false }: { loca
           <p>{c.cta.copy}</p>
           <div className="lnHeroCta">
             <Link className="primary lnBig" href={register}>{c.cta.primary}<ArrowRight className="submitArrow" size={17} /></Link>
-            <a className="lnGhost lnBig" href="mailto:sales@lemiri.ai">{c.cta.secondary}</a>
+            <a className="lnGhost lnBig" href="mailto:sales@lemeriai.com">{c.cta.secondary}</a>
           </div>
         </section>
       </main>
@@ -161,7 +161,7 @@ function CardDemo({ locale }: { locale: Locale }) {
       <div className="lnDemoBar"><i /><i /><i /><span>{d.site}</span></div>
       <div className="lnDemoPage" aria-hidden="true"><b /><b /><span /><span /><span /></div>
       <div className="lnDemoCard" aria-hidden="true">
-        <header><span><LemiriGlyph size={18} /></span><div><b>Lemiri</b><small>{d.status}</small></div></header>
+        <header><span><LemiriGlyph size={18} /></span><div><b>Lemeri</b><small>{d.status}</small></div></header>
         <div className="lnDemoChat">
           <p className="me">{d.q1}</p>
           <div className="ai"><p>{d.a1}</p><ul>{d.items.map(item => <li key={item}>{item}</li>)}</ul><p>{d.a1b}</p></div>

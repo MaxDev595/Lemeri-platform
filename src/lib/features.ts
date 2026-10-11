@@ -1,4 +1,4 @@
-// Product scope switches. Lemiri AI ships as one product — an AI sales assistant
+// Product scope switches. Lemeri AI ships as one product — an AI sales assistant
 // for websites — and every module outside that scope stays in the codebase but is
 // switched off here. See docs/FUTURE_FEATURES.md before turning anything on.
 //

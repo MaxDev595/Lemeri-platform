@@ -6,11 +6,11 @@ import { employeeRoleLabel, employeeToneLabel } from "../src/lib/employee-domain
 test("employee validation normalizes legacy labels to stable business keys and rejects unknown roles",()=>{
   const expected=["ADMINISTRATOR","SALES","SUPPORT"];
   for(const [index,role] of ["Администратор","Менеджер продаж","Поддержка"].entries()){
-    const parsed=employeeSchema.safeParse({name:"Lemiri",role,goal:"Помогать клиентам компании",tone:"Дружелюбный"});
+    const parsed=employeeSchema.safeParse({name:"Lemeri",role,goal:"Помогать клиентам компании",tone:"Дружелюбный"});
     assert.equal(parsed.success,true);if(parsed.success){assert.equal(parsed.data.role,expected[index]);assert.equal(parsed.data.tone,"FRIENDLY")}
   }
-  assert.equal(employeeSchema.safeParse({name:"Lemiri",role:"SALES",goal:"Помогать клиентам компании",tone:"WARM_PROFESSIONAL"}).success,true);
-  assert.equal(employeeSchema.safeParse({name:"Lemiri",role:"LLM agent",goal:"Помогать клиентам компании",tone:"Дружелюбный"}).success,false);
+  assert.equal(employeeSchema.safeParse({name:"Lemeri",role:"SALES",goal:"Помогать клиентам компании",tone:"WARM_PROFESSIONAL"}).success,true);
+  assert.equal(employeeSchema.safeParse({name:"Lemeri",role:"LLM agent",goal:"Помогать клиентам компании",tone:"Дружелюбный"}).success,false);
 });
 
 test("stable employee keys are rendered as localized business language",()=>{

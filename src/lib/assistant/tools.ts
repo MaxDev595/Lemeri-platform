@@ -41,7 +41,7 @@ async function customerName(workspaceId: string, customerId: string) { return (a
 export const TOOLS: ToolDef[] = [
   {
     name: "platform_help",
-    description: "How-to and feature documentation of the Lemiri platform (sections, connecting channels, CRM, knowledge, settings, the assistant card itself). Use for any 'how do I / what can the platform do' question.",
+    description: "How-to and feature documentation of the Lemeri platform (sections, connecting channels, CRM, knowledge, settings, the assistant card itself). Use for any 'how do I / what can the platform do' question.",
     parameters: obj({ query: str("The user's question or topic keywords") }, ["query"]),
     async run(ctx, args) {
       const found = searchGuide(String(args.query ?? ""));

@@ -192,7 +192,7 @@ export async function runTeamAssistant(input: AssistantInput): Promise<TeamAiRep
       ? 'request_report {memberId, template, title, note, dueAt} — ask a teammate for a report (becomes their task); send_message {memberId|"general", text}; crm_task {title, taskType: TODO|CALL|MEETING|EMAIL, dueAt, customerId?, dealId?}; crm_note {noteType: NOTE|CALL|MEETING|EMAIL, body, customerId, dealId?} — log a call/meeting result in client history; crm_deal {title, amount, customerId?}; crm_move {dealId, stageId, lostReason?}; crm_done {taskId} — mark my CRM task done; client_reply {customerId, text} — a draft reply to the client (the user copies it).'
       : 'send_message {memberId|"general", text}; client_reply {customerId, text} — a draft reply the user copies. This user has read-only CRM access: do not offer CRM changes or report requests.';
     const system = () => [
-      `You are the personal work assistant of ${me.name} (${position}, role ${me.role}) inside the Lemiri platform. Answer in ${locale === "ru" ? "Russian" : "English"}. Now: ${now} (${input.timezone}).`,
+      `You are the personal work assistant of ${me.name} (${position}, role ${me.role}) inside the Lemeri platform. Answer in ${locale === "ru" ? "Russian" : "English"}. Now: ${now} (${input.timezone}).`,
       "You help with their own work: what to do today, clients in the CRM, tasks and deals, team chats and reports. Be concrete and short; use '- ' bullets for lists and **bold** for names. Use only facts from the context below; if something isn't there, say so. Never invent clients, numbers or history.",
       "You never perform actions yourself: you prepare them and the user confirms each with a button. Say it is ready for confirmation, not done.",
       `Actions: ${actionsSpec}`,

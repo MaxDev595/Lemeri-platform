@@ -1,6 +1,6 @@
 // Paddle Billing (merchant of record): customers, addresses, businesses,
 // transactions for checkout, subscription plan changes, customer portal and
-// webhook signatures. Card data never touches Lemiri: it is entered in Paddle's
+// webhook signatures. Card data never touches Lemeri: it is entered in Paddle's
 // own secure checkout frame (components/billing/checkout-page.tsx).
 //
 // Env: PADDLE_API_KEY, PADDLE_CLIENT_TOKEN, PADDLE_WEBHOOK_SECRET,
@@ -32,7 +32,7 @@ export function paddlePriceInfo(priceId: string, e: Env = env()): { plan: Paid; 
   return null;
 }
 export function paddlePlanFromPriceId(priceId: string, e: Env = env()) { return paddlePriceInfo(priceId, e)?.plan ?? null; }
-/** Paddle subscription status → Lemiri status (resolveAccess understands ACTIVE / TRIALING / PAST_DUE). */
+/** Paddle subscription status → Lemeri status (resolveAccess understands ACTIVE / TRIALING / PAST_DUE). */
 export function paddleStatus(status: string) {
   const map: Record<string, string> = { active: "ACTIVE", trialing: "TRIALING", past_due: "PAST_DUE", paused: "PAUSED", canceled: "CANCELED" };
   return map[status] ?? status.toUpperCase();
@@ -133,7 +133,7 @@ export async function verifyPaddleSignature(raw: string, header: string, secret:
   return signatures.some(candidate => candidate.length === expected.length && [...candidate].reduce((diff, char, index) => diff | (char.charCodeAt(0) ^ expected.charCodeAt(index)), 0) === 0);
 }
 
-/** Card number, CVC etc. must never be posted to Lemiri; reject any payload that looks like one. */
+/** Card number, CVC etc. must never be posted to Lemeri; reject any payload that looks like one. */
 export function looksLikeCardData(value: unknown): boolean {
   const text = JSON.stringify(value ?? "");
   return /\b(?:\d[ -]?){13,19}\b/.test(text.replace(/"(postalCode|taxId)":"[^"]*"/g, "")) || /"(cvc|cvv|cardNumber|card_number|expiry)"/i.test(text);

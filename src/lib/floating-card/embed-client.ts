@@ -1,5 +1,5 @@
 // Runs on the customer's website (shipped by /api/widget/[id]/embed.js as source
-// text). It renders the same floating card as the in-app Lemiri assistant —
+// text). It renders the same floating card as the in-app Lemeri assistant —
 // launcher, drag, resize, docking, pin, maximize, theme — around the chat iframe.
 //
 // IMPORTANT: must stay self-contained (no imports, no module-level references).
@@ -11,7 +11,7 @@ export type WidgetBootConfig = {
   base: string; employeeId: string; frameUrl: string; tokenUrl: string; token: string;
   name: string; status: string; locale: "ru" | "en";
   labels: { open: string; collapse: string; pin: string; unpin: string; maximize: string; restore: string };
-  /** Look configured in the Lemiri cabinet; data-* attributes on the script tag override it. */
+  /** Look configured in the Lemeri cabinet; data-* attributes on the script tag override it. */
   accent?: string; theme?: "auto" | "light" | "dark"; position?: "left" | "right"; autoOpenSeconds?: number;
   /** Card design for the current plan (lib/widget/design.ts → shellConfig). */
   shell?: ShellConfig; avatar?: string;
@@ -42,7 +42,7 @@ export function lemiriWidgetBootstrap(runtimeFactory: typeof floatingCardRuntime
     min: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14h6v6"/><path d="M20 10h-6V4"/><path d="M14 10l7-7"/><path d="M3 21l7-7"/></svg>',
     collapse: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>',
   };
-  // Design for the current plan; defaults equal the classic Lemiri card.
+  // Design for the current plan; defaults equal the classic Lemeri card.
   type Pal = { accent: string; bg: string; bg2: string; text: string; text3: string; line: string; head: string; headText: string; launcher: string; launcherIcon: string };
   const defLight: Pal = { accent: "#6254e8", bg: "#ffffff", bg2: "#f6f6f9", text: "#17191f", text3: "#6b7080", line: "#e6e7ec", head: "#ffffff", headText: "#17191f", launcher: "#6254e8", launcherIcon: "#ffffff" };
   const defDark: Pal = { accent: "#7466f5", bg: "#15171c", bg2: "#1a1c22", text: "#eceef3", text3: "#9398a6", line: "#2a2d36", head: "#15171c", headText: "#eceef3", launcher: "#7466f5", launcherIcon: "#ffffff" };

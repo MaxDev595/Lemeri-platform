@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { WebsiteWidget } from "@/components/website-widget";
 import { loadWebsiteWidget } from "@/lib/widget/channel";
 
-export async function generateMetadata({params}:{params:Promise<{employeeId:string}>}):Promise<Metadata>{const {employeeId}=await params;const widget=await loadWebsiteWidget(employeeId);const look=widget?.look;return{title:look?.title||widget?.employee.name||"Lemiri AI",robots:{index:false}}}
+export async function generateMetadata({params}:{params:Promise<{employeeId:string}>}):Promise<Metadata>{const {employeeId}=await params;const widget=await loadWebsiteWidget(employeeId);const look=widget?.look;return{title:look?.title||widget?.employee.name||"Lemeri AI",robots:{index:false}}}
 
 // Embedded in a customer's site (?embedded=1) or opened directly as a hosted chat link.
 export default async function WidgetPage({params,searchParams}:{params:Promise<{employeeId:string}>;searchParams:Promise<{embedded?:string;theme?:string}>}){

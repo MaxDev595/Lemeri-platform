@@ -7,7 +7,7 @@ import { LemiriGlyph } from "../logo";
 
 // Checkout: step 1 — payer details (full name, email, country, address, company and
 // tax id) saved to Paddle and to the billing profile; step 2 — the card is entered in
-// Paddle's secure inline frame. Card data never reaches Lemiri's servers.
+// Paddle's secure inline frame. Card data never reaches Lemeri's servers.
 
 type Plan = "STARTER" | "CUSTOM";
 type Interval = "month" | "year";
@@ -26,11 +26,11 @@ const T = {
     address: "Адрес", country: "Страна", region: "Область / регион", city: "Город", postalCode: "Почтовый индекс", line1: "Улица, дом, квартира / офис", line2: "Доп. строка адреса",
     company: "Компания (если платите от юрлица)", companyName: "Название компании", taxId: "ИНН / БИН / VAT", optional: "необязательно",
     next: "Перейти к оплате картой", saving: "Сохраняем…", edit: "Изменить данные",
-    cardCopy: "Номер карты, срок и CVC вводятся в защищённой форме Paddle — Lemiri их не видит и не хранит.",
+    cardCopy: "Номер карты, срок и CVC вводятся в защищённой форме Paddle — Lemeri их не видит и не хранит.",
     loadingCard: "Загружаем защищённую форму оплаты…", cardFailed: "Не удалось загрузить форму оплаты. Проверьте блокировщик рекламы и попробуйте ещё раз.",
     summary: "Ваш заказ", perMonth: "в месяц", total: "Итого сегодня", taxes: "Налоги рассчитает Paddle по вашей стране", cancel: "Отменить можно в любой момент в «Оплата и счета».",
     billing: "Период оплаты", monthly: "Помесячно", yearly: "За год", yearlyRenews: "Продлевается раз в год. ИИ получает месячный лимит ответов каждый месяц.",
-    mor: "Платежи принимает Paddle.com — официальный продавец (Merchant of Record). В выписке будет PADDLE.NET* LEMIRI.",
+    mor: "Платежи принимает Paddle.com — официальный продавец (Merchant of Record). В выписке будет PADDLE.NET* LEMERI.",
     secure: "Защищённая оплата", accept: "Оплачивая, вы принимаете", terms: "условия использования", refund: "правила возврата", and: "и", privacy: "политику конфиденциальности",
     errors: { DETAILS_REQUIRED: "Заполните данные плательщика", BILLING_PROVIDER_NOT_CONFIGURED: "Оплата ещё не подключена — напишите нам", OPEN_ACCESS: "Сейчас идёт тестовый период — оплата не нужна", CARD_DATA_NOT_ACCEPTED: "Не вводите номер карты в эти поля — он вводится на следующем шаге", FORBIDDEN: "Оплачивать может только владелец", INVALID_REQUEST: "Проверьте поля формы", default: "Не удалось начать оплату. Попробуйте ещё раз." } as Record<string, string>,
     success: "Оплата прошла! Переходим в кабинет…", changed: "Тариф изменён",
@@ -41,11 +41,11 @@ const T = {
     address: "Address", country: "Country", region: "State / region", city: "City", postalCode: "Postal code", line1: "Street, building, apartment / office", line2: "Address line 2",
     company: "Company (if paying as a business)", companyName: "Company name", taxId: "Tax ID / VAT", optional: "optional",
     next: "Continue to card payment", saving: "Saving…", edit: "Edit details",
-    cardCopy: "Card number, expiry and CVC are entered in Paddle's secure form — Lemiri never sees or stores them.",
+    cardCopy: "Card number, expiry and CVC are entered in Paddle's secure form — Lemeri never sees or stores them.",
     loadingCard: "Loading the secure payment form…", cardFailed: "Couldn't load the payment form. Check your ad blocker and try again.",
     summary: "Your order", perMonth: "per month", total: "Due today", taxes: "Paddle adds taxes for your country", cancel: "Cancel any time in “Billing & invoices”.",
     billing: "Billing period", monthly: "Monthly", yearly: "Yearly", yearlyRenews: "Renews once a year. The AI reply allowance resets every month.",
-    mor: "Payments are processed by Paddle.com, the Merchant of Record. Your statement will show PADDLE.NET* LEMIRI.",
+    mor: "Payments are processed by Paddle.com, the Merchant of Record. Your statement will show PADDLE.NET* LEMERI.",
     secure: "Secure payment", accept: "By paying you accept the", terms: "terms of service", refund: "refund policy", and: "and the", privacy: "privacy policy",
     errors: { DETAILS_REQUIRED: "Fill in the billing details", BILLING_PROVIDER_NOT_CONFIGURED: "Payments aren't set up yet — contact us", OPEN_ACCESS: "Testing period — no payment needed", CARD_DATA_NOT_ACCEPTED: "Don't type the card number here — it goes in the next step", FORBIDDEN: "Only the owner can pay", INVALID_REQUEST: "Check the form fields", default: "Couldn't start the payment. Please try again." } as Record<string, string>,
     success: "Payment complete! Opening your cabinet…", changed: "Plan changed",
@@ -117,7 +117,7 @@ export function CheckoutPage({ locale, plan, interval: initialInterval = "month"
   }
 
   return <main className="ckPage">
-    <header className="ckTop"><a href="/app?section=billing" className="ckBack"><ArrowLeft size={16}/>{c.back}</a><span className="ckBrand"><LemiriGlyph size={22}/>Lemiri AI</span><span className="ckSecure"><Lock size={13}/>{c.secure}</span></header>
+    <header className="ckTop"><a href="/app?section=billing" className="ckBack"><ArrowLeft size={16}/>{c.back}</a><span className="ckBrand"><LemiriGlyph size={22}/>Lemeri AI</span><span className="ckSecure"><Lock size={13}/>{c.secure}</span></header>
     <div className="ckGrid">
       <section className="ckMain">
         <h1>{c.title}</h1>
@@ -162,7 +162,7 @@ export function CheckoutPage({ locale, plan, interval: initialInterval = "month"
             <button type="button" className={interval === "year" ? "on" : ""} aria-pressed={interval === "year"} disabled={step === 2} onClick={() => setBillingInterval("year")}>{c.yearly} <span className="ckSave">−{YEARLY_SAVE_PERCENT}%</span></button>
           </div>
         </div>
-        <div className="ckPlan"><span className="ckPlanIcon"><LemiriGlyph size={20}/></span><div><b>Lemiri AI · {offer.name}</b><small>{offer.copy}</small></div><strong>{price.total}<small> / {price.per}</small></strong></div>
+        <div className="ckPlan"><span className="ckPlanIcon"><LemiriGlyph size={20}/></span><div><b>Lemeri AI · {offer.name}</b><small>{offer.copy}</small></div><strong>{price.total}<small> / {price.per}</small></strong></div>
         {interval === "year" && <small className="ckYearNote">{price.price} {price.period} · {price.note}</small>}
         <ul>{offer.features.slice(0, 6).map(feature => <li key={feature}><Check size={13}/>{feature}</li>)}</ul>
         <div className="ckTotal"><span>{c.total}</span><strong>{price.total}</strong></div>

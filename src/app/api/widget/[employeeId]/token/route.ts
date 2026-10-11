@@ -6,7 +6,7 @@ import { originAllowed } from "@/lib/widget/settings";
 // Widget tokens are short-lived. The embed script calls this endpoint from the
 // customer's page (a CORS request carrying its Origin) to renew the token, so a
 // visitor who keeps the page open longer than the TTL can still send messages.
-// The hosted chat page on Lemiri's own domain renews with a same-origin POST.
+// The hosted chat page on Lemeri's own domain renews with a same-origin POST.
 async function issue(request:Request,{params}:{params:Promise<{employeeId:string}>}){
   const {employeeId}=await params;
   let origin="";try{origin=new URL(request.headers.get("origin")??"").origin}catch{}

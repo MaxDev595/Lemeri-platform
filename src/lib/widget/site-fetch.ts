@@ -4,7 +4,7 @@
 // Small budget: 1 page + up to 4 stylesheets (Workers subrequest limit).
 
 const PAGE_LIMIT = 1_500_000, CSS_LIMIT = 400_000, CSS_TOTAL = 1_200_000;
-const UA = "Mozilla/5.0 (compatible; LemiriDesignBot/1.0; +https://lemeriai.com)";
+const UA = "Mozilla/5.0 (compatible; LemeriDesignBot/1.0; +https://lemeriai.com)";
 
 export type SiteFetchCode = "INVALID_URL" | "PRIVATE_ADDRESS" | "UNREACHABLE" | "NOT_HTML";
 export class SiteFetchError extends Error { code: SiteFetchCode; constructor(code: SiteFetchCode) { super(code); this.code = code; } }

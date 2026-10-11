@@ -1,4 +1,4 @@
-# Lemiri AI — architecture baseline
+# Lemeri AI — architecture baseline
 
 The product is organized around the lifecycle of a digital employee: hire → teach → connect → test → launch → supervise → improve.
 
