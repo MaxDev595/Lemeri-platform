@@ -1,3 +1,5 @@
+import { formatUsd, planPriceUsd, yearlyMonthlyUsd, YEARLY_DISCOUNT, type BillingInterval } from "./plans.ts";
+
 // What each plan includes, worded for customers. One source for the landing page
 // and the cabinet so the promise is identical everywhere. Starter and Custom have
 // the same AI; Custom only adds the advanced card editor.
@@ -14,6 +16,27 @@ export const PLAN_OFFER = {
     CUSTOM: { name: "Custom", price: "$29", period: "per month", copy: "Everything in Starter + your own card design.", features: ["Everything in Starter", "No “Lemiri AI” label in the card", "AI matches the card design to your website", "Visual card editor, no code", "Premium effects: frosted glass, glow, gradients, background textures", "Proactive message and pulsing button", "Own palette for light and dark themes", "19 fonts plus a heading font, sizes, radii, shadows, borders, background", "Message style and animation, input field, buttons and header", "Launcher icon and hint", "Welcome screen and animations", "Separate phone settings", "Saved custom styles"] },
   },
 } as const;
+
+/**
+ * Price lines for a paid plan in the chosen billing period, computed from plans.ts
+ * so the landing page, the cabinet and checkout always show the same numbers.
+ * Yearly: Starter $15.20/month ($182.40 a year), Custom $23.20/month ($278.40 a year).
+ */
+export function planPriceText(plan: "STARTER" | "CUSTOM", interval: BillingInterval, locale: "ru" | "en") {
+  const ru = locale === "ru";
+  const monthly = planPriceUsd(plan), yearly = planPriceUsd(plan, "year");
+  const save = formatUsd(Math.round((monthly * 12 - yearly) * 100) / 100);
+  if (interval === "year") return {
+    price: formatUsd(yearlyMonthlyUsd(plan)), period: ru ? "в месяц при оплате за год" : "per month, billed yearly",
+    total: formatUsd(yearly), per: ru ? "в год" : "per year",
+    note: ru ? `${formatUsd(yearly)} раз в год · экономия ${save}` : `${formatUsd(yearly)} once a year · save ${save}`,
+  };
+  return {
+    price: formatUsd(monthly), period: ru ? "в месяц" : "per month", total: formatUsd(monthly), per: ru ? "в месяц" : "per month",
+    note: ru ? `или ${formatUsd(yearlyMonthlyUsd(plan))}/мес при оплате за год (−${YEARLY_SAVE_PERCENT}%)` : `or ${formatUsd(yearlyMonthlyUsd(plan))}/mo billed yearly (−${YEARLY_SAVE_PERCENT}%)`,
+  };
+}
+export const YEARLY_SAVE_PERCENT = Math.round(YEARLY_DISCOUNT * 100);
 
 /** Not part of any plan yet — shown separately, never as available. */
 export const COMING_SOON = {

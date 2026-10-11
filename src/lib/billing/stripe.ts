@@ -3,7 +3,8 @@ import type { BillingCheckout, BillingProvider } from "./types";
 // Price ids: STRIPE_STARTER_PRICE_ID / STRIPE_CUSTOM_PRICE_ID. The old
 // STRIPE_START_PRICE_ID / STRIPE_GROWTH_PRICE_ID are still honoured so existing
 // subscriptions keep mapping to a plan (START → Starter, GROWTH → Custom).
-export function priceIdFor(plan:"STARTER"|"CUSTOM",env:Record<string,string|undefined>=process.env){return plan==="STARTER"?(env.STRIPE_STARTER_PRICE_ID||env.STRIPE_START_PRICE_ID):(env.STRIPE_CUSTOM_PRICE_ID||env.STRIPE_GROWTH_PRICE_ID)}
+// Yearly (−20%): STRIPE_STARTER_YEARLY_PRICE_ID / STRIPE_CUSTOM_YEARLY_PRICE_ID.
+export function priceIdFor(plan:"STARTER"|"CUSTOM",env:Record<string,string|undefined>=process.env,interval:"month"|"year"="month"){if(interval==="year")return plan==="STARTER"?env.STRIPE_STARTER_YEARLY_PRICE_ID:env.STRIPE_CUSTOM_YEARLY_PRICE_ID;return plan==="STARTER"?(env.STRIPE_STARTER_PRICE_ID||env.STRIPE_START_PRICE_ID):(env.STRIPE_CUSTOM_PRICE_ID||env.STRIPE_GROWTH_PRICE_ID)}
 async function stripe<T>(path:string,method:"GET"|"POST",form?:URLSearchParams){
   const key=process.env.STRIPE_SECRET_KEY;if(!key)throw new Error("BILLING_PROVIDER_NOT_CONFIGURED");
   const response=await fetch(`https://api.stripe.com/v1/${path}`,{method,headers:{authorization:`Bearer ${key}`,...(form?{"content-type":"application/x-www-form-urlencoded"}:{})},body:form});
@@ -39,8 +40,8 @@ export function verifyStripeSignature(raw:string,header:string,secret:string,tol
 /** Plan for a Stripe price id. Legacy price ids map to the new plans. */
 export function stripePlanFromPriceId(priceId:string,env:Record<string,string|undefined>=process.env){
   if(!priceId)return null;
-  const starter=[env.STRIPE_STARTER_PRICE_ID,env.STRIPE_START_PRICE_ID].filter(Boolean);
-  const custom=[env.STRIPE_CUSTOM_PRICE_ID,env.STRIPE_GROWTH_PRICE_ID].filter(Boolean);
+  const starter=[env.STRIPE_STARTER_PRICE_ID,env.STRIPE_STARTER_YEARLY_PRICE_ID,env.STRIPE_START_PRICE_ID].filter(Boolean);
+  const custom=[env.STRIPE_CUSTOM_PRICE_ID,env.STRIPE_CUSTOM_YEARLY_PRICE_ID,env.STRIPE_GROWTH_PRICE_ID].filter(Boolean);
   if(starter.includes(priceId))return "STARTER" as const;
   if(custom.includes(priceId))return "CUSTOM" as const;
   return null;

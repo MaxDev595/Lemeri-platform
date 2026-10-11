@@ -8,8 +8,8 @@ import { paddlePlanFromPriceId, paddleStatus, verifyPaddleSignature } from "./pa
 // binds the Paddle customer/subscription to the workspace from custom_data. Events are
 // applied in order per workspace (advisory lock + last applied event), like Stripe's.
 
-type PaddleSubscription = { id?: string; customer_id?: string; status?: string; custom_data?: { workspaceId?: string; plan?: string } | null; items?: Array<{ price?: { id?: string } }>; current_billing_period?: { starts_at?: string; ends_at?: string } | null; scheduled_change?: { action?: string } | null; next_billed_at?: string | null };
-type PaddleTransaction = { id?: string; customer_id?: string; subscription_id?: string | null; custom_data?: { workspaceId?: string; plan?: string } | null; billing_period?: { starts_at?: string; ends_at?: string } | null };
+type PaddleSubscription = { id?: string; customer_id?: string; status?: string; custom_data?: { workspaceId?: string; plan?: string; interval?: string } | null; items?: Array<{ price?: { id?: string } }>; current_billing_period?: { starts_at?: string; ends_at?: string } | null; scheduled_change?: { action?: string } | null; next_billed_at?: string | null };
+type PaddleTransaction = { id?: string; customer_id?: string; subscription_id?: string | null; custom_data?: { workspaceId?: string; plan?: string; interval?: string } | null; billing_period?: { starts_at?: string; ends_at?: string } | null };
 type PaddleEvent = { event_id?: string; event_type?: string; occurred_at?: string; data?: PaddleSubscription & PaddleTransaction };
 
 async function applyEvent(workspaceId: string, event: { id: string; createdAt: Date }, mutation: (tx: Prisma.TransactionClient) => Promise<void>) {
@@ -40,7 +40,8 @@ export async function handlePaddleWebhook(request: Request) {
     const plan = data.custom_data?.plan === "STARTER" || data.custom_data?.plan === "CUSTOM" ? data.custom_data.plan : null;
     if (!workspaceId || !plan || !data.subscription_id) return NextResponse.json({ received: true, ignored: "NOT_A_SUBSCRIPTION_CHECKOUT" });
     if (!await db.workspace.findUnique({ where: { id: workspaceId }, select: { id: true } })) return NextResponse.json({ received: true, ignored: "UNKNOWN_WORKSPACE" });
-    const end = date(data.billing_period?.ends_at, new Date(Date.now() + 30 * 86400_000));
+    // Fallback period when Paddle omits it: a year for yearly checkouts, a month otherwise.
+    const end = date(data.billing_period?.ends_at, new Date(Date.now() + (data.custom_data?.interval === "year" ? 365 : 30) * 86400_000));
     const applied = await applyEvent(workspaceId, cursor, async tx => { await tx.subscription.upsert({ where: { workspaceId }, create: { workspaceId, provider: "PADDLE", externalCustomerId: data.customer_id ?? null, externalPlanId: data.subscription_id ?? null, plan, status: "ACTIVE", currentPeriodStart: date(data.billing_period?.starts_at, new Date()), currentPeriodEnd: end }, update: { provider: "PADDLE", externalCustomerId: data.customer_id ?? undefined, externalPlanId: data.subscription_id ?? undefined } }); });
     return NextResponse.json({ received: true, ...(!applied ? { ignored: "STALE_EVENT" } : {}) });
   }

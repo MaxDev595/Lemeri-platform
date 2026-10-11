@@ -5,9 +5,9 @@ import { readBillingProfile } from "@/lib/billing/profile";
 import { CheckoutClient } from "@/components/billing/checkout-client";
 
 // Subscription checkout: payer details + Paddle's secure card form.
-export default async function Checkout({ searchParams }: { searchParams: Promise<{ plan?: string }> }) {
+export default async function Checkout({ searchParams }: { searchParams: Promise<{ plan?: string; interval?: string }> }) {
   const context = await requireWorkspace();
-  const { plan } = await searchParams;
+  const { plan, interval } = await searchParams;
   if (plan !== "STARTER" && plan !== "CUSTOM") redirect("/app?section=billing");
   if (context.membership.role !== "OWNER") redirect("/app?section=billing");
   const [settings, profile] = await Promise.all([
@@ -15,5 +15,5 @@ export default async function Checkout({ searchParams }: { searchParams: Promise
     readBillingProfile(context.workspace.id).catch(() => null),
   ]);
   const initial = profile?.details ?? { email: context.user.email, fullName: context.user.name ?? "" };
-  return <CheckoutClient locale={settings?.locale === "en" ? "en" : "ru"} plan={plan} initial={initial}/>;
+  return <CheckoutClient locale={settings?.locale === "en" ? "en" : "ru"} plan={plan} interval={interval === "year" ? "year" : "month"} initial={initial}/>;
 }

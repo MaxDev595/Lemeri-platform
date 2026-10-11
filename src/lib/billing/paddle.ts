@@ -4,22 +4,34 @@
 // own secure checkout frame (components/billing/checkout-page.tsx).
 //
 // Env: PADDLE_API_KEY, PADDLE_CLIENT_TOKEN, PADDLE_WEBHOOK_SECRET,
-// PADDLE_ENVIRONMENT=sandbox|production, PADDLE_STARTER_PRICE_ID, PADDLE_CUSTOM_PRICE_ID.
+// PADDLE_ENVIRONMENT=sandbox|production, PADDLE_STARTER_PRICE_ID, PADDLE_CUSTOM_PRICE_ID
+// (monthly) and PADDLE_STARTER_YEARLY_PRICE_ID, PADDLE_CUSTOM_YEARLY_PRICE_ID (yearly, −20%).
 // PADDLE_API_BASE overrides the API address (local tests only).
 
+import type { BillingInterval } from "./plans.ts";
+
 type Env = Record<string, string | undefined>;
+type Paid = "STARTER" | "CUSTOM";
 const env = (): Env => (typeof process !== "undefined" ? process.env : {});
 
 export type PaddleEnvironment = "sandbox" | "production";
 export function paddleEnvironment(e: Env = env()): PaddleEnvironment { return e.PADDLE_ENVIRONMENT === "production" ? "production" : "sandbox"; }
-export function paddlePriceId(plan: "STARTER" | "CUSTOM", e: Env = env()) { return (plan === "STARTER" ? e.PADDLE_STARTER_PRICE_ID : e.PADDLE_CUSTOM_PRICE_ID) || ""; }
+export function paddlePriceId(plan: Paid, e: Env = env(), interval: BillingInterval = "month") {
+  if (interval === "year") return (plan === "STARTER" ? e.PADDLE_STARTER_YEARLY_PRICE_ID : e.PADDLE_CUSTOM_YEARLY_PRICE_ID) || "";
+  return (plan === "STARTER" ? e.PADDLE_STARTER_PRICE_ID : e.PADDLE_CUSTOM_PRICE_ID) || "";
+}
+/** Monthly prices are required; yearly ones are optional (paddleYearlyConfigured). */
 export function paddleConfigured(e: Env = env()) { return Boolean(e.PADDLE_API_KEY && e.PADDLE_CLIENT_TOKEN && paddlePriceId("STARTER", e) && paddlePriceId("CUSTOM", e)); }
-export function paddlePlanFromPriceId(priceId: string, e: Env = env()) {
+export function paddleYearlyConfigured(e: Env = env()) { return paddleConfigured(e) && Boolean(paddlePriceId("STARTER", e, "year") && paddlePriceId("CUSTOM", e, "year")); }
+/** Plan and billing period of a Paddle price id (monthly or yearly). */
+export function paddlePriceInfo(priceId: string, e: Env = env()): { plan: Paid; interval: BillingInterval } | null {
   if (!priceId) return null;
-  if (priceId === paddlePriceId("STARTER", e)) return "STARTER" as const;
-  if (priceId === paddlePriceId("CUSTOM", e)) return "CUSTOM" as const;
+  for (const plan of ["STARTER", "CUSTOM"] as const) for (const interval of ["month", "year"] as const) {
+    if (priceId === paddlePriceId(plan, e, interval)) return { plan, interval };
+  }
   return null;
 }
+export function paddlePlanFromPriceId(priceId: string, e: Env = env()) { return paddlePriceInfo(priceId, e)?.plan ?? null; }
 /** Paddle subscription status → Lemiri status (resolveAccess understands ACTIVE / TRIALING / PAST_DUE). */
 export function paddleStatus(status: string) {
   const map: Record<string, string> = { active: "ACTIVE", trialing: "TRIALING", past_due: "PAST_DUE", paused: "PAUSED", canceled: "CANCELED" };
@@ -80,19 +92,26 @@ export async function syncPaddleCustomer(details: BillingDetails, known: { custo
 }
 
 /** Draft transaction the Paddle checkout frame completes (card entry happens there). */
-export async function createPaddleTransaction(input: { customerId: string; addressId: string; businessId?: string | null; plan: "STARTER" | "CUSTOM"; workspaceId: string }) {
-  const priceId = paddlePriceId(input.plan);
+export async function createPaddleTransaction(input: { customerId: string; addressId: string; businessId?: string | null; plan: Paid; interval?: BillingInterval; workspaceId: string }) {
+  const interval = input.interval ?? "month";
+  const priceId = paddlePriceId(input.plan, env(), interval);
   if (!priceId) throw new PaddleError("BILLING_PROVIDER_NOT_CONFIGURED", 503);
   const transaction = await paddle<{ id: string }>("/transactions", "POST", {
     items: [{ price_id: priceId, quantity: 1 }], customer_id: input.customerId, address_id: input.addressId, ...(input.businessId ? { business_id: input.businessId } : {}),
-    collection_mode: "automatic", custom_data: { workspaceId: input.workspaceId, plan: input.plan },
+    collection_mode: "automatic", custom_data: { workspaceId: input.workspaceId, plan: input.plan, interval },
   });
   return transaction.id;
 }
 
-/** Starter ⇄ Custom on a live subscription, prorated now — never a second subscription. */
-export async function changePaddlePlan(subscriptionId: string, plan: "STARTER" | "CUSTOM") {
-  return paddle<{ id: string; status: string }>(`/subscriptions/${encodeURIComponent(subscriptionId)}`, "PATCH", { items: [{ price_id: paddlePriceId(plan), quantity: 1 }], proration_billing_mode: "prorated_immediately" });
+/**
+ * Starter ⇄ Custom and monthly ⇄ yearly on a live subscription, prorated now — never
+ * a second subscription. Moving to yearly charges the year minus the unused part of
+ * the current month and the billing date moves to a year from today.
+ */
+export async function changePaddlePlan(subscriptionId: string, plan: Paid, interval: BillingInterval = "month") {
+  const priceId = paddlePriceId(plan, env(), interval);
+  if (!priceId) throw new PaddleError("BILLING_PROVIDER_NOT_CONFIGURED", 503);
+  return paddle<{ id: string; status: string }>(`/subscriptions/${encodeURIComponent(subscriptionId)}`, "PATCH", { items: [{ price_id: priceId, quantity: 1 }], proration_billing_mode: "prorated_immediately" });
 }
 
 /** Paddle customer portal: card, invoices, cancellation. */

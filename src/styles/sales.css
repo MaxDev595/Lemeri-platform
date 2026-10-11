@@ -176,6 +176,11 @@ input[type=color] { width: 36px; height: 30px; padding: 2px; border: 1px solid v
 .sxPrice { display: flex; align-items: baseline; gap: 6px; }
 .sxPrice strong { font-size: 30px; letter-spacing: -0.03em; }
 .sxPrice small { color: var(--text-3); }
+.sxPriceNote { margin-top: -4px; color: var(--text-3); font-size: var(--fs-12); }
+.sxInterval { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.sxInterval small { color: var(--text-3); font-size: var(--fs-12); }
+.sxSave, .ckSave { margin-left: 4px; padding: 1px 6px; border-radius: 999px; background: var(--ok-soft); color: var(--ok); font-size: 11px; font-weight: 700; }
+.sxYearTag { margin-left: 8px; padding: 2px 8px; border-radius: 999px; background: var(--accent-softer); color: var(--accent-text); font-size: 12px; font-weight: 600; vertical-align: middle; }
 .sxBadge { position: absolute; top: 16px; right: 16px; display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 999px; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; }
 .sxSoon { padding: 16px 18px; border: 1px dashed var(--line); border-radius: 16px; }
 .sxSoon h3 { display: flex; align-items: center; gap: 6px; margin: 0; font-size: var(--fs-14, 14px); }
@@ -305,6 +310,9 @@ input[type=color] { width: 36px; height: 30px; padding: 2px; border: 1px solid v
 .ckSummary ul { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; color: var(--text-2); font-size: var(--fs-13); }
 .ckSummary li { display: flex; gap: 7px; }
 .ckSummary li svg { flex: none; margin-top: 2px; color: var(--ok); }
+.ckInterval .sxSegmented { width: 100%; }
+.ckInterval .sxSegmented button { flex: 1; }
+.ckYearNote { margin-top: -4px; }
 .ckTotal { display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px solid var(--line); font-size: var(--fs-15); }
 .ckMor, .ckLegal { margin: 0; color: var(--text-3); font-size: var(--fs-12); line-height: 1.5; }
 .ckLegal a { color: var(--accent); }

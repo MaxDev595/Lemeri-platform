@@ -3,7 +3,7 @@ import { ArrowRight, BadgeCheck, Check, Clock3, ClipboardList, Headset, Messages
 import { Logo, LemiriGlyph } from "./logo";
 import { LandingNav, SmoothScroll, StepsRail } from "./landing-client";
 import { landingCopy } from "./landing-copy";
-import { COMING_SOON, PLAN_OFFER } from "@/lib/billing/offer";
+import { COMING_SOON, PLAN_OFFER, planPriceText } from "@/lib/billing/offer";
 import type { Locale } from "@/lib/i18n";
 import { localeHref } from "@/lib/locale-utils";
 
@@ -109,6 +109,7 @@ export function Landing({ locale, signedIn = false, openAccess = false }: { loca
                 {featured && <span className="lnBadge">{c.pricing.recommended}</span>}
                 <h3>{plan.name}</h3>
                 <div className="lnPrice"><strong>{plan.price}</strong><small>{plan.period}</small></div>
+                {key !== "TRIAL" && <small className="lnYearly">{planPriceText(key, "month", locale).note}</small>}
                 <p>{plan.copy}</p>
                 <ul className="lnPlanList">{plan.features.map(feature => <li key={feature}><Check size={14} />{feature}</li>)}</ul>
                 <Link className={featured || key === "TRIAL" ? "primary" : "btn"} href={register}>{key === "TRIAL" ? c.pricing.trial : c.pricing.choose}</Link>

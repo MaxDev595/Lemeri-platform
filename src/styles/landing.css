@@ -1017,6 +1017,12 @@ html.lenis {
   color: var(--text-4);
   font-size: var(--fs-13);
 }
+.lnYearly {
+  margin-top: -4px;
+  color: var(--ok);
+  font-size: var(--fs-13);
+  font-weight: 600;
+}
 .lnPlan p {
   flex: 1;
   color: var(--text-3);

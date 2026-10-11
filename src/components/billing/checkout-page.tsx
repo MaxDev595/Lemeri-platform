@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { ArrowLeft, Building2, Check, CreditCard, Lock, ShieldCheck, User } from "lucide-react";
-import { PLAN_OFFER } from "@/lib/billing/offer";
+import { PLAN_OFFER, planPriceText, YEARLY_SAVE_PERCENT } from "@/lib/billing/offer";
 import { LemiriGlyph } from "../logo";
 
 // Checkout: step 1 — payer details (full name, email, country, address, company and
@@ -10,6 +10,7 @@ import { LemiriGlyph } from "../logo";
 // Paddle's secure inline frame. Card data never reaches Lemiri's servers.
 
 type Plan = "STARTER" | "CUSTOM";
+type Interval = "month" | "year";
 type Details = { fullName: string; email: string; country: string; region: string; city: string; postalCode: string; address: string; address2: string; company: string; taxId: string };
 type PaddleSdk = { Environment: { set(env: "sandbox"): void }; Initialize(options: { token: string; eventCallback?: (event: { name?: string }) => void }): void; Checkout: { open(options: Record<string, unknown>): void } };
 declare global { interface Window { Paddle?: PaddleSdk; __lemiriPaddleToken?: string } }
@@ -28,6 +29,7 @@ const T = {
     cardCopy: "Номер карты, срок и CVC вводятся в защищённой форме Paddle — Lemiri их не видит и не хранит.",
     loadingCard: "Загружаем защищённую форму оплаты…", cardFailed: "Не удалось загрузить форму оплаты. Проверьте блокировщик рекламы и попробуйте ещё раз.",
     summary: "Ваш заказ", perMonth: "в месяц", total: "Итого сегодня", taxes: "Налоги рассчитает Paddle по вашей стране", cancel: "Отменить можно в любой момент в «Оплата и счета».",
+    billing: "Период оплаты", monthly: "Помесячно", yearly: "За год", yearlyRenews: "Продлевается раз в год. ИИ получает месячный лимит ответов каждый месяц.",
     mor: "Платежи принимает Paddle.com — официальный продавец (Merchant of Record). В выписке будет PADDLE.NET* LEMIRI.",
     secure: "Защищённая оплата", accept: "Оплачивая, вы принимаете", terms: "условия использования", refund: "правила возврата", and: "и", privacy: "политику конфиденциальности",
     errors: { DETAILS_REQUIRED: "Заполните данные плательщика", BILLING_PROVIDER_NOT_CONFIGURED: "Оплата ещё не подключена — напишите нам", OPEN_ACCESS: "Сейчас идёт тестовый период — оплата не нужна", CARD_DATA_NOT_ACCEPTED: "Не вводите номер карты в эти поля — он вводится на следующем шаге", FORBIDDEN: "Оплачивать может только владелец", INVALID_REQUEST: "Проверьте поля формы", default: "Не удалось начать оплату. Попробуйте ещё раз." } as Record<string, string>,
@@ -42,6 +44,7 @@ const T = {
     cardCopy: "Card number, expiry and CVC are entered in Paddle's secure form — Lemiri never sees or stores them.",
     loadingCard: "Loading the secure payment form…", cardFailed: "Couldn't load the payment form. Check your ad blocker and try again.",
     summary: "Your order", perMonth: "per month", total: "Due today", taxes: "Paddle adds taxes for your country", cancel: "Cancel any time in “Billing & invoices”.",
+    billing: "Billing period", monthly: "Monthly", yearly: "Yearly", yearlyRenews: "Renews once a year. The AI reply allowance resets every month.",
     mor: "Payments are processed by Paddle.com, the Merchant of Record. Your statement will show PADDLE.NET* LEMIRI.",
     secure: "Secure payment", accept: "By paying you accept the", terms: "terms of service", refund: "refund policy", and: "and the", privacy: "privacy policy",
     errors: { DETAILS_REQUIRED: "Fill in the billing details", BILLING_PROVIDER_NOT_CONFIGURED: "Payments aren't set up yet — contact us", OPEN_ACCESS: "Testing period — no payment needed", CARD_DATA_NOT_ACCEPTED: "Don't type the card number here — it goes in the next step", FORBIDDEN: "Only the owner can pay", INVALID_REQUEST: "Check the form fields", default: "Couldn't start the payment. Please try again." } as Record<string, string>,
@@ -62,9 +65,11 @@ function loadPaddle() {
   return sdk;
 }
 
-export function CheckoutPage({ locale, plan, initial }: { locale: "ru" | "en"; plan: Plan; initial: Partial<Details> }) {
+export function CheckoutPage({ locale, plan, interval: initialInterval = "month", initial }: { locale: "ru" | "en"; plan: Plan; interval?: Interval; initial: Partial<Details> }) {
   const c = T[locale];
   const offer = PLAN_OFFER[locale][plan];
+  const [interval, setBillingInterval] = useState<Interval>(initialInterval);
+  const price = planPriceText(plan, interval, locale);
   const [details, setDetails] = useState<Details>({ fullName: "", email: "", country: "KZ", region: "", city: "", postalCode: "", address: "", address2: "", company: "", taxId: "", ...Object.fromEntries(Object.entries(initial).filter(([, value]) => typeof value === "string" && value)) } as Details);
   const [asCompany, setAsCompany] = useState(Boolean(initial.company));
   const [step, setStep] = useState<1 | 2>(1);
@@ -87,7 +92,7 @@ export function CheckoutPage({ locale, plan, initial }: { locale: "ru" | "en"; p
     event.preventDefault(); setError(""); setBusy(true);
     try {
       const payload = { ...details, company: asCompany ? details.company : "", taxId: asCompany ? details.taxId : "" };
-      const response = await fetch("/api/billing", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "checkout", plan, details: payload }) });
+      const response = await fetch("/api/billing", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "checkout", plan, interval, details: payload }) });
       const body = await response.json().catch(() => ({})) as { error?: string; changed?: boolean; paddle?: { transactionId: string; clientToken: string; environment: "sandbox" | "production"; successUrl: string } };
       if (body.changed) { window.location.assign("/app?section=billing&billing=changed"); return; }
       if (!response.ok || !body.paddle) { setError(c.errors[body.error ?? ""] ?? c.errors.default); return; }
@@ -111,7 +116,6 @@ export function CheckoutPage({ locale, plan, initial }: { locale: "ru" | "en"; p
     finally { setBusy(false); }
   }
 
-  const price = offer.price;
   return <main className="ckPage">
     <header className="ckTop"><a href="/app?section=billing" className="ckBack"><ArrowLeft size={16}/>{c.back}</a><span className="ckBrand"><LemiriGlyph size={22}/>Lemiri AI</span><span className="ckSecure"><Lock size={13}/>{c.secure}</span></header>
     <div className="ckGrid">
@@ -152,10 +156,18 @@ export function CheckoutPage({ locale, plan, initial }: { locale: "ru" | "en"; p
       </section>
       <aside className="ckSummary">
         <h2>{c.summary}</h2>
-        <div className="ckPlan"><span className="ckPlanIcon"><LemiriGlyph size={20}/></span><div><b>Lemiri AI · {offer.name}</b><small>{offer.copy}</small></div><strong>{price}<small> / {c.perMonth}</small></strong></div>
+        <div className="ckInterval" role="group" aria-label={c.billing}>
+          <div className="sxSegmented">
+            <button type="button" className={interval === "month" ? "on" : ""} aria-pressed={interval === "month"} disabled={step === 2} onClick={() => setBillingInterval("month")}>{c.monthly}</button>
+            <button type="button" className={interval === "year" ? "on" : ""} aria-pressed={interval === "year"} disabled={step === 2} onClick={() => setBillingInterval("year")}>{c.yearly} <span className="ckSave">−{YEARLY_SAVE_PERCENT}%</span></button>
+          </div>
+        </div>
+        <div className="ckPlan"><span className="ckPlanIcon"><LemiriGlyph size={20}/></span><div><b>Lemiri AI · {offer.name}</b><small>{offer.copy}</small></div><strong>{price.total}<small> / {price.per}</small></strong></div>
+        {interval === "year" && <small className="ckYearNote">{price.price} {price.period} · {price.note}</small>}
         <ul>{offer.features.slice(0, 6).map(feature => <li key={feature}><Check size={13}/>{feature}</li>)}</ul>
-        <div className="ckTotal"><span>{c.total}</span><strong>{price}</strong></div>
+        <div className="ckTotal"><span>{c.total}</span><strong>{price.total}</strong></div>
         <small>{c.taxes}</small>
+        {interval === "year" && <small>{c.yearlyRenews}</small>}
         <small>{c.cancel}</small>
         <p className="ckMor">{c.mor}</p>
         <p className="ckLegal">{c.accept} <a href="/legal/terms" target="_blank">{c.terms}</a>, <a href="/legal/refund" target="_blank">{c.refund}</a> {c.and} <a href="/legal/privacy" target="_blank">{c.privacy}</a>.</p>

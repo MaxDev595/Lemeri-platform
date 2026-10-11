@@ -1,4 +1,5 @@
 // Lemiri AI plans: Trial ($0, 14 days) → Starter ($19) → Custom ($29).
+// Paid plans are billed monthly or yearly; yearly costs 20% less (YEARLY_DISCOUNT).
 // Starter and Custom have the same AI sales assistant; Custom adds the advanced
 // visual editor for the website card. Nothing else differs (see docs/CLAUDE_CONTEXT.md).
 //
@@ -16,6 +17,27 @@ export const billingPlans = {
   CUSTOM: { key: "CUSTOM", name: "Custom", priceUsd: 29, employeeLimit: 1, design: "custom" },
 } as const satisfies Record<PlanKey, { key: PlanKey; name: string; priceUsd: number; employeeLimit: number; design: DesignTier }>;
 export type BillingPlanKey = PlanKey;
+
+/** How often a paid plan is billed. Yearly = 12 months minus YEARLY_DISCOUNT. */
+export type BillingInterval = "month" | "year";
+export const YEARLY_DISCOUNT = 0.2;
+export function normalizeInterval(value: unknown): BillingInterval {
+  const key = String(value ?? "").toLowerCase();
+  return key === "year" || key === "yearly" || key === "annual" ? "year" : "month";
+}
+/** Price in USD for one billing period: Starter $19 / $182.40, Custom $29 / $278.40. */
+export function planPriceUsd(plan: PlanKey, interval: BillingInterval = "month") {
+  const monthly = billingPlans[plan].priceUsd;
+  return interval === "year" ? Math.round(monthly * 12 * (1 - YEARLY_DISCOUNT) * 100) / 100 : monthly;
+}
+/** Monthly equivalent of the yearly price ($15.20 for Starter). */
+export function yearlyMonthlyUsd(plan: PlanKey) { return Math.round((planPriceUsd(plan, "year") / 12) * 100) / 100; }
+export function formatUsd(value: number) { return Number.isInteger(value) ? `$${value}` : `$${value.toFixed(2)}`; }
+/** A subscription period longer than ~6 weeks is a yearly one (no extra column needed). */
+export function intervalFromPeriod(start: Date | string | null | undefined, end: Date | string | null | undefined): BillingInterval {
+  const from = start ? new Date(start).getTime() : NaN, to = end ? new Date(end).getTime() : NaN;
+  return Number.isFinite(from) && Number.isFinite(to) && to - from > 45 * 86_400_000 ? "year" : "month";
+}
 
 // Plans sold before the restructuring keep working: START → Starter, GROWTH → Custom.
 const LEGACY: Record<string, PlanKey> = { START: "STARTER", GROWTH: "CUSTOM", PRO: "CUSTOM", BUSINESS: "CUSTOM" };
@@ -49,6 +71,8 @@ export type Access = {
   periodStart: string;
   periodEnd: string;
   messageLimit: number;
+  /** Billing period of a paid subscription (absent for Trial). AI replies are counted per month either way. */
+  interval?: BillingInterval;
   /** Testing period: every plan feature is unlocked for everyone (LEMIRI_OPEN_ACCESS). */
   openAccess?: boolean;
 };
@@ -103,10 +127,13 @@ export function resolveAccess(input: { subscription: SubscriptionLike; ownerCrea
   if (sub && paid !== "TRIAL") {
     const start = sub.currentPeriodStart ? new Date(sub.currentPeriodStart) : monthStart;
     const end = periodEnd && periodEnd > start ? periodEnd : monthEnd;
-    // Usage is counted per calendar month inside long periods so limits stay monthly.
+    const interval = intervalFromPeriod(start, end);
+    // Usage is counted per calendar month inside long periods so limits stay monthly
+    // (a yearly plan gets the monthly allowance every month, not once a year).
     const usageStart = start > monthStart ? start : monthStart;
-    if (status === "ACTIVE" || status === "TRIALING") return make(paid, "active", usageStart, end);
-    if (status === "PAST_DUE" && periodEnd && now.getTime() < periodEnd.getTime() + PAST_DUE_GRACE_DAYS * DAY) return make(paid, "past_due", usageStart, end);
+    const usageEnd = interval === "year" && end > monthEnd ? monthEnd : end;
+    if (status === "ACTIVE" || status === "TRIALING") return { ...make(paid, "active", usageStart, usageEnd), interval };
+    if (status === "PAST_DUE" && periodEnd && now.getTime() < periodEnd.getTime() + PAST_DUE_GRACE_DAYS * DAY) return { ...make(paid, "past_due", usageStart, usageEnd), interval };
   }
   if (now < trialEnd) return make("TRIAL", "trial", new Date(trialEnd.getTime() - TRIAL_DAYS * DAY), trialEnd);
   return make("TRIAL", "expired", monthStart, monthEnd);

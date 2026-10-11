@@ -54,3 +54,42 @@ test("paddle prices, statuses and card guard", () => {
   assert.equal(looksLikeCardData({ cvc: "123" }), true);
   assert.equal(looksLikeCardData({ details: { fullName: "Иван Петров", postalCode: "050000", address: "ул. Абая 10, кв 5", taxId: "123456789012" } }), false);
 });
+
+test("yearly billing: 20% off, yearly price ids, monthly AI allowance", async () => {
+  const { planPriceUsd, yearlyMonthlyUsd, intervalFromPeriod, resolveAccess, normalizeInterval } = await import("../src/lib/billing/plans.ts");
+  const { planPriceText } = await import("../src/lib/billing/offer.ts");
+  const { paddlePriceId, paddlePriceInfo, paddleYearlyConfigured } = await import("../src/lib/billing/paddle.ts");
+  assert.equal(planPriceUsd("STARTER", "year"), 182.4);
+  assert.equal(planPriceUsd("CUSTOM", "year"), 278.4);
+  assert.equal(planPriceUsd("STARTER"), 19);
+  assert.equal(yearlyMonthlyUsd("STARTER"), 15.2);
+  assert.equal(yearlyMonthlyUsd("CUSTOM"), 23.2);
+  assert.equal(planPriceText("STARTER", "year", "ru").total, "$182.40");
+  assert.equal(planPriceText("CUSTOM", "year", "en").price, "$23.20");
+  assert.match(planPriceText("STARTER", "year", "ru").note, /экономия \$45\.60/);
+  assert.equal(planPriceText("STARTER", "month", "en").price, "$19");
+  assert.equal(normalizeInterval("annual"), "year");
+  assert.equal(normalizeInterval(undefined), "month");
+
+  const env = { PADDLE_API_KEY: "k", PADDLE_CLIENT_TOKEN: "test_t", PADDLE_STARTER_PRICE_ID: "pri_s", PADDLE_CUSTOM_PRICE_ID: "pri_c", PADDLE_STARTER_YEARLY_PRICE_ID: "pri_sy", PADDLE_CUSTOM_YEARLY_PRICE_ID: "pri_cy" };
+  assert.equal(paddlePriceId("STARTER", env, "year"), "pri_sy");
+  assert.equal(paddlePriceId("CUSTOM", env), "pri_c");
+  assert.deepEqual(paddlePriceInfo("pri_cy", env), { plan: "CUSTOM", interval: "year" });
+  assert.deepEqual(paddlePriceInfo("pri_s", env), { plan: "STARTER", interval: "month" });
+  assert.equal(paddlePlanFromPriceId("pri_sy", env), "STARTER");
+  assert.equal(paddleYearlyConfigured(env), true);
+  assert.equal(paddleYearlyConfigured({ ...env, PADDLE_CUSTOM_YEARLY_PRICE_ID: "" }), false);
+
+  assert.equal(intervalFromPeriod("2026-10-10T00:00:00Z", "2027-10-10T00:00:00Z"), "year");
+  assert.equal(intervalFromPeriod("2026-10-10T00:00:00Z", "2026-11-10T00:00:00Z"), "month");
+  // A yearly subscriber gets the monthly allowance, counted per calendar month.
+  const access = resolveAccess({ subscription: { plan: "STARTER", status: "ACTIVE", currentPeriodStart: "2026-10-10T00:00:00Z", currentPeriodEnd: "2027-10-10T00:00:00Z" }, now: new Date("2027-03-15T12:00:00Z"), env: {} });
+  assert.equal(access.state, "active");
+  assert.equal(access.interval, "year");
+  assert.equal(access.periodStart, "2027-03-01T00:00:00.000Z");
+  assert.equal(access.periodEnd, "2027-04-01T00:00:00.000Z");
+  assert.equal(access.messageLimit, 2000);
+  const monthly = resolveAccess({ subscription: { plan: "CUSTOM", status: "ACTIVE", currentPeriodStart: "2026-10-10T00:00:00Z", currentPeriodEnd: "2026-11-10T00:00:00Z" }, now: new Date("2026-10-20T00:00:00Z"), env: {} });
+  assert.equal(monthly.interval, "month");
+  assert.equal(monthly.periodEnd, "2026-11-10T00:00:00.000Z");
+});
