@@ -66,7 +66,7 @@ export function privacyText(locale: "ru" | "en", c: LegalCompany): Doc {
       { title: "Зачем", body: [["Предоставлять сервис: ответы ИИ, заявки, кабинет.", "Принимать оплату и выставлять счета (через Paddle).", "Защищать сервис от злоупотреблений и сбоев.", "Связываться с вами по поводу аккаунта и важных изменений."]] },
       { title: "Кому передаются данные", body: [[
         "Paddle.com — приём платежей и налоги (Merchant of Record).",
-        "Поставщики ИИ-моделей (Groq, OpenAI) — тексты сообщений и фрагменты знаний — только для генерации ответа.",
+        "Поставщик ИИ-моделей (OpenAI) — тексты сообщений и фрагменты знаний — только для генерации ответа.",
         "Cloudflare (хостинг), Neon (база данных), Resend (письма).",
       ], "Мы не продаём персональные данные и не используем их для рекламы."] },
       { title: "Данные посетителей ваших сайтов", body: ["Для данных посетителей вы — оператор (контролёр), Lemeri AI — обработчик по вашему поручению. Форма заявки в карточке запрашивает согласие посетителя и сохраняет время и текст согласия. Укажите ссылку на свою политику в настройках ИИ-сотрудника."] },
@@ -89,7 +89,7 @@ export function privacyText(locale: "ru" | "en", c: LegalCompany): Doc {
       { title: "Why", body: [["To provide the service: AI answers, requests, cabinet.", "To take payments and issue invoices (via Paddle).", "To protect the service from abuse and failures.", "To contact you about your account and important changes."]] },
       { title: "Who receives data", body: [[
         "Paddle.com — payments and taxes (Merchant of Record).",
-        "AI model providers (Groq, OpenAI) — message text and knowledge snippets, only to generate answers.",
+        "AI model provider (OpenAI) — message text and knowledge snippets, only to generate answers.",
         "Cloudflare (hosting), Neon (database), Resend (email).",
       ], "We do not sell personal data or use it for advertising."] },
       { title: "Your website visitors' data", body: ["For visitors' data you are the controller and Lemeri AI is your processor. The request form asks for the visitor's consent and stores its time and text. Add a link to your own policy in the AI employee settings."] },

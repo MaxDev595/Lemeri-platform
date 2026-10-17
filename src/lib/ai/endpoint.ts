@@ -1,7 +1,6 @@
-// Chat-completions endpoint for assistant-style calls (Groq or OpenAI), or null when no model is configured.
+// OpenAI Chat Completions endpoint for assistant-style calls, or null when no model is configured.
 export function modelEndpoint() {
   const provider = process.env.AI_PROVIDER ?? "mock";
-  if (provider === "groq" && process.env.GROQ_API_KEY) return { url: `${process.env.GROQ_API_BASE ?? "https://api.groq.com"}/openai/v1/chat/completions`, key: process.env.GROQ_API_KEY, model: process.env.GROQ_ASSISTANT_MODEL || process.env.GROQ_CHAT_MODEL || "openai/gpt-oss-120b", extra: { reasoning_effort: "low" } };
   if (provider === "openai" && process.env.OPENAI_API_KEY) return { url: `${process.env.OPENAI_API_BASE ?? "https://api.openai.com"}/v1/chat/completions`, key: process.env.OPENAI_API_KEY, model: process.env.OPENAI_ASSISTANT_MODEL || process.env.OPENAI_RESPONSE_MODEL || "gpt-4.1-mini", extra: {} };
   return null;
 }

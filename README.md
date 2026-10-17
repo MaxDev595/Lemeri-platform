@@ -17,7 +17,7 @@ Requirements: Node.js 22+, Docker Desktop and npm.
 5. Generate Prisma Client: `npm run db:generate`.
 6. Start the app: `npm run dev` and open `http://localhost:3000`.
 
-Use `AI_PROVIDER=mock` only for local interface development. Production responses support `AI_PROVIDER=groq` with `GROQ_CHAT_MODEL=openai/gpt-oss-120b`, while semantic embeddings continue to use the OpenAI embedding configuration.
+Use `AI_PROVIDER=mock` only for local interface development. Production uses OpenAI only: `AI_PROVIDER=openai`, `OPENAI_API_KEY`, `OPENAI_RESPONSE_MODEL=gpt-4.1-mini` for answers and `OPENAI_EMBEDDING_MODEL=text-embedding-3-small` for semantic search.
 
 ## Verification
 

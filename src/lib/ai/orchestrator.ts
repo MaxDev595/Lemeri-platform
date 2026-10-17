@@ -30,7 +30,8 @@ export async function handleIncomingMessage(params: { workspaceId: string; emplo
   const { siteKnowledge } = await import("@/lib/knowledge/site-live");
   const site = await siteKnowledge({ workspaceId: params.workspaceId, query, locale: locale === "en" ? "en" : "ru", hint: params.site, fallbackRoot: params.siteRoot, retrieved }).catch(error => { console.error("Site knowledge failed", error instanceof Error ? error.message : error); return { extra: [], context: "", origin: undefined, needsOverview: false, studyQueued: false }; });
   const knowledge = [...retrieved, ...site.extra];
-  const provider = params.provider ?? configuredAIProvider();
+  // Created inside the try below: a missing or wrong key must hand off, not crash with a 500.
+  let provider: AIProvider | undefined = params.provider;
   const [conversation, workspace, settings] = await Promise.all([
     db.conversation.findFirst({ where: { id: params.conversationId, workspaceId: params.workspaceId }, select: { channelType: true, customer: { select: { name: true, phone: true, email: true } } } }),
     db.workspace.findUnique({ where: { id: params.workspaceId }, select: { name: true } }),
@@ -41,6 +42,7 @@ export async function handleIncomingMessage(params: { workspaceId: string; emplo
   try {
     // Deferred modules (docs/FUTURE_FEATURES.md) never reach the model as actions.
     const allowedActionKeys = employee.permissions.map(permission=>permission.actionKey).filter(key=>key!=="createAppointment"||featureEnabled("appointments"));
+    provider ??= configuredAIProvider();
     result = await provider.generateResponse(withSalesPrompt({ companyName: workspace?.name, profile: profileFromRules(employee.settings.handoffRules), context, employeeName: employee.name, role: employeeRoleLabel(employee.role,locale), goal: employee.settings.goal, tone: employeeToneLabel(employee.settings.tone,locale), instructions:employee.settings.instructions??undefined,handoffRules:employee.settings.handoffRules as Record<string,unknown>,messages: history.reverse().map(item => ({ role: item.direction === "INBOUND" ? "user" as const : "assistant" as const, content: item.content })), knowledge, allowedActionKeys }));
   } catch (error) {
     // A provider outage must not leave the customer without an answer: the inbound
@@ -61,7 +63,7 @@ export async function handleIncomingMessage(params: { workspaceId: string; emplo
       await tx.knowledgeGap.upsert({where:{workspaceId_question:{workspaceId:params.workspaceId,question}},create:{workspaceId:params.workspaceId,question},update:{occurrences:{increment:1},lastSeenAt:new Date(),status:"OPEN"}});
       await tx.analyticsEvent.create({ data: { workspaceId: params.workspaceId, type: "HANDOFF_CREATED", payload: { conversationId: params.conversationId, reason: effectiveHandoffReason } } });
     }
-    await tx.analyticsEvent.create({ data: { workspaceId: params.workspaceId, type: "AI_RESPONSE", payload: { provider: provider.name, confidence: result.confidence, citedChunks: result.usedSourceIds.length, handoff: Boolean(effectiveHandoffReason), actionKey:result.actionRequest?.key,actionStatus } } });
+    await tx.analyticsEvent.create({ data: { workspaceId: params.workspaceId, type: "AI_RESPONSE", payload: { provider: provider?.name ?? "unconfigured", confidence: result.confidence, citedChunks: result.usedSourceIds.length, handoff: Boolean(effectiveHandoffReason), actionKey:result.actionRequest?.key,actionStatus } } });
     return { message, confidence: result.confidence, handoff: Boolean(effectiveHandoffReason), siteWork: site.needsOverview || site.studyQueued };
   });
   await triggerAutomations(effectiveHandoffReason?"HANDOFF_CREATED":"AI_RESPONSE",{workspaceId:params.workspaceId,employeeId:params.employeeId,conversationId:params.conversationId,data:{handoff:Boolean(effectiveHandoffReason),confidence:result.confidence}});
