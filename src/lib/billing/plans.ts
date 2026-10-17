@@ -54,7 +54,7 @@ export function getBillingPlan(value: string) { return billingPlans[normalizePla
  * LEMIRI_LIMIT_CUSTOM_MESSAGES. Defaults and their cost maths are in
  * docs/CLAUDE_CONTEXT.md ("Лимиты и экономика").
  */
-export const DEFAULT_MESSAGE_LIMITS: Record<PlanKey, number> = { TRIAL: 150, STARTER: 2000, CUSTOM: 2000 };
+export const DEFAULT_MESSAGE_LIMITS: Record<PlanKey, number> = { TRIAL: 150, STARTER: 1000, CUSTOM: 2000 };
 export function messageLimit(plan: PlanKey, env: Record<string, string | undefined> = typeof process !== "undefined" ? process.env : {}) {
   const value = Number(env[`LEMIRI_LIMIT_${plan}_MESSAGES`]);
   return Number.isFinite(value) && value > 0 ? Math.floor(value) : DEFAULT_MESSAGE_LIMITS[plan];

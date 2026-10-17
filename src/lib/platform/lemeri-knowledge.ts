@@ -28,7 +28,7 @@ The AI can write first: a proactive message with an unread badge on the closed c
 Plans
 - Trial: free for ${TRIAL_DAYS} days, ${DEFAULT_MESSAGE_LIMITS.TRIAL} AI replies, up to 5 knowledge sources, name, greeting, side and light or dark theme of the card.
 - Starter: ${price("STARTER")}. ${DEFAULT_MESSAGE_LIMITS.STARTER} AI replies per month, 50 knowledge sources, documents, manager replies, subtitle, quick questions, auto-open and proactive first messages. The card design itself is fixed: only light or dark theme.
-- Custom: ${price("CUSTOM")}. Everything in Starter plus the full visual editor: colours, fonts, avatar, ready styles, premium effects, AI that matches the card to the site design, and no «Lemeri AI» label in the card.
+- Custom: ${price("CUSTOM")}. ${DEFAULT_MESSAGE_LIMITS.CUSTOM} AI replies per month and everything in Starter plus the full visual editor: colours, fonts, avatar, ready styles, premium effects, AI that matches the card to the site design, and no «Lemeri AI» label in the card.
 Yearly payment saves 20%. Payment is by card through Paddle; refunds within 14 days.
 
 Important
@@ -47,7 +47,7 @@ Important
 Тарифы
 - Trial: бесплатно ${TRIAL_DAYS} дней, ${DEFAULT_MESSAGE_LIMITS.TRIAL} ответов ИИ, до 5 источников знаний; в карточке — имя, приветствие, сторона экрана и светлая или тёмная тема.
 - Starter: ${price("STARTER")}. ${DEFAULT_MESSAGE_LIMITS.STARTER} ответов ИИ в месяц, 50 источников знаний, документы, ответы менеджера из кабинета, подпись, быстрые вопросы, автооткрытие и первое сообщение от ИИ. Дизайн карточки фиксированный: только светлая или тёмная тема.
-- Custom: ${price("CUSTOM")}. Всё из Starter плюс полный визуальный редактор: цвета, шрифты, аватар, готовые стили, премиум-эффекты, ИИ подбирает дизайн под сайт, карточка без подписи «Lemeri AI».
+- Custom: ${price("CUSTOM")}. ${DEFAULT_MESSAGE_LIMITS.CUSTOM} ответов ИИ в месяц и всё из Starter плюс полный визуальный редактор: цвета, шрифты, аватар, готовые стили, премиум-эффекты, ИИ подбирает дизайн под сайт, карточка без подписи «Lemeri AI».
 Оплата за год — скидка 20%. Оплата картой через Paddle, возврат в течение 14 дней.
 
 Важно

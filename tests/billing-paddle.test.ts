@@ -88,7 +88,7 @@ test("yearly billing: 20% off, yearly price ids, monthly AI allowance", async ()
   assert.equal(access.interval, "year");
   assert.equal(access.periodStart, "2027-03-01T00:00:00.000Z");
   assert.equal(access.periodEnd, "2027-04-01T00:00:00.000Z");
-  assert.equal(access.messageLimit, 2000);
+  assert.equal(access.messageLimit, 1000);
   const monthly = resolveAccess({ subscription: { plan: "CUSTOM", status: "ACTIVE", currentPeriodStart: "2026-10-10T00:00:00Z", currentPeriodEnd: "2026-11-10T00:00:00Z" }, now: new Date("2026-10-20T00:00:00Z"), env: {} });
   assert.equal(monthly.interval, "month");
   assert.equal(monthly.periodEnd, "2026-11-10T00:00:00.000Z");

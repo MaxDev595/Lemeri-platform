@@ -45,7 +45,8 @@ test("paid plans: active, past due grace, cancelled, design tiers", () => {
 });
 
 test("message limits are configurable and enforced per period", () => {
-  assert.equal(messageLimit("STARTER", {}), 2000);
+  assert.equal(messageLimit("STARTER", {}), 1000);
+  assert.equal(messageLimit("CUSTOM", {}), 2000);
   assert.equal(messageLimit("STARTER", { LEMIRI_LIMIT_STARTER_MESSAGES: "3500" }), 3500);
   assert.equal(messageLimit("TRIAL", { LEMIRI_LIMIT_TRIAL_MESSAGES: "nope" }), 150);
   assert.equal(canSendAiReply(1999, { aiAllowed: true, messageLimit: 2000 }), true);

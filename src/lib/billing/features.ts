@@ -14,7 +14,7 @@ type Value = boolean | number | string;
 export type FeatureRow = { key: FeatureKey; group: "ai" | "knowledge" | "sales" | "card"; label: { ru: string; en: string }; values: Record<PlanKey, Value>; hint?: { ru: string; en: string } };
 
 export const FEATURE_MATRIX: FeatureRow[] = [
-  { key: "aiReplies", group: "ai", label: { ru: "Ответы ИИ в месяц", en: "AI replies per month" }, values: { TRIAL: 150, STARTER: 2000, CUSTOM: 2000 } },
+  { key: "aiReplies", group: "ai", label: { ru: "Ответы ИИ в месяц", en: "AI replies per month" }, values: { TRIAL: 150, STARTER: 1000, CUSTOM: 2000 } },
   { key: "employees", group: "ai", label: { ru: "ИИ-сотрудник (продавец)", en: "AI employee (seller)" }, values: { TRIAL: 1, STARTER: 1, CUSTOM: 1 } },
   { key: "liveSiteReading", group: "ai", label: { ru: "ИИ читает страницу, где сейчас посетитель", en: "AI reads the page the visitor is on" }, values: { TRIAL: true, STARTER: true, CUSTOM: true } },
   { key: "knowledgeSources", group: "knowledge", label: { ru: "Источников в базе знаний", en: "Knowledge sources" }, values: { TRIAL: 5, STARTER: 50, CUSTOM: 50 } },
