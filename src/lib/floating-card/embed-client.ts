@@ -15,6 +15,8 @@ export type WidgetBootConfig = {
   accent?: string; theme?: "auto" | "light" | "dark"; position?: "left" | "right"; autoOpenSeconds?: number;
   /** Card design for the current plan (lib/widget/design.ts → shellConfig). */
   shell?: ShellConfig; avatar?: string;
+  /** The AI writes first (Starter+): shown with an unread badge while the card is closed. */
+  proactive?: { messages: string[]; delay: number };
 };
 
 export function lemiriWidgetBootstrap(runtimeFactory: typeof floatingCardRuntime, cfg: WidgetBootConfig) {
@@ -106,6 +108,8 @@ export function lemiriWidgetBootstrap(runtimeFactory: typeof floatingCardRuntime
 .lemiri-launcher[data-teaser] .lemiri-label{display:none}
 .lemiri-teaser i{flex:none;width:22px;height:22px;margin:-4px -6px 0 0;padding:0;border-radius:6px;color:var(--lw-text3);font:400 18px/22px ui-sans-serif,system-ui,sans-serif;font-style:normal;text-align:center}
 .lemiri-teaser i:hover{background:var(--lw-hover)}
+.lemiri-teaser b{display:block;margin-bottom:2px;color:var(--lw-text3);font-size:12px;font-weight:600}
+.lemiri-teaser span{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 .lemiri-teaser-x{flex:none;width:22px;height:22px;margin:-4px -6px 0 0;padding:0;border:0;border-radius:6px;background:transparent;color:var(--lw-text3);font:400 18px/1 ui-sans-serif,system-ui,sans-serif;cursor:pointer}
 @keyframes lemiriPulse{0%{transform:scale(1);opacity:.45}70%,100%{transform:scale(1.55);opacity:0}}
 @keyframes lemiriTeaser{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
@@ -151,7 +155,12 @@ export function lemiriWidgetBootstrap(runtimeFactory: typeof floatingCardRuntime
   let frame: HTMLIFrameElement | null = null;
   let token = cfg.token;
   // The page path lets the AI read the page the visitor is looking at.
-  const sendToken = () => frame?.contentWindow?.postMessage({ type: "lemiri:configure", token, page: (location.pathname + location.search).slice(0, 300) }, cfg.base);
+  // The AI's first message: "" (not yet) → "pending" (shown, unread) → "read" (chat opened), per visit.
+  const proKey = `lemiri-widget:${cfg.employeeId}:proactive`;
+  const pro = cfg.proactive && cfg.proactive.messages.length ? cfg.proactive : null;
+  let proState = ""; try { proState = sessionStorage.getItem(proKey) || ""; } catch { /* storage unavailable */ }
+  const setPro = (value: string) => { proState = value; try { sessionStorage.setItem(proKey, value); } catch { /* storage unavailable */ } };
+  const sendToken = () => frame?.contentWindow?.postMessage({ type: "lemiri:configure", token, page: (location.pathname + location.search).slice(0, 300), proactive: proState === "pending" || proState === "read" }, cfg.base);
   function ensureFrame() {
     if (frame) return;
     frame = d.createElement("iframe"); frame.className = "lemiri-frame"; frame.title = cfg.name; frame.allow = "clipboard-write";
@@ -159,6 +168,7 @@ export function lemiriWidgetBootstrap(runtimeFactory: typeof floatingCardRuntime
     card.appendChild(frame);
   }
   let unread = 0;
+  let preview: HTMLElement | null = null;
   const setUnread = (n: number) => { unread = n; badge.hidden = n === 0; badge.textContent = String(n); };
 
   const rt = runtimeFactory();
@@ -170,7 +180,7 @@ export function lemiriWidgetBootstrap(runtimeFactory: typeof floatingCardRuntime
       maxBtn.innerHTML = s.maximized ? icons.min : icons.max; const maxLabel = s.maximized ? cfg.labels.restore : cfg.labels.maximize; maxBtn.setAttribute("aria-label", maxLabel); maxBtn.title = maxLabel;
       if (s.open) ensureFrame();
     },
-    onOpen: () => { setUnread(0); ensureFrame(); window.setTimeout(() => frame?.contentWindow?.postMessage({ type: "lemiri:focus" }, cfg.base), 120); },
+    onOpen: () => { setUnread(0); if (proState === "pending") setPro("read"); else if (!proState) setPro("skip"); preview?.remove(); preview = null; delete launcher.dataset.teaser; ensureFrame(); window.setTimeout(() => frame?.contentWindow?.postMessage({ type: "lemiri:focus" }, cfg.base), 120); },
   });
   pinBtn.addEventListener("click", () => ctl.setPinned(!ctl.getState().pinned));
   maxBtn.addEventListener("click", () => ctl.toggleMaximize());
@@ -182,8 +192,28 @@ export function lemiriWidgetBootstrap(runtimeFactory: typeof floatingCardRuntime
     if (type === "lemiri:ready" || type === "lemiri:where") sendToken();
     else if (type === "lemiri:refresh") fetch(cfg.tokenUrl, { credentials: "omit" }).then(r => (r.ok ? r.json() : null)).then(b => { if (b && b.token) { token = b.token; sendToken(); } }).catch(() => undefined);
     else if (type === "lemiri:close") { ctl.close(); launcher.focus(); }
-    else if (type === "lemiri:message" && !ctl.getState().open) setUnread(unread + 1);
+    else if (type === "lemiri:message" && !ctl.getState().open) { setUnread(unread + 1); if (typeof e.data.text === "string" && e.data.text) showPreview(e.data.text); }
   });
+  // A message bubble next to the closed chat button: the AI's first message or a new reply.
+  function showPreview(message: string) {
+    if (ctl.getState().open) return;
+    preview?.remove();
+    const bubble = d.createElement("span"); bubble.className = "lemiri-teaser"; bubble.setAttribute("role", "status"); bubble.setAttribute("aria-live", "polite");
+    const who = d.createElement("b"); who.textContent = cfg.name;
+    const text = d.createElement("span"); text.textContent = message.length > 220 ? `${message.slice(0, 217)}…` : message;
+    const body = d.createElement("div"); body.append(who, text);
+    const x = d.createElement("i"); x.textContent = "×"; x.setAttribute("role", "button"); x.setAttribute("aria-label", cfg.labels.collapse);
+    x.addEventListener("click", ev => { ev.stopPropagation(); ev.preventDefault(); bubble.remove(); preview = null; delete launcher.dataset.teaser; });
+    x.addEventListener("pointerdown", ev => ev.stopPropagation());
+    bubble.append(body, x); launcher.appendChild(bubble); launcher.dataset.teaser = ""; preview = bubble;
+  }
+  const deliverProactive = () => {
+    if (!pro || ctl.getState().open) return;
+    if (!proState) setPro("pending");
+    setUnread(pro.messages.length); showPreview(pro.messages[0]);
+  };
+  // Still unread from an earlier page of this visit: show it again right away.
+  if (pro && !startOpen) { if (proState === "pending") deliverProactive(); else if (!proState) window.setTimeout(deliverProactive, pro.delay * 1000); }
   // Optional gentle auto-open, once per visitor session.
   const autoKey = `lemiri-widget:${cfg.employeeId}:auto`;
   if (!startOpen && (cfg.autoOpenSeconds ?? 0) > 0) {
@@ -192,7 +222,7 @@ export function lemiriWidgetBootstrap(runtimeFactory: typeof floatingCardRuntime
   }
   // Proactive message next to the chat button, once per visitor session.
   const teaserKey = `lemiri-widget:${cfg.employeeId}:teaser`;
-  if (sh.teaser && !startOpen) {
+  if (sh.teaser && !startOpen && !pro) {
     let seen = false; try { seen = sessionStorage.getItem(teaserKey) === "1"; } catch { /* storage unavailable */ }
     if (!seen) window.setTimeout(() => {
       if (ctl.getState().open) return;

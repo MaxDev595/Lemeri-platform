@@ -3,12 +3,12 @@ import { canSendAiReply, resolveAccess, type Access } from "./plans";
 
 // What a workspace may use right now (plan, trial, AI allowance). One query.
 export async function workspaceAccess(workspaceId: string): Promise<Access> {
-  const rows = await db.$queryRawUnsafe<Array<{ plan: string | null; status: string | null; currentPeriodStart: Date | null; currentPeriodEnd: Date | null; ownerCreatedAt: Date | null }>>(
-    `SELECT s."plan", s."status", s."currentPeriodStart", s."currentPeriodEnd",
+  const rows = await db.$queryRawUnsafe<Array<{ plan: string | null; status: string | null; provider: string | null; currentPeriodStart: Date | null; currentPeriodEnd: Date | null; ownerCreatedAt: Date | null }>>(
+    `SELECT s."plan", s."status", s."provider", s."currentPeriodStart", s."currentPeriodEnd",
        (SELECT MIN(u."createdAt") FROM "WorkspaceMember" m JOIN "User" u ON u."id" = m."userId" WHERE m."workspaceId" = w."id" AND m."role" = 'OWNER') AS "ownerCreatedAt"
      FROM "Workspace" w LEFT JOIN "Subscription" s ON s."workspaceId" = w."id" WHERE w."id" = $1`, workspaceId);
   const row = rows[0];
-  return resolveAccess({ workspaceId, ownerCreatedAt: row?.ownerCreatedAt ?? null, subscription: row?.plan ? { plan: row.plan, status: row.status, currentPeriodStart: row.currentPeriodStart, currentPeriodEnd: row.currentPeriodEnd } : null });
+  return resolveAccess({ workspaceId, ownerCreatedAt: row?.ownerCreatedAt ?? null, subscription: row?.plan ? { plan: row.plan, status: row.status, provider: row.provider, currentPeriodStart: row.currentPeriodStart, currentPeriodEnd: row.currentPeriodEnd } : null });
 }
 
 /** AI replies given in the current usage period (each reply writes one AI_RESPONSE event). */

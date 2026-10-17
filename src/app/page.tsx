@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Landing } from "@/components/landing";
+import { PlatformAssistant } from "@/components/platform-assistant";
 import { getSessionUser } from "@/lib/auth/session";
 import { getPublicLocale } from "@/lib/public-locale";
 import { openAccessEnabled } from "@/lib/billing/plans";
@@ -16,5 +17,5 @@ export const metadata: Metadata = {
 export default async function Home({ searchParams }: { searchParams: Promise<{ lang?: string }> }) {
   if (await getSessionUser()) redirect("/app");
   const locale = await getPublicLocale((await searchParams).lang);
-  return <Landing locale={locale} openAccess={openAccessEnabled()} />;
+  return <><Landing locale={locale} openAccess={openAccessEnabled()} /><PlatformAssistant place="landing" /></>;
 }

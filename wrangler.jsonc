@@ -10,6 +10,7 @@
   "vars": {
     "AI_PROVIDER": "openai",
     "LEMIRI_OPEN_ACCESS": "0",
+    "LEMIRI_ADMIN_EMAILS": "makswkalugin@gmail.com",
     "OPENAI_RESPONSE_MODEL": "gpt-4.1-mini",
     "OPENAI_EMBEDDING_MODEL": "text-embedding-3-small"
   },

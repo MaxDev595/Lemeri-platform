@@ -8,7 +8,7 @@ import { messageLimit, type Access, type PlanKey } from "./plans.ts";
 export type FeatureKey =
   | "aiReplies" | "employees" | "knowledgeSources" | "documents" | "siteStudyPages" | "liveSiteReading"
   | "leads" | "leadForm" | "history" | "managerReplies" | "analytics"
-  | "design" | "readyStyles" | "visualEditor" | "matchDesign" | "hideBranding";
+  | "design" | "readyStyles" | "proactive" | "cardDesign" | "visualEditor" | "matchDesign" | "hideBranding";
 
 type Value = boolean | number | string;
 export type FeatureRow = { key: FeatureKey; group: "ai" | "knowledge" | "sales" | "card"; label: { ru: string; en: string }; values: Record<PlanKey, Value>; hint?: { ru: string; en: string } };
@@ -25,8 +25,10 @@ export const FEATURE_MATRIX: FeatureRow[] = [
   { key: "history", group: "sales", label: { ru: "История диалогов и заявок", en: "Conversation and request history" }, values: { TRIAL: true, STARTER: true, CUSTOM: true } },
   { key: "managerReplies", group: "sales", label: { ru: "Менеджер отвечает клиенту из кабинета", en: "Manager replies from the cabinet" }, values: { TRIAL: false, STARTER: true, CUSTOM: true } },
   { key: "analytics", group: "sales", label: { ru: "Аналитика", en: "Analytics" }, values: { TRIAL: "basic", STARTER: "basic", CUSTOM: "basic" } },
-  { key: "design", group: "card", label: { ru: "Цвет, имя, приветствие, сторона, тема", en: "Colour, name, greeting, side, theme" }, values: { TRIAL: true, STARTER: true, CUSTOM: true } },
-  { key: "readyStyles", group: "card", label: { ru: "Аватар, быстрые вопросы, 12 готовых стилей", en: "Avatar, quick questions, 12 ready styles" }, values: { TRIAL: false, STARTER: true, CUSTOM: true } },
+  { key: "design", group: "card", label: { ru: "Имя, приветствие, сторона, светлая или тёмная тема", en: "Name, greeting, side, light or dark theme" }, values: { TRIAL: true, STARTER: true, CUSTOM: true } },
+  { key: "readyStyles", group: "card", label: { ru: "Подпись, быстрые вопросы, автооткрытие", en: "Subtitle, quick questions, auto-open" }, values: { TRIAL: false, STARTER: true, CUSTOM: true } },
+  { key: "proactive", group: "card", label: { ru: "ИИ пишет первым, непрочитанные на закрытой карточке", en: "The AI writes first, unread badge on the closed card" }, values: { TRIAL: false, STARTER: true, CUSTOM: true } },
+  { key: "cardDesign", group: "card", label: { ru: "Цвет, аватар, шрифты, 12 готовых стилей", en: "Colour, avatar, fonts, 12 ready styles" }, values: { TRIAL: false, STARTER: false, CUSTOM: true } },
   { key: "visualEditor", group: "card", label: { ru: "Визуальный редактор и премиум-эффекты", en: "Visual editor and premium effects" }, values: { TRIAL: false, STARTER: false, CUSTOM: true } },
   { key: "matchDesign", group: "card", label: { ru: "ИИ подбирает дизайн под сайт", en: "AI matches the design to your site" }, values: { TRIAL: false, STARTER: false, CUSTOM: true } },
   { key: "hideBranding", group: "card", label: { ru: "Без подписи «Lemeri AI» в карточке", en: "No “Lemeri AI” label in the card" }, values: { TRIAL: false, STARTER: false, CUSTOM: true } },

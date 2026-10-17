@@ -77,7 +77,10 @@ export function WebsiteWidget({ locale, employeeId, employeeName, company = "", 
   const design = look.design;
   const copy = { ...base, hello: design.welcome.title || look.greeting || base.hello, help: design.welcome.text || look.help || base.help, status: look.status || base.status, suggestions: look.suggestions?.length ? look.suggestions : base.suggestions };
   const title = look.title || employeeName;
-  const [messages, setMessages] = useState<Message[]>(() => preview && previewSample ? [{ role: "user", text: locale === "en" ? "I need a gift for a runner, budget around $50" : "Нужен подарок бегуну, бюджет около 5000 ₽" }, { role: "assistant", text: locale === "en" ? "Great choice! Two options fit your budget:\n- **Running belt** — light, fits a phone\n- **Wireless earbuds** — water resistant\nShall I tell you about delivery? [Catalog](https://example.com)" : "Отличный повод! Под ваш бюджет подойдут:\n- **Беговой пояс** — лёгкий, помещается телефон\n- **Беспроводные наушники** — защита от влаги\nРассказать о доставке? [Каталог](https://example.com)" }] : []);
+  // The AI's first message (Starter+): shown on top when the visitor arrives through it.
+  const proactiveMessages: Message[] = look.proactive.enabled ? look.proactive.messages.map(text => ({ role: "assistant" as const, text })) : [];
+  const openedWithProactive = useRef(false);
+  const [messages, setMessages] = useState<Message[]>(() => preview && previewSample ? [{ role: "user", text: locale === "en" ? "I need a gift for a runner, budget around $50" : "Нужен подарок бегуну, бюджет около 5000 ₽" }, { role: "assistant", text: locale === "en" ? "Great choice! Two options fit your budget:\n- **Running belt** — light, fits a phone\n- **Wireless earbuds** — water resistant\nShall I tell you about delivery? [Catalog](https://example.com)" : "Отличный повод! Под ваш бюджет подойдут:\n- **Беговой пояс** — лёгкий, помещается телефон\n- **Беспроводные наушники** — защита от влаги\nРассказать о доставке? [Каталог](https://example.com)" }] : preview && look.proactive.enabled ? proactiveMessages : []);
   const [conversationId, setConversationId] = useState<string>();
   const [busy, setBusy] = useState(false);
   const [visitorId, setVisitorId] = useState("");
@@ -114,7 +117,8 @@ export function WebsiteWidget({ locale, employeeId, employeeName, company = "", 
   const assistantCount = useRef(0);
   useEffect(() => {
     const count = messages.filter(message => message.role === "assistant").length;
-    if (embedded && count > assistantCount.current) window.parent.postMessage({ type: "lemiri:message" }, "*");
+    // The closed card shows an unread badge and the start of the new message.
+    if (embedded && count > assistantCount.current) window.parent.postMessage({ type: "lemiri:message", text: [...messages].reverse().find(message => message.role === "assistant")?.text.slice(0, 240) ?? "" }, "*");
     assistantCount.current = count;
   }, [messages, embedded]);
   useEffect(() => {
@@ -144,6 +148,12 @@ export function WebsiteWidget({ locale, employeeId, employeeName, company = "", 
       if (event.source !== window.parent || event.data?.type !== "lemiri:configure" || typeof event.data.token !== "string") return;
       const next = { token: event.data.token, origin: event.origin };
       if (typeof event.data.page === "string") pageRef.current = event.data.page.slice(0, 300);
+      // The card showed the AI's first message while closed: put it on top of the chat once.
+      if (event.data.proactive === true && !openedWithProactive.current && proactiveMessages.length) {
+        openedWithProactive.current = true;
+        assistantCount.current += proactiveMessages.length;
+        setMessages(value => value.length ? value : proactiveMessages);
+      }
       if (authRef.current && authRef.current.token === next.token && authRef.current.origin === next.origin) return; // page update only
       authRef.current = next; setEmbedAuth(next);
       authWaiters.current.splice(0).forEach(resolve => resolve(next));
@@ -178,7 +188,9 @@ export function WebsiteWidget({ locale, employeeId, employeeName, company = "", 
         if (!response.ok) return;
         const body = await response.json() as { messages: Array<{ id: string; content: string; createdAt: string }> };
         if (!active) return;
-        const fresh = body.messages.filter(message => !seenMessageIds.current.has(message.id));
+        // The AI's first message is already on screen; the server stored it on top of the conversation.
+        const opening = new Set(openedWithProactive.current ? proactiveMessages.map(item => item.text) : []);
+        const fresh = body.messages.filter(message => !seenMessageIds.current.has(message.id) && !opening.has(message.content));
         if (body.messages.length) pollCursor.current = body.messages.at(-1)!.createdAt;
         if (!fresh.length) return;
         fresh.forEach(message => seenMessageIds.current.add(message.id));
@@ -205,7 +217,7 @@ export function WebsiteWidget({ locale, employeeId, employeeName, company = "", 
     if (preview) { setMessages(value => [...value, { role: "assistant", text: copy.preview }]); return; }
     setBusy(true);
     try {
-      const { response, json } = await authedFetch("messages", { visitorId, conversationId, messageId: crypto.randomUUID(), message: input, ...(pageRef.current ? { page: pageRef.current } : {}) });
+      const { response, json } = await authedFetch("messages", { visitorId, conversationId, messageId: crypto.randomUUID(), message: input, ...(pageRef.current ? { page: pageRef.current } : {}), ...(!conversationId && openedWithProactive.current ? { proactive: true } : {}) });
       if (!response.ok) throw new Error(copy.sendFailed);
       setConversationId(json.conversationId as string);
       if (json.messageId) seenMessageIds.current.add(String(json.messageId));

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { DEFAULT_DESIGN, mergeForTier, normalizeAvatar, normalizeDesign, normalizePresets, resolveLook } from "../src/lib/widget/design.ts";
+import { DEFAULT_DESIGN, mergeForTier, normalizeAvatar, normalizeDesign, normalizePresets, normalizeProactive, resolveLook } from "../src/lib/widget/design.ts";
 
 test("design input is clamped and never carries markup", () => {
   const d = normalizeDesign({ width: 9999, height: 10, radius: -5, colors: { accent: "red", text: "#ABCDEF" }, launcher: { size: 200, label: "<script>x</script>Help" }, font: "comic", shadow: "huge" });
@@ -21,17 +21,32 @@ test("avatars accept https or small images only", () => {
 
 test("the card shows what the plan allows; Custom work survives a downgrade", () => {
   const stored = { accent: "#ff0000", title: "Anna", avatarUrl: "https://x.test/a.png", style: "dark", design: normalizeDesign({ radius: 3 }), presets: normalizePresets([{ name: "Mine", design: { radius: 2 } }]) };
+  // Trial and Starter: fixed Lemeri design — no colour, avatar or styles; only light or dark.
   const basic = resolveLook(stored, "basic");
-  assert.equal(basic.avatarUrl, ""); assert.equal(basic.design.radius, DEFAULT_DESIGN.radius); assert.equal(basic.design.colors.accent, "#ff0000");
-  const standard = resolveLook(stored, "standard");
-  assert.equal(standard.avatarUrl, "https://x.test/a.png"); assert.notEqual(standard.design.radius, 3);
-  assert.equal(resolveLook(stored, "custom").design.radius, 3);
+  assert.equal(basic.avatarUrl, ""); assert.deepEqual(basic.design, DEFAULT_DESIGN); assert.equal(basic.theme, "light");
+  const standard = resolveLook({ ...stored, theme: "dark" }, "standard");
+  assert.equal(standard.avatarUrl, ""); assert.deepEqual(standard.design, DEFAULT_DESIGN); assert.equal(standard.theme, "dark");
+  assert.equal(resolveLook({ ...stored, theme: "auto" }, "standard").theme, "light");
+  const custom = resolveLook(stored, "custom");
+  assert.equal(custom.design.radius, 3); assert.equal(custom.avatarUrl, "https://x.test/a.png"); assert.equal(resolveLook({ accent: "#ff0000" }, "custom").design.colors.accent, "#ff0000");
   // A Starter save cannot wipe or change Custom fields…
-  const saved = mergeForTier(stored, { title: "Bob" }, "standard");
+  const saved = mergeForTier(stored, { title: "Bob", accent: "#00ff00", avatarUrl: "https://evil.test/x.png" }, "standard");
   assert.equal(saved.title, "Bob"); assert.equal(saved.design?.radius, 3); assert.equal(saved.presets?.length, 1);
+  assert.equal(saved.accent, "#ff0000"); assert.equal(saved.avatarUrl, "https://x.test/a.png");
   // …and a Trial save keeps Starter fields too.
   const trial = mergeForTier(stored, { title: "C", avatarUrl: "https://evil.test/x.png" }, "basic");
   assert.equal(trial.avatarUrl, "https://x.test/a.png");
   // Custom can clear its design.
   assert.equal(mergeForTier(stored, { title: "D" }, "custom").design, undefined);
+});
+
+test("the AI's first message: Starter and Custom, validated, never markup", () => {
+  const stored = { proactive: { enabled: true, messages: ["Здравствуйте! <b>Подсказать</b>?", "", "Второе", "Третье", "Четвёртое"], delay: 999 } };
+  assert.equal(resolveLook(stored, "basic").proactive.enabled, false);
+  const p = resolveLook(stored, "standard").proactive;
+  assert.equal(p.enabled, true); assert.equal(p.messages.length, 3); assert.ok(!p.messages[0]!.includes("<")); assert.equal(p.delay, 120);
+  assert.equal(normalizeProactive({ enabled: true, messages: [] }).enabled, false);
+  assert.equal(normalizeProactive({ enabled: "yes", messages: ["Hi"] }).enabled, false);
+  // Trial saves keep the stored first message instead of overwriting it.
+  assert.deepEqual(mergeForTier(stored, { title: "T", proactive: { enabled: false, messages: [], delay: 0 } }, "basic").proactive, stored.proactive);
 });

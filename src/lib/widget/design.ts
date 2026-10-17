@@ -1,7 +1,7 @@
 // Website card design. Three tiers follow the plan (lib/billing/plans.ts):
-//   basic    (Trial)   — colour, name, greeting, side, theme
-//   standard (Starter) — + avatar, subtitle, quick questions, auto-open, ready-made styles
-//   custom   (Custom)  — the full visual editor below, plus saved presets
+//   basic    (Trial)   — name, greeting, side, light or dark theme; the design itself is fixed
+//   standard (Starter) — + subtitle, quick questions, auto-open, the AI's first message; design still fixed
+//   custom   (Custom)  — colour, avatar, ready-made styles, fonts, the full visual editor and saved presets
 // Everything is validated and clamped here, so a stored design can never break a
 // customer's site. Pure module: used by the API, the embed script config, the chat
 // iframe and the cabinet editor.
@@ -220,25 +220,37 @@ export type StoredLook = {
   accent?: string; title?: string; status?: string; greeting?: string; help?: string; suggestions?: string[];
   position?: "right" | "left"; theme?: "auto" | "light" | "dark"; autoOpenSeconds?: number; hostedLink?: boolean;
   avatarUrl?: string; style?: string; leadForm?: boolean; design?: Design; presets?: DesignPreset[];
+  /** The AI writes first (Starter and Custom). */
+  proactive?: Proactive;
 };
+/** First messages from the AI: shown with an unread badge on the closed card, then at the top of the chat. */
+export type Proactive = { enabled: boolean; messages: string[]; delay: number };
+export const DEFAULT_PROACTIVE: Proactive = { enabled: false, messages: [], delay: 6 };
+export function normalizeProactive(raw: unknown): Proactive {
+  const v = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+  const messages = Array.isArray(v.messages) ? v.messages.map(item => typeof item === "string" ? item.replace(/[\u0000-\u0008\u000b-\u001f<>]/g, "").trim().slice(0, 300) : "").filter(Boolean).slice(0, 3) : [];
+  const delay = Number(v.delay);
+  return { enabled: v.enabled === true && messages.length > 0, messages, delay: Number.isFinite(delay) ? Math.max(0, Math.min(120, Math.round(delay))) : DEFAULT_PROACTIVE.delay };
+}
 /** What the card actually shows for a plan tier. Stored Custom settings stay untouched in the database after a downgrade. */
 export type ResolvedLook = {
   title?: string; status?: string; greeting?: string; help?: string; suggestions?: string[];
   position: "right" | "left"; theme: "auto" | "light" | "dark"; autoOpenSeconds: number; hostedLink: boolean;
-  avatarUrl: string; leadForm: boolean; design: Design; tier: DesignTier;
+  avatarUrl: string; leadForm: boolean; design: Design; tier: DesignTier; proactive: Proactive;
 };
 
 export function resolveLook(stored: StoredLook | undefined, tier: DesignTier): ResolvedLook {
   const s = stored ?? {};
   const withAccent = (design: Design, accent?: string) => accent && HEX.test(accent) ? { ...design, colors: { ...design.colors, accent, userBubble: accent, button: accent, launcherBg: accent }, dark: { ...design.dark, accent, userBubble: accent, button: accent, launcherBg: accent } } : design;
-  const base = { title: s.title, greeting: s.greeting, help: s.help, position: s.position ?? "right", theme: s.theme ?? "auto", hostedLink: s.hostedLink !== false, leadForm: s.leadForm !== false, tier };
-  if (tier === "basic") return { ...base, status: undefined, suggestions: undefined, autoOpenSeconds: 0, avatarUrl: "", design: withAccent(DEFAULT_DESIGN, s.accent) };
-  const standard = { ...base, status: s.status, suggestions: s.suggestions, autoOpenSeconds: s.autoOpenSeconds ?? 0, avatarUrl: s.avatarUrl ?? "" };
-  if (tier === "standard" || !s.design) {
-    const ready = READY_STYLES[s.style ?? "classic"]?.design ?? DEFAULT_DESIGN;
-    return { ...standard, design: withAccent(ready, s.accent) };
-  }
-  return { ...standard, design: normalizeDesign(s.design) };
+  // Trial and Starter: the Lemeri design as is, only light or dark ("auto" shows light).
+  const fixedTheme = s.theme === "dark" ? "dark" as const : "light" as const;
+  const base = { title: s.title, greeting: s.greeting, help: s.help, position: s.position ?? "right", theme: tier === "custom" ? s.theme ?? "auto" : fixedTheme, hostedLink: s.hostedLink !== false, leadForm: s.leadForm !== false, tier, avatarUrl: "", design: DEFAULT_DESIGN };
+  if (tier === "basic") return { ...base, status: undefined, suggestions: undefined, autoOpenSeconds: 0, proactive: DEFAULT_PROACTIVE };
+  const standard = { ...base, status: s.status, suggestions: s.suggestions, autoOpenSeconds: s.autoOpenSeconds ?? 0, proactive: normalizeProactive(s.proactive) };
+  if (tier === "standard") return standard;
+  const avatarUrl = s.avatarUrl ?? "";
+  if (!s.design) return { ...standard, avatarUrl, design: withAccent(READY_STYLES[s.style ?? "classic"]?.design ?? DEFAULT_DESIGN, s.accent) };
+  return { ...standard, avatarUrl, design: normalizeDesign(s.design) };
 }
 
 // ------------------------------------------------------------------ CSS
@@ -301,8 +313,8 @@ export function shellConfig(design: Design) {
 export type ShellConfig = ReturnType<typeof shellConfig>;
 
 // ------------------------------------------------------------------ saving by plan
-const STANDARD_KEYS = ["status", "suggestions", "autoOpenSeconds", "avatarUrl", "style"] as const;
-const CUSTOM_KEYS = ["design", "presets"] as const;
+const STANDARD_KEYS = ["status", "suggestions", "autoOpenSeconds", "proactive"] as const;
+const CUSTOM_KEYS = ["design", "presets", "accent", "avatarUrl", "style"] as const;
 /**
  * Applies plan rules to a save: fields above the plan keep their stored value
  * (so a downgrade never deletes Custom work), everything else is replaced.

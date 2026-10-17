@@ -14,7 +14,7 @@ import { decryptCredentials } from "@/lib/security/encryption";
 import { pageUrlFor, siteRootFromConfig } from "@/lib/knowledge/site-basics";
 import { after } from "next/server";
 
-const payloadSchema = z.object({ conversationId: z.string().cuid().optional(), visitorId: z.string().min(8).max(128), messageId: z.string().uuid(), name: z.string().trim().min(2).max(80).optional(), message: z.string().trim().min(1).max(4000), page: z.string().max(300).optional() });
+const payloadSchema = z.object({ conversationId: z.string().cuid().optional(), visitorId: z.string().min(8).max(128), messageId: z.string().uuid(), name: z.string().trim().min(2).max(80).optional(), message: z.string().trim().min(1).max(4000), page: z.string().max(300).optional(), proactive: z.boolean().optional() });
 
 export async function GET(request:Request,{params}:{params:Promise<{employeeId:string}>}){
   const {employeeId}=await params;const url=new URL(request.url);const conversationId=url.searchParams.get("conversationId")??"";const visitorId=url.searchParams.get("visitorId")??"";const after=url.searchParams.get("after");
@@ -50,6 +50,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ emp
   if (!signed && !member) return NextResponse.json({ error: "WIDGET_AUTH_REQUIRED" }, { status: 403 });
 
   const visitorExternalId = `widget:${employeeId}:${parsed.data.visitorId}`;
+  let createdNow = false;
   let conversation = parsed.data.conversationId ? await db.conversation.findFirst({ where: { id: parsed.data.conversationId, workspaceId: employee.workspaceId, employeeId, externalId: visitorExternalId } }) : null;
   if (!conversation) {
     const existing = await db.conversation.findUnique({ where: { workspaceId_channelType_externalId: { workspaceId: employee.workspaceId, channelType: "WEBSITE", externalId: visitorExternalId } } });
@@ -66,7 +67,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ emp
           await tx.analyticsEvent.create({ data: { workspaceId: employee.workspaceId, type: "CONVERSATION_STARTED", payload: { conversationId: created.id, channelType: "WEBSITE" } } });
           return { conversation: created, created: true };
         });
-        if (result.conversation.employeeId === employeeId) conversation = result.conversation;
+        if (result.conversation.employeeId === employeeId) { conversation = result.conversation; createdNow = result.created; }
       } catch (error) {
         if (error instanceof BillingLimitError) return NextResponse.json({ error: error.code }, { status: 402 });
         if (!isUniqueConstraintError(error)) throw error;
@@ -76,6 +77,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ emp
     }
   }
   if (!conversation) return NextResponse.json({ error: "VISITOR_CONVERSATION_CONFLICT" }, { status: 409 });
+  // The visitor answers the AI's first message (Starter+): store it on top of the new
+  // conversation so the AI and the manager see what the visitor replied to. The text
+  // comes from the card settings, never from the visitor's browser.
+  if (createdNow && parsed.data.proactive) {
+    try {
+      const { proactiveForChannel } = await import("@/lib/widget/proactive");
+      const opening = await proactiveForChannel(employee.workspaceId, website.configEncrypted);
+      if (opening.length) await db.message.createMany({ data: opening.map((content, index) => ({ conversationId: conversation.id, direction: "OUTBOUND" as const, content, createdAt: new Date(Date.now() - 2000 + index * 10), sources: { authorType: "AI_PROACTIVE" } })) });
+    } catch (error) { console.error("Proactive opening was not stored", error instanceof Error ? error.message : error); }
+  }
   const messageExternalId = `widget:${employee.workspaceId}:${parsed.data.messageId}`;
   if (await db.message.findUnique({ where: { externalId: messageExternalId } })) return NextResponse.json({ conversationId: conversation.id, message: t("server.messageAccepted"), duplicate: true });
   try {

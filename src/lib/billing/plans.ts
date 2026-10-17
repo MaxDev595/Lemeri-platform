@@ -60,7 +60,7 @@ export function messageLimit(plan: PlanKey, env: Record<string, string | undefin
   return Number.isFinite(value) && value > 0 ? Math.floor(value) : DEFAULT_MESSAGE_LIMITS[plan];
 }
 
-export type SubscriptionLike = { plan?: string | null; status?: string | null; currentPeriodStart?: Date | string | null; currentPeriodEnd?: Date | string | null } | null | undefined;
+export type SubscriptionLike = { plan?: string | null; status?: string | null; provider?: string | null; currentPeriodStart?: Date | string | null; currentPeriodEnd?: Date | string | null } | null | undefined;
 export type Access = {
   plan: PlanKey;
   /** trial: free trial running · active: paid · past_due: paid, payment retrying · expired: nothing active */
@@ -88,6 +88,7 @@ export function openAccessEnabled(env: Record<string, string | undefined> = type
 }
 
 const DAY = 86_400_000;
+export const PLATFORM_MESSAGE_LIMIT = 1_000_000;
 const PAST_DUE_GRACE_DAYS = 7;
 /**
  * Trials of accounts created before billing went live start on this date instead
@@ -132,6 +133,8 @@ export function resolveAccess(input: { subscription: SubscriptionLike; ownerCrea
     // (a yearly plan gets the monthly allowance every month, not once a year).
     const usageStart = start > monthStart ? start : monthStart;
     const usageEnd = interval === "year" && end > monthEnd ? monthEnd : end;
+    // Lemeri's own workspace (platform admin): no reply allowance — it answers Lemeri's own visitors.
+    if (sub.provider === "platform" && (status === "ACTIVE" || status === "TRIALING")) return { ...make(paid, "active", monthStart, monthEnd), messageLimit: PLATFORM_MESSAGE_LIMIT };
     if (status === "ACTIVE" || status === "TRIALING") return { ...make(paid, "active", usageStart, usageEnd), interval };
     if (status === "PAST_DUE" && periodEnd && now.getTime() < periodEnd.getTime() + PAST_DUE_GRACE_DAYS * DAY) return { ...make(paid, "past_due", usageStart, usageEnd), interval };
   }

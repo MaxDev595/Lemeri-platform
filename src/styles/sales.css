@@ -330,3 +330,21 @@ input[type=color] { width: 36px; height: 30px; padding: 2px; border: 1px solid v
 .ckForm select { height: 42px; appearance: auto; }
 .ckForm input[type="checkbox"] { appearance: auto; width: 16px; height: 16px; min-height: 16px; padding: 0; accent-color: var(--accent); }
 .ckForm > .linkButton { justify-self: start; background: none; }
+
+/* Admin panel (components/admin/admin-panel.tsx) */
+.adminPanel { max-width: 860px; }
+.adminGrid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 12px; }
+.adminCard { display: grid; gap: 8px; align-content: start; padding: 14px; border: 1px solid var(--line-soft); border-radius: 12px; background: var(--surface-2); }
+.adminCard > small { color: var(--text-3); font-size: var(--fs-12); text-transform: uppercase; letter-spacing: .04em; }
+.adminRow { display: flex; justify-content: space-between; gap: 12px; font-size: var(--fs-13); }
+.adminRow span { color: var(--text-2); }
+.adminRow b { font-weight: 600; text-align: right; color: var(--ok); }
+.adminRow b.warn { color: var(--bad); }
+.adminStat { margin: 0; color: var(--text-2); font-size: var(--fs-13); }
+.adminStat b { color: var(--text); font-size: var(--fs-16); }
+.adminActions { display: flex; flex-wrap: wrap; gap: 8px; }
+.adminActions .btn { display: inline-flex; align-items: center; gap: 6px; }
+@media (max-width: 640px) { .adminGrid { grid-template-columns: 1fr; } }
+.sxLauncher .sxBadge { position: absolute; top: -5px; right: -5px; display: grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; border: 2px solid #fff; border-radius: 999px; background: #e5484d; color: #fff; font-size: 11px; font-weight: 600; line-height: 1; }
+.sxLauncher em.sxTeaser span { display: grid; gap: 2px; }
+.sxLauncher em.sxTeaser small { font-size: 11px; font-weight: 600; opacity: .65; }

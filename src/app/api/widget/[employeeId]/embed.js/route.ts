@@ -12,8 +12,17 @@ const labels={
 } as const;
 
 export async function GET(request:Request,{params}:{params:Promise<{employeeId:string}>}){
-  const {employeeId}=await params;
+  let {employeeId}=await params;
   const js={"content-type":"application/javascript; charset=utf-8"};
+  // Lemeri's own assistant on lemeriai.com and in the cabinet (Админка): resolved by
+  // place; switched off → an empty script, so the page never shows an error.
+  if(employeeId==="platform"){
+    const place=new URL(request.url).searchParams.get("place")==="landing"?"landing":"app";
+    const {platformAssistantFor}=await import("@/lib/platform/settings");
+    const resolved=await platformAssistantFor(place);
+    if(!resolved)return new NextResponse("/* Lemeri assistant is off */",{headers:{...js,"cache-control":"private, no-store"}});
+    employeeId=resolved;
+  }
   const widget=await loadWebsiteWidget(employeeId);
   if(!widget)return new NextResponse("/* Lemeri widget is unavailable */",{status:404,headers:js});
   const base=new URL(request.url).origin;
@@ -27,7 +36,7 @@ export async function GET(request:Request,{params}:{params:Promise<{employeeId:s
   // What the current plan allows (stored Custom settings stay in the config after a downgrade).
   const look=widget.look;
   const {status,...buttonLabels}=labels[widget.locale];
-  const config:WidgetBootConfig={base,employeeId,frameUrl,tokenUrl:`${base}/api/widget/${employeeId}/token`,token,name:look.title||widget.employee.name,status:look.status||status,locale:widget.locale,labels:buttonLabels,theme:look.theme,position:look.position,autoOpenSeconds:look.autoOpenSeconds,shell:shellConfig(look.design),avatar:look.avatarUrl||undefined};
+  const config:WidgetBootConfig={base,employeeId,frameUrl,tokenUrl:`${base}/api/widget/${employeeId}/token`,token,name:look.title||widget.employee.name,status:look.status||status,locale:widget.locale,labels:buttonLabels,theme:look.theme,position:look.position,autoOpenSeconds:look.autoOpenSeconds,shell:shellConfig(look.design),avatar:look.avatarUrl||undefined,...(look.proactive.enabled?{proactive:{messages:look.proactive.messages,delay:look.proactive.delay}}:{})};
   // Same floating-card engine as the in-app assistant, shipped as plain source.
   // The Worker bundler (esbuild keepNames) may wrap functions in __name(); give
   // the shipped source a local no-op so it runs on any customer page.

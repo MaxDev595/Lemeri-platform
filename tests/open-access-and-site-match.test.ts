@@ -33,7 +33,7 @@ test("premium settings are validated and older saved designs get defaults", () =
     assert.deepEqual(normalizeDesign(style.design), style.design, key);
     assert.ok(chatVars(style.design, false)["--lw-user-fill"]); assert.ok(shellConfig(style.design).light.accent);
   }
-  const glass = resolveLook({ style: "glass" }, "standard");
+  const glass = resolveLook({ style: "glass" }, "custom");
   assert.equal(glass.design.effects.glass, true);
   assert.match(chatVars(READY_STYLES.aurora!.design, false)["--lw-user-fill"]!, /^linear-gradient/);
 });

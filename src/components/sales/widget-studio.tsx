@@ -2,9 +2,9 @@
 
 import { ChangeEvent, CSSProperties, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { Check, Copy, Gem, Megaphone, MessageSquareText, Monitor, Moon, Palette, Plus, RotateCcw, Save, Smartphone, Sun, Trash2, Type, Upload, Wand2 } from "lucide-react";
+import { Check, Copy, Gem, Megaphone, MessageSquareText, Monitor, Moon, Palette, Plus, RotateCcw, Save, Smartphone, Sparkles, Sun, Trash2, Type, Upload, Wand2 } from "lucide-react";
 import type { DesignTier } from "@/lib/billing/plans";
-import { DEFAULT_DESIGN, FONTS, normalizeDesign, READY_STYLES, resolveLook, shellConfig, type Colors, type Design, type DesignPreset, type StoredLook } from "@/lib/widget/design";
+import { DEFAULT_DESIGN, DEFAULT_PROACTIVE, FONTS, normalizeDesign, READY_STYLES, resolveLook, shellConfig, type Colors, type Design, type DesignPreset, type StoredLook } from "@/lib/widget/design";
 import { WebsiteWidget } from "../website-widget";
 import { LemiriGlyph } from "../logo";
 import { Field, PlanLock, Section, Segmented, Toggle } from "./ui";
@@ -25,10 +25,11 @@ const T = {
     create: "Создать карточку для сайта", createCopy: "Карточка — это окно чата с вашим ИИ-продавцом поверх сайта. Создайте её, настройте вид и вставьте код на сайт.", creating: "Создаём…", createFailed: "Не удалось создать карточку",
     loading: "Загружаем карточку…", loadFailed: "Не удалось загрузить настройки карточки", retry: "Повторить",
     save: "Сохранить", saving: "Сохраняем…", saved: "Сохранено — изменения уже на сайте, код менять не нужно", saveFailed: "Не удалось сохранить", planRequired: "Расширенный редактор доступен в тарифе Custom",
-    basics: "Основное", basicsCopy: "Доступно во всех тарифах.",
+    basics: "Основное", basicsCopy: "Доступно во всех тарифах.", ownLook: "Свой вид карточки",
+    proactive: "Первое сообщение от ИИ", proactiveCopy: "ИИ пишет посетителю первым. Пока чат закрыт, на кнопке видно непрочитанное сообщение и его начало; при открытии оно стоит первым в диалоге.", proactiveOn: "ИИ пишет первым", proactiveOnHint: "Один раз за визит, если посетитель ещё не открыл чат", proactiveMessages: "Сообщения", proactiveMessagesHint: "Каждое с новой строки, до 3. Можно написать самому или попросить ИИ", proactivePlaceholder: "Здравствуйте! Подсказать с выбором?", proactiveDelay: "Написать через", proactiveNow: "Сразу", proactiveAi: "Помощь ИИ", proactiveAiHint: "ИИ отредактирует ваш текст или напишет свой — проверьте и сохраните", proactivePolish: "Отредактировать с ИИ", proactiveWrite: "Написать с ИИ", proactivePolishing: "ИИ пишет…", proactiveFailed: "ИИ сейчас не ответил, попробуйте ещё раз",
     title: "Имя в карточке", greeting: "Приветствие", help: "Текст под приветствием", accent: "Основной цвет", position: "Сторона экрана", right: "Справа", left: "Слева",
     theme: "Тема", themes: { auto: "Как у посетителя", light: "Светлая", dark: "Тёмная" }, leadForm: "Кнопка «Оставить заявку»", leadFormHint: "Форма с согласием на передачу контактов",
-    standard: "Стандартная кастомизация", standardCopy: "Аватар, подпись, быстрые вопросы и готовые варианты оформления.",
+    standard: "Тексты и поведение", standardCopy: "Подпись, быстрые вопросы и автооткрытие. Дизайн карточки в Starter фиксированный — светлая или тёмная тема.",
     avatar: "Аватар", upload: "Загрузить", avatarUrl: "или ссылка https://", removeAvatar: "Убрать", avatarTooBig: "Не удалось обработать картинку",
     status: "Подпись под именем", suggestions: "Быстрые вопросы", suggestionsHint: "По одному в строке, до 4", autoOpen: "Открыть автоматически", never: "Не открывать", after: (n: number) => `Через ${n} с`,
     styles: "Готовые варианты", custom: "Расширенный редактор", customCopy: "Полная настройка карточки без программирования.",
@@ -58,10 +59,11 @@ const T = {
     create: "Create the website card", createCopy: "The card is the chat window with your AI seller on top of your site. Create it, style it and paste the code.", creating: "Creating…", createFailed: "Couldn't create the card",
     loading: "Loading the card…", loadFailed: "Couldn't load card settings", retry: "Retry",
     save: "Save", saving: "Saving…", saved: "Saved — changes are live, the code stays the same", saveFailed: "Couldn't save", planRequired: "The advanced editor is on the Custom plan",
-    basics: "Basics", basicsCopy: "Available on every plan.",
+    basics: "Basics", basicsCopy: "Available on every plan.", ownLook: "Your own card look",
+    proactive: "The AI writes first", proactiveCopy: "The AI messages the visitor first. While the chat is closed the button shows an unread badge and the start of the message; when opened it is the first message in the chat.", proactiveOn: "AI writes first", proactiveOnHint: "Once per visit, if the visitor has not opened the chat yet", proactiveMessages: "Messages", proactiveMessagesHint: "One per line, up to 3. Write them yourself or ask the AI", proactivePlaceholder: "Hi! Need help choosing?", proactiveDelay: "Write after", proactiveNow: "Right away", proactiveAi: "AI help", proactiveAiHint: "The AI polishes your text or writes its own — review and save", proactivePolish: "Polish with AI", proactiveWrite: "Write with AI", proactivePolishing: "The AI is writing…", proactiveFailed: "The AI did not answer, try again",
     title: "Name on the card", greeting: "Greeting", help: "Text under greeting", accent: "Main colour", position: "Screen side", right: "Right", left: "Left",
     theme: "Theme", themes: { auto: "Visitor's system", light: "Light", dark: "Dark" }, leadForm: "“Leave a request” button", leadFormHint: "Form with consent to share contacts",
-    standard: "Standard customisation", standardCopy: "Avatar, subtitle, quick questions and ready-made styles.",
+    standard: "Texts and behaviour", standardCopy: "Subtitle, quick questions and auto-open. On Starter the card design is fixed — light or dark theme.",
     avatar: "Avatar", upload: "Upload", avatarUrl: "or an https:// link", removeAvatar: "Remove", avatarTooBig: "Couldn't process the image",
     status: "Subtitle", suggestions: "Quick questions", suggestionsHint: "One per line, up to 4", autoOpen: "Open automatically", never: "Never", after: (n: number) => `After ${n}s`,
     styles: "Ready-made styles", custom: "Advanced editor", customCopy: "Full card design without code.",
@@ -123,6 +125,7 @@ function DesignEditor({ locale, channelId, employeeId, employeeName, company, no
   const [previewDark, setPreviewDark] = useState(false);
   const [previewScreen, setPreviewScreen] = useState<"dialog" | "welcome" | "closed">("dialog");
   const [presetName, setPresetName] = useState("");
+  const [polishing, setPolishing] = useState(false);
   const load = useCallback(async () => {
     setFailed(false);
     try { const response = await fetch(`/api/channels/${channelId}`, { cache: "no-store" }); if (!response.ok) throw new Error(); const body = await response.json() as State; setState(body); setLook(body.widget ?? {}); }
@@ -140,6 +143,19 @@ function DesignEditor({ locale, channelId, employeeId, employeeName, company, no
   // normalizeDesign fills settings added later, so older saved designs open with defaults.
   const design: Design = normalizeDesign(look.design ?? READY_STYLES[look.style ?? "classic"]?.design ?? DEFAULT_DESIGN);
   const setDesign = (patch: Partial<Design>) => update({ design: { ...design, ...patch } });
+  // Raw while editing (normalizeProactive runs on save), so an empty line can be typed.
+  const proactive = { ...DEFAULT_PROACTIVE, ...look.proactive };
+  const setProactive = (patch: Partial<typeof proactive>) => update({ proactive: { ...proactive, ...patch } });
+  const polish = async () => {
+    setPolishing(true);
+    try {
+      const response = await fetch(`/api/channels/${channelId}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "proactive", messages: proactive.messages.filter(m => m.trim()), locale }) });
+      const body = await response.json().catch(() => ({})) as { messages?: string[] };
+      if (response.status === 402) { notify(locale === "en" ? "Available on Starter" : "Доступно в тарифе Starter"); return; }
+      if (!response.ok || !body.messages?.length) throw new Error();
+      setProactive({ messages: body.messages, enabled: true });
+    } catch { notify(c.proactiveFailed); } finally { setPolishing(false); }
+  };
   const setColor = (key: keyof Colors, value: string) => setDesign({ [palette]: { ...design[palette], [key]: value } } as Partial<Design>);
   const save = async () => {
     setSaving(true);
@@ -173,35 +189,49 @@ function DesignEditor({ locale, channelId, employeeId, employeeName, company, no
       <Section title={c.basics} copy={c.basicsCopy}>
         <div className="sxGrid">
           <Field label={c.title}><input value={look.title ?? ""} placeholder={employeeName} maxLength={60} onChange={e => update({ title: e.target.value })}/></Field>
-          <Field label={c.accent}><span className="sxColorInput"><input type="color" value={look.accent ?? design.colors.accent} onChange={e => update({ accent: e.target.value, ...(look.design ? { design: { ...design, colors: { ...design.colors, accent: e.target.value, userBubble: e.target.value, button: e.target.value, launcherBg: e.target.value } } } : {}) })}/><code>{look.accent ?? design.colors.accent}</code></span></Field>
           <Field label={c.greeting}><input value={look.greeting ?? ""} maxLength={80} onChange={e => update({ greeting: e.target.value })}/></Field>
           <Field label={c.help}><input value={look.help ?? ""} maxLength={200} onChange={e => update({ help: e.target.value })}/></Field>
           <Field label={c.position}><Segmented label={c.position} value={look.position ?? "right"} onChange={value => update({ position: value })} options={[{ value: "right", label: c.right }, { value: "left", label: c.left }]}/></Field>
-          <Field label={c.theme}><select value={look.theme ?? "auto"} onChange={e => update({ theme: e.target.value as StoredLook["theme"] })}>{(["auto", "light", "dark"] as const).map(key => <option key={key} value={key}>{c.themes[key]}</option>)}</select></Field>
+          <Field label={c.theme}>{customOk ? <select value={look.theme ?? "auto"} onChange={e => update({ theme: e.target.value as StoredLook["theme"] })}>{(["auto", "light", "dark"] as const).map(key => <option key={key} value={key}>{c.themes[key]}</option>)}</select> : <Segmented label={c.theme} value={resolved.theme === "dark" ? "dark" : "light"} onChange={value => update({ theme: value })} options={[{ value: "light", label: c.themes.light }, { value: "dark", label: c.themes.dark }]}/>}</Field>
         </div>
         <Toggle label={c.leadForm} hint={c.leadFormHint} checked={look.leadForm !== false} onChange={value => update({ leadForm: value })}/>
       </Section>
 
       <Section title={c.standard} copy={c.standardCopy} aside={!standardOk && <PlanLock plan="Starter" locale={locale} onUpgrade={onUpgrade}/>}>
         <fieldset disabled={!standardOk} className="sxFieldset">
+          <div className="sxGrid">
+            <Field label={c.status}><input value={look.status ?? ""} maxLength={80} onChange={e => update({ status: e.target.value })}/></Field>
+            <Field label={c.autoOpen}><select value={look.autoOpenSeconds ?? 0} onChange={e => update({ autoOpenSeconds: Number(e.target.value) })}>{[0, 5, 10, 20, 30, 60].map(n => <option key={n} value={n}>{n ? c.after(n) : c.never}</option>)}</select></Field>
+            <Field wide label={c.suggestions} hint={c.suggestionsHint}><textarea rows={3} value={(look.suggestions ?? []).join("\n")} onChange={e => update({ suggestions: e.target.value.split("\n").slice(0, 4) })}/></Field>
+          </div>
+        </fieldset>
+      </Section>
+
+      <Section title={c.proactive} copy={c.proactiveCopy} aside={!standardOk && <PlanLock plan="Starter" locale={locale} onUpgrade={onUpgrade}/>}>
+        <fieldset disabled={!standardOk} className="sxFieldset">
+          <Toggle label={c.proactiveOn} hint={c.proactiveOnHint} checked={proactive.enabled} onChange={value => setProactive({ enabled: value })}/>
+          <Field wide label={c.proactiveMessages} hint={c.proactiveMessagesHint}><textarea rows={3} maxLength={920} value={proactive.messages.join("\n")} placeholder={c.proactivePlaceholder} onChange={e => setProactive({ messages: e.target.value.split("\n").slice(0, 3) })}/></Field>
+          <div className="sxGrid">
+            <Field label={c.proactiveDelay}><select value={proactive.delay} onChange={e => setProactive({ delay: Number(e.target.value) })}>{[0, 3, 6, 10, 20, 30, 60].map(n => <option key={n} value={n}>{n ? c.after(n) : c.proactiveNow}</option>)}</select></Field>
+            <Field label={c.proactiveAi} hint={c.proactiveAiHint}><button type="button" className="btn" disabled={polishing || !standardOk} onClick={() => void polish()}><Sparkles size={14}/>{polishing ? c.proactivePolishing : proactive.messages.some(m => m.trim()) ? c.proactivePolish : c.proactiveWrite}</button></Field>
+          </div>
+        </fieldset>
+      </Section>
+
+      <Section title={c.custom} copy={c.customCopy} aside={!customOk ? <PlanLock plan="Custom" locale={locale} onUpgrade={onUpgrade}/> : <button type="button" className="linkButton" onClick={() => update({ design: undefined })}><RotateCcw size={13}/>{c.reset}</button>}>
+        <fieldset disabled={!customOk} className={customOk ? "sxFieldset" : "sxFieldset locked"}>
+          <Group title={c.ownLook} icon={<Palette size={14}/>}>
+            <div className="sxGrid">
+              <Field label={c.accent}><span className="sxColorInput"><input type="color" value={look.accent ?? design.colors.accent} onChange={e => update({ accent: e.target.value, ...(look.design ? { design: { ...design, colors: { ...design.colors, accent: e.target.value, userBubble: e.target.value, button: e.target.value, launcherBg: e.target.value } } } : {}) })}/><code>{look.accent ?? design.colors.accent}</code></span></Field>
+            </div>
           <div className="sxAvatarRow">
             <span className="sxAvatarPreview" style={{ borderRadius: design.avatarShape === "circle" ? "50%" : design.avatarShape === "square" ? 6 : 14 }}>{look.avatarUrl ? <img src={look.avatarUrl} alt=""/> : <LemiriGlyph size={24}/>}</span>
             <label className="btn sxUpload"><Upload size={14}/>{c.upload}<input type="file" accept="image/png,image/jpeg,image/webp" onChange={uploadAvatar} hidden/></label>
             <input className="sxAvatarUrl" placeholder={c.avatarUrl} value={look.avatarUrl?.startsWith("https://") ? look.avatarUrl : ""} onChange={e => update({ avatarUrl: e.target.value })}/>
             {look.avatarUrl && <button type="button" className="linkButton" onClick={() => update({ avatarUrl: "" })}>{c.removeAvatar}</button>}
           </div>
-          <div className="sxGrid">
-            <Field label={c.status}><input value={look.status ?? ""} maxLength={80} onChange={e => update({ status: e.target.value })}/></Field>
-            <Field label={c.autoOpen}><select value={look.autoOpenSeconds ?? 0} onChange={e => update({ autoOpenSeconds: Number(e.target.value) })}>{[0, 5, 10, 20, 30, 60].map(n => <option key={n} value={n}>{n ? c.after(n) : c.never}</option>)}</select></Field>
-            <Field wide label={c.suggestions} hint={c.suggestionsHint}><textarea rows={3} value={(look.suggestions ?? []).join("\n")} onChange={e => update({ suggestions: e.target.value.split("\n").slice(0, 4) })}/></Field>
-          </div>
           <Field wide label={c.styles}><div className="sxStyles">{Object.entries(READY_STYLES).map(([key, style]) => <button type="button" key={key} className={(look.style ?? "classic") === key && !look.design ? "on" : ""} onClick={() => update({ style: key, ...(customOk ? { design: undefined } : {}) })}><StyleSwatch design={style.design}/><span>{style.label}</span></button>)}</div></Field>
-        </fieldset>
-      </Section>
-
-
-      <Section title={c.custom} copy={c.customCopy} aside={!customOk ? <PlanLock plan="Custom" locale={locale} onUpgrade={onUpgrade}/> : <button type="button" className="linkButton" onClick={() => update({ design: undefined })}><RotateCcw size={13}/>{c.reset}</button>}>
-        <fieldset disabled={!customOk} className={customOk ? "sxFieldset" : "sxFieldset locked"}>
+          </Group>
           <Group title={c.colors} icon={<Palette size={14}/>}>
             <Segmented label={c.colors} value={palette} onChange={setPalette} options={[{ value: "colors", label: c.lightPalette }, { value: "dark", label: c.darkPalette }]}/>
             <div className="sxColors">{(Object.keys(design.colors) as Array<keyof Colors>).map(color)}</div>
@@ -425,7 +455,10 @@ function CardPreview({ locale, employeeId, employeeName, company, look, device, 
   const glass: CSSProperties = shell.glass ? { backdropFilter: `blur(${shell.blur}px) saturate(1.6)`, WebkitBackdropFilter: `blur(${shell.blur}px) saturate(1.6)` } : {};
   // "Closed" shows the site with the chat button only: pulse and the proactive message.
   const showCard = !closed || phone;
-  const teaser = closed && !phone && Boolean(shell.teaser);
+  // The AI's first message wins over the plain teaser; the badge counts its messages.
+  const firstMessage = look.proactive.enabled ? look.proactive.messages[0] ?? "" : "";
+  const teaserText = firstMessage || shell.teaser;
+  const teaser = closed && !phone && Boolean(teaserText);
   const cardStyle: CSSProperties = phone
     ? { inset: 0, borderRadius: 0, border: 0 }
     : { [side]: 16, bottom: 16 + launcherSize + 12 + (shell.launcherLabel ? 40 : 0), width: shell.width * scale, height: shell.height * scale, borderRadius: shell.radius, border: `${shell.border}px solid ${pal.line}`, boxShadow: shell.shadow + glow };
@@ -443,7 +476,8 @@ function CardPreview({ locale, employeeId, employeeName, company, look, device, 
       </div>}
       {!phone && <span className={shell.pulse && closed ? "sxLauncher pulse" : "sxLauncher"} style={{ [side]: 16, width: launcherSize, height: launcherSize, borderRadius: radius(shell.launcherShape, launcherSize), background: fill(pal.launcher), color: pal.launcherIcon, boxShadow: shell.shadow, ["--pulse" as string]: pal.launcher }}>
         {shell.launcherIcon === "avatar" && look.avatarUrl ? <img src={look.avatarUrl} alt=""/> : <LemiriGlyph size={Math.round(launcherSize * 0.42)}/>}
-        {teaser ? <em className={`${side} sxTeaser`} style={{ background: shell.glass ? glassBg(pal.bg) : pal.bg, color: pal.text, borderColor: pal.line, fontFamily: shell.font, ...glass }}>{shell.teaser}<i>×</i></em>
+        {closed && firstMessage && <b className="sxBadge">{look.proactive.messages.length}</b>}
+        {teaser ? <em className={`${side} sxTeaser`} style={{ background: shell.glass ? glassBg(pal.bg) : pal.bg, color: pal.text, borderColor: pal.line, fontFamily: shell.font, ...glass }}>{firstMessage ? <span><small>{look.title || employeeName}</small>{teaserText}</span> : teaserText}<i>×</i></em>
           : (closed || !showCard) && shell.launcherLabel ? <em className={side} style={{ background: pal.bg, color: pal.text, borderColor: pal.line }}>{shell.launcherLabel}</em> : !closed && shell.launcherLabel ? <em className={side} style={{ background: pal.bg, color: pal.text, borderColor: pal.line }}>{shell.launcherLabel}</em> : null}
       </span>}
     </>}

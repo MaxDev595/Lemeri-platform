@@ -2,7 +2,7 @@
 // channel's encrypted config next to allowedOrigins, so changing the look in the
 // cabinet never changes the embed code the customer already installed.
 
-import { normalizeAvatar, normalizeDesign, normalizePresets, READY_STYLES, type StoredLook } from "./design";
+import { normalizeAvatar, normalizeDesign, normalizePresets, normalizeProactive, READY_STYLES, type StoredLook } from "./design";
 
 export type WidgetSettings = StoredLook;
 
@@ -32,6 +32,7 @@ export function normalizeWidgetSettings(raw: unknown): Partial<WidgetSettings> {
   if (typeof v.style === "string" && v.style in READY_STYLES) out.style = v.style;
   if (v.design !== undefined && v.design !== null) out.design = normalizeDesign(v.design);
   if (v.presets !== undefined) out.presets = normalizePresets(v.presets);
+  if (v.proactive !== undefined) out.proactive = normalizeProactive(v.proactive);
   return out;
 }
 
