@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, Check, Clock3, ClipboardList, Headset, MessagesSquare, MoonStar, Plus, Settings2, ShoppingBag, Sparkles, UserRoundCheck, Wrench, X } from "lucide-react";
+import { ArrowRight, BadgeCheck, Check, Clock3, ClipboardList, Headset, MessagesSquare, MoonStar, Plus, Settings2, ShoppingBag, Sparkles, UserRoundCheck, Wrench, X, Gift } from "lucide-react";
 import { Logo, LemiriGlyph } from "./logo";
 import { LandingNav, SmoothScroll, StepsRail } from "./landing-client";
 import { landingCopy } from "./landing-copy";
-import { COMING_SOON, PLAN_OFFER, planPriceText } from "@/lib/billing/offer";
+import { COMING_SOON, PLAN_OFFER, planPriceText, TRIAL_PROMO } from "@/lib/billing/offer";
 import type { Locale } from "@/lib/i18n";
 import { localeHref } from "@/lib/locale-utils";
 
@@ -105,11 +105,14 @@ export function Landing({ locale, signedIn = false, openAccess = false }: { loca
           <div className="lnPlans lnPlans3" data-stagger>
             {(["TRIAL", "STARTER", "CUSTOM"] as const).map(key => {
               const plan = plans[key]; const featured = key === "CUSTOM";
-              return <article key={key} className={featured ? "lnPlan featured" : "lnPlan"}>
+              const promo = key === "TRIAL" && !openAccess ? TRIAL_PROMO[locale] : null;
+              return <article key={key} className={featured ? "lnPlan featured" : promo ? "lnPlan promo" : "lnPlan"}>
                 {featured && <span className="lnBadge">{c.pricing.recommended}</span>}
+                {promo && <span className="lnBadge promo"><Gift size={12} />{promo.badge}</span>}
                 <h3>{plan.name}</h3>
                 <div className="lnPrice"><strong>{plan.price}</strong><small>{plan.period}</small></div>
                 {key !== "TRIAL" && <small className="lnYearly">{planPriceText(key, "month", locale).note}</small>}
+                {promo && <small className="lnPromo">{promo.text}</small>}
                 <p>{plan.copy}</p>
                 <ul className="lnPlanList">{plan.features.map(feature => <li key={feature}><Check size={14} />{feature}</li>)}</ul>
                 <Link className={featured || key === "TRIAL" ? "primary" : "btn"} href={register}>{key === "TRIAL" ? c.pricing.trial : c.pricing.choose}</Link>

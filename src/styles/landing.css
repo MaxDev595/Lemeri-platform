@@ -1441,3 +1441,25 @@ html.lenis {
 .lnLegal { display: flex; gap: 14px; flex-wrap: wrap; font-size: var(--fs-13); }
 .lnLegal a { color: var(--text-3); text-decoration: none; }
 .lnLegal a:hover { color: var(--text); }
+
+/* Free plan «Специальное предложение» (TRIAL_PROMO in lib/billing/offer.ts) */
+.lnPlan.promo {
+  border-color: color-mix(in srgb, var(--ok) 45%, var(--line));
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--ok) 9%, transparent);
+}
+.lnBadge.promo {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--ok);
+  box-shadow: 0 8px 20px -10px var(--ok);
+}
+.lnPromo {
+  padding: 8px 10px;
+  border-radius: var(--r-md, 10px);
+  background: color-mix(in srgb, var(--ok) 11%, transparent);
+  color: var(--text);
+  font-size: var(--fs-13);
+  font-weight: 600;
+  line-height: 1.4;
+}

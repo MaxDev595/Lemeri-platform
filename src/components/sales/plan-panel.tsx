@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Check, Clock3, CreditCard, ExternalLink, Sparkles } from "lucide-react";
+import { Check, Clock3, CreditCard, ExternalLink, Sparkles, Gift } from "lucide-react";
 import type { Access } from "@/lib/billing/plans";
-import { COMING_SOON, PLAN_OFFER, planPriceText, YEARLY_SAVE_PERCENT } from "@/lib/billing/offer";
+import { COMING_SOON, PLAN_OFFER, planPriceText, TRIAL_PROMO, YEARLY_SAVE_PERCENT } from "@/lib/billing/offer";
 import { FEATURE_MATRIX } from "@/lib/billing/features";
 import { Minus } from "lucide-react";
 
@@ -91,11 +91,14 @@ export function PlanPanel({ locale, notify, isOwner }: { locale: string; notify:
         const current = samePlan && (key === "TRIAL" || currentInterval === period);
         const configured = (key === "STARTER" ? data.configured.starter : key === "CUSTOM" ? data.configured.custom : false) && (period === "month" || Boolean(data.configured.yearly));
         const price = key === "TRIAL" ? { price: plan.price, period: plan.period, note: "" } : planPriceText(key, period, ru ? "ru" : "en");
-        return <article key={key} className={`sxPlan${key === "CUSTOM" ? " featured" : ""}${current ? " current" : ""}`}>
+        const promo = key === "TRIAL" && !access.openAccess ? TRIAL_PROMO[ru ? "ru" : "en"] : null;
+        return <article key={key} className={`sxPlan${key === "CUSTOM" ? " featured" : ""}${promo ? " promo" : ""}${current ? " current" : ""}`}>
           {key === "CUSTOM" && <span className="sxBadge"><Sparkles size={12}/>{ru ? "Свой дизайн" : "Own design"}</span>}
+          {promo && <span className="sxBadge promo"><Gift size={12}/>{promo.badge}</span>}
           <h3>{plan.name}</h3>
           <div className="sxPrice"><strong>{price.price}</strong><small>{price.period}</small></div>
           {price.note && <small className="sxPriceNote">{price.note}</small>}
+          {promo && <small className="sxPromo">{promo.text}</small>}
           <p>{plan.copy}</p>
           <ul>{plan.features.map(feature => <li key={feature}><Check size={14}/>{feature}</li>)}</ul>
           {access.openAccess ? <button className="btn" disabled><Check size={14}/>{ru ? "Открыто на время тестов" : "Unlocked for testing"}</button>

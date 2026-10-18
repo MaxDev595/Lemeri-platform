@@ -17,6 +17,12 @@ export const PLAN_OFFER = {
   },
 } as const;
 
+/** «Специальное предложение» on the free plan. Only true statements: the trial is free and needs no card. */
+export const TRIAL_PROMO = {
+  ru: { badge: "Специальное предложение", text: "14 дней ИИ-продавца бесплатно — без карты и без обязательств" },
+  en: { badge: "Special offer", text: "14 days of the AI seller free — no card, no commitment" },
+} as const;
+
 /**
  * Price lines for a paid plan in the chosen billing period, computed from plans.ts
  * so the landing page, the cabinet and checkout always show the same numbers.

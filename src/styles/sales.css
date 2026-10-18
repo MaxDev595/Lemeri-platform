@@ -348,3 +348,7 @@ input[type=color] { width: 36px; height: 30px; padding: 2px; border: 1px solid v
 .sxLauncher .sxBadge { position: absolute; top: -5px; right: -5px; display: grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; border: 2px solid #fff; border-radius: 999px; background: #e5484d; color: #fff; font-size: 11px; font-weight: 600; line-height: 1; }
 .sxLauncher em.sxTeaser span { display: grid; gap: 2px; }
 .sxLauncher em.sxTeaser small { font-size: 11px; font-weight: 600; opacity: .65; }
+/* Free plan «Специальное предложение» */
+.sxPlan.promo { border-color: color-mix(in srgb, var(--ok) 45%, var(--line)); }
+.sxBadge.promo { background: var(--ok); }
+.sxPromo { padding: 7px 9px; border-radius: 9px; background: color-mix(in srgb, var(--ok) 11%, transparent); color: var(--text); font-size: var(--fs-13); font-weight: 600; line-height: 1.4; }
