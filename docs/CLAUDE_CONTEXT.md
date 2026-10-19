@@ -37,7 +37,9 @@
 - **Пробный период:**
   - 14 дней от регистрации владельца — один раз на аккаунт;
   - для аккаунтов, созданных до запуска биллинга, отсчёт идёт от `TRIAL_EPOCH` = 2026-10-10 (env `LEMIRI_TRIAL_EPOCH`).
+- **Отсчёт в кабинете:** на главной плашка «Пробный период: осталось N дн. M ч. · до <даты>» с полоской прогресса (`PlanBanner`, обновляется раз в минуту).
 - **Конец пробного периода или подписки:**
+  - при каждом входе в кабинет окно «Пробный период закончился» / «Подписка закончилась» с Starter и Custom и кнопками оформления (`PlanGate` → `PlanEnded` в `plan-panel.tsx`); «Позже» скрывает его до перезагрузки, оформить может только владелец;
   - ИИ не вызывается — модель не тратит токены;
   - посетитель получает просьбу оставить контакты;
   - форма заявки работает;
@@ -58,17 +60,19 @@
 - Custom: всё из Starter + визуальный редактор, «Подобрать под сайт», карточка без подписи «Lemeri AI» (остаётся «ИИ может ошибаться»).
 - Проверки на сервере: `api/knowledge` и `study-site` (число источников), `api/knowledge/documents`, `api/conversations/[id]/messages`, дизайн — как раньше (`designAllows`), страницы краулера — `site-jobs.ts`.
 
-### Биллинг — Paddle (по умолчанию), Stripe как запасной (`BILLING_PROVIDER=stripe`)
-- **Env:** `PADDLE_API_KEY`, `PADDLE_CLIENT_TOKEN`, `PADDLE_WEBHOOK_SECRET`, `PADDLE_ENVIRONMENT=sandbox|production`, `PADDLE_STARTER_PRICE_ID`, `PADDLE_CUSTOM_PRICE_ID` (помесячно, обязательны), `PADDLE_STARTER_YEARLY_PRICE_ID`, `PADDLE_CUSTOM_YEARLY_PRICE_ID` (за год, необязательны — без них вариант «За год» показывает «Оплата скоро»; `PADDLE_API_BASE` — только для локальных тестов). Stripe: `STRIPE_*_YEARLY_PRICE_ID`. Модуль `src/lib/billing/paddle.ts`.
-- **Период оплаты:** переключатель «Помесячно / За год» над тарифами в кабинете и в форме оплаты; `/app/checkout?plan=…&interval=year`, `POST /api/billing {…, interval: "month"|"year"}`, в `custom_data` транзакции пишется `interval`. Смена месяц ⇄ год у живой подписки — тот же `PATCH` (`prorated_immediately`), при `past_due` — 409 `PAST_DUE`.
-- **Оформление:** «Выбрать Starter/Custom» → `/app/checkout?plan=…` (`components/billing/checkout-page.tsx`, рендерится только в браузере). Шаг 1 — ФИО, email, страна (без RU/BY/IR/KP/CU/SY — Paddle их не обслуживает), регион, город, индекс, адрес, компания и ИНН/БИН/VAT. `POST /api/billing {action:"checkout", plan, details}` → Paddle customer + address (+ business) → таблица `BillingProfile` (создаётся сама, raw SQL, `lib/billing/profile.ts`) → transaction с `custom_data {workspaceId, plan}`. Шаг 2 — карта вводится во встроенной форме Paddle (Paddle.js inline, `frameTarget: lemiri-paddle-frame`). Номер карты к Lemeri не попадает; API отвергает похожие на карту данные (`CARD_DATA_NOT_ACCEPTED`).
-- **Смена тарифа:** живая подписка Paddle меняется на месте (`PATCH /subscriptions/{id}`, `prorated_immediately`), вторая не создаётся. **Портал:** `POST /api/billing {action:"portal"}` → Paddle customer portal (карта, счета, отмена).
-- **Вебхук:** `/api/webhooks/paddle` (и `/api/webhooks/stripe`) — один маршрут `api/webhooks/[type]/route.ts`, обработчики `lib/billing/paddle-webhook.ts` / `stripe-webhook.ts`. Подпись `Paddle-Signature` (HMAC, 5 минут), события по порядку (advisory lock + последний событие), привязка к пространству по `custom_data`. `transaction.completed` связывает customer/subscription, `subscription.*` ставит план, статус (`active/trialing/past_due/paused/canceled`), период и `cancelAtPeriodEnd`.
-- В Paddle включить события: `transaction.completed`, `subscription.created`, `subscription.updated`, `subscription.activated`, `subscription.canceled`, `subscription.past_due`, `subscription.paused`, `subscription.resumed`. URL: `https://lemeriai.com/api/webhooks/paddle`. Домен lemeriai.com одобрить в Paddle (Checkout → Website approval), default payment link — `https://lemeriai.com/app/checkout`.
-- CSP разрешает `cdn.paddle.com` (скрипт) и `*.paddle.com` (frame, connect).
+### Биллинг — P2P-переводы (по умолчанию), Stripe как запасной (`BILLING_PROVIDER=stripe`)
+> **Проект работает на P2P-оплате.** Paddle полностью удалён (19.10.2026): платёжного провайдера, карт, вебхуков и автосписаний нет. Не возвращать Paddle. С 19.10.2026 по решению владельца добавлена оплата в USDT (TRC-20) с автоматической выдачей подписки.
+- **Как платит клиент:** «Выбрать Starter/Custom» → `/app/checkout?plan=…&interval=month|year` (`components/billing/checkout-page.tsx`): сумма, получатель, реквизиты и код платежа `LM-XXXXXX` (стабильный на пространство, `paymentCode`) с кнопками «Копировать». Клиент переводит деньги, вводит имя отправителя (и комментарий) и жмёт «Я оплатил» → `POST /api/billing {action:"p2p_claim", plan, interval, payerName, note}`. Пока заявка ждёт — «Отменить заявку» (`p2p_cancel`). Данные карты не принимаются (`CARD_DATA_NOT_ACCEPTED`).
+- **Как подтверждает админ:** раздел «Админка» → «Оплаты переводом» (`admin-panel.tsx`): найти платёж в банке по сумме, коду и имени → «Подтвердить» или «Не найден». API: `POST /api/settings {action:"payment", id, decision:"confirm"|"reject"}` → `decidePayment` (`lib/billing/p2p-store.ts`). Админы получают письмо о новой заявке, если задан Resend.
+- **Подтверждение** ставит `Subscription {provider:"P2P", status:"ACTIVE", currentPeriodEnd}` на месяц или 12 месяцев (`addPeriod`). Повторная оплата того же тарифа до конца периода продлевает от текущей даты окончания, другой тариф начинается с сегодня (`p2pPeriod`). Клиенту — уведомление в кабинете.
+- **Конец периода:** предоплата, без льготных 7 дней — `resolveAccess` считает P2P-подписку закончившейся сразу после `currentPeriodEnd`. За 5 дней до конца (`P2P_REMIND_DAYS` в `plan-panel.tsx`) — напоминание «продлить».
+- **Таблица `PaymentRequest`** создаётся сама (raw SQL): статусы PENDING / CONFIRMED / REJECTED / CANCELED.
+- **Env (только Cloudflare Secrets, не в репозитории):** `LEMIRI_P2P_RECIPIENT` (имя получателя), `LEMIRI_P2P_DETAILS` (реквизиты, строки через `|`), `LEMIRI_P2P_CURRENCY` (по умолчанию USD), `LEMIRI_P2P_RATE` (курс к USD-ценам, по умолчанию 1), `LEMIRI_P2P_NOTE`. Без получателя и реквизитов оплата показывает «Оплата ещё не подключена». Модуль `lib/billing/p2p.ts` (чистый), хранилище `p2p-store.ts`.
+- **USDT (TRC-20), автоматически:** env `LEMIRI_CRYPTO_USDT_TRC20` (адрес кошелька, `T…`), необязательный `LEMIRI_TRONGRID_KEY`. На странице оплаты вкладка «Криптой (USDT)» → `POST /api/billing {action:"crypto_invoice", plan, interval}` → заявка `method:"crypto"`, `currency:"USDT"` с уникальной суммой: цена + 0.0001…0.0999 (`cryptoAmount`, `pickTail` — хвост не повторяется у открытых счетов). `checkCryptoPayments()` (`p2p-store.ts`) читает входящие USDT-переводы кошелька из TronGrid (`/v1/accounts/{addr}/transactions/trc20`, только подтверждённые, контракт `TR7NHqjeKQxGTCi8q8ZY4pL8otSLjLj6t`), сопоставляет точную сумму в окне 3 часа после счёта (`matchCryptoPayments`, чистая функция), пишет `txId` (уникальный индекс — одна транзакция оплачивает один счёт) и вызывает `decidePayment(…, null)` — тариф включается без админа (`decidedBy = 'crypto'`, аудит `actorType: "SYSTEM"`). Запускается по cron (каждые 5 мин, `api/internal/jobs/run`) и при каждом `GET /api/billing` (страница оплаты опрашивает раз в 15 с; не чаще раза в 15 с на изолят). Неверная сумма/сеть или счёт старше 3 ч — остаётся в «Оплаты переводом», админ подтверждает вручную (ссылка на транзакцию в Tronscan).
+- Stripe-код остаётся (`lib/billing/stripe*.ts`, `/api/webhooks/stripe`) и подключается только при `BILLING_PROVIDER=stripe`.
 
 ### Юридические страницы
-- `/legal/terms`, `/legal/privacy`, `/legal/refund` (одна страница `app/legal/[doc]`, `/terms` и т. п. — редиректы). Тексты `src/lib/legal/texts.ts` (шаблоны, перед платным запуском — проверить юристом), реквизиты из env: `LEMIRI_LEGAL_ENTITY`, `LEMIRI_LEGAL_ID`, `LEMIRI_LEGAL_ADDRESS`, `LEMIRI_LEGAL_COUNTRY`, `LEMIRI_SUPPORT_EMAIL`. Ссылки: футер лендинга, регистрация, оформление оплаты. Возврат: 14 дней с любого платежа через Paddle.
+- `/legal/terms`, `/legal/privacy`, `/legal/refund` (одна страница `app/legal/[doc]`, `/terms` и т. п. — редиректы). Тексты `src/lib/legal/texts.ts` (шаблоны, перед платным запуском — проверить юристом), продавец указан как «Lemeri AI» без личных данных (`lib/legal/company.ts`), из env берётся только `LEMIRI_SUPPORT_EMAIL`. **Не выводить на сайт имя, адрес или номера документов владельца.** Ссылки: футер лендинга, регистрация, оформление оплаты. Возврат: 14 дней с любого платежа, переводом обратно по запросу на email поддержки.
 
 ### Лимиты и экономика
 - Лимит считается в **ответах ИИ за период**: событие `AnalyticsEvent` с типом `AI_RESPONSE`. Период — календарный месяц, внутри платного периода — с его начала.
@@ -112,7 +116,7 @@
 - **CSP:** для `/widget` разрешены Google Fonts и `https:`-картинки (аватар).
 
 ## Админка и ассистент Lemeri
-- **Админы платформы:** env `LEMIRI_ADMIN_EMAILS` (в `wrangler.jsonc` → `vars`, сейчас makswkalugin@gmail.com). Правила — `src/lib/platform/access.ts` (чистый модуль).
+- **Админы платформы:** env `LEMIRI_ADMIN_EMAILS` (задаётся в Cloudflare как Secret, а не в `wrangler.jsonc`, чтобы адреса не попадали в репозиторий). Правила — `src/lib/platform/access.ts` (чистый модуль).
 - **Аккаунт админа без онбординга:** при регистрации или первом входе `provisionAdminWorkspace` (`src/lib/platform/admin.ts`) переименовывает пространство в «Lemeri AI», даёт подписку `CUSTOM` с `provider: "platform"` до 2100 года (без лимита ответов ИИ — `PLATFORM_MESSAGE_LIMIT`), создаёт ИИ-продавца «Lemeri» со знаниями о продукте (`lemeri-knowledge.ts`, цены из каталога), действиями и карточкой, разрешённой на lemeriai.com. Идемпотентно, существующее не трогает. Вызывается из `/onboarding` и `/app` (только пока не задан ассистент).
 - **Настройки платформы:** таблица `PlatformSetting` (создаётся сама, raw SQL, `src/lib/platform/settings.ts`), ключ `assistant`: `{workspaceId, employeeId, landing, app}`.
 - **Раздел «Админка»** в кабинете (только админам, `components/admin/admin-panel.tsx`): состояние ассистента и модели, диалоги/заявки за 30 дней, переключатели «на лендинге» и «в кабинете клиентов», ссылки на настройку, «Настроить заново». API без нового маршрута: `GET /api/settings?scope=platform`, `POST /api/settings {action:"assistant"|"provision"}` → `lib/platform/admin-api.ts` (403 не-админам).
@@ -123,7 +127,7 @@
 - **Workers Free:**
   - 10 ms CPU;
   - **50 subrequests на запрос** — каждый запрос к БД по HTTP считается;
-  - **3 MiB gzip** на бандл, сейчас ≈3052 KiB (17.10.2026). Каждый новый маршрут и всё, что импортирует `jobs/worker.ts`, копируется в чанки многих маршрутов — новые страницы лучше делать клиентскими (`dynamic(..., {ssr:false})`) или объединять в один динамический маршрут.
+  - **3 MiB gzip** на бандл, сейчас ≈3070 KiB (19.10.2026, запас ~1.5 KiB — перед новыми функциями что-то вынести или перейти на Workers Paid). Каждый новый маршрут и всё, что импортирует `jobs/worker.ts`, копируется в чанки многих маршрутов — новые страницы лучше делать клиентскими (`dynamic(..., {ssr:false})`) или объединять в один динамический маршрут.
 
   Рекомендуется Workers Paid.
 - Продакшен-кабинет читает данные одним SQL-снимком: `getDirectAppSnapshot` в `src/lib/neon-direct.ts`. Новые поля для кабинета добавлять и туда, и в Prisma-путь `src/app/app/page.tsx`.

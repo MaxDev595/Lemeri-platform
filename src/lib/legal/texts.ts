@@ -1,8 +1,8 @@
 import type { LegalSection } from "@/components/legal-page";
 import type { LegalCompany } from "./company";
 
-// Texts of /terms, /privacy and /refund. Payments are processed by Paddle.com as
-// Merchant of Record, which Paddle requires to be stated on the seller's site.
+// Texts of /terms, /privacy and /refund. Payments are P2P bank transfers that
+// an admin confirms by hand (lib/billing/p2p*.ts); no card data reaches Lemeri.
 // These are templates prepared for review by a lawyer before the paid launch.
 
 type Doc = { title: string; intro: string; sections: LegalSection[] };
@@ -16,9 +16,9 @@ export function termsText(locale: "ru" | "en", c: LegalCompany): Doc {
       { title: "Аккаунт", body: ["Вы отвечаете за достоверность данных при регистрации, сохранность пароля и действия, совершённые в вашем аккаунте. Пользоваться сервисом могут лица старше 18 лет и организации."] },
       { title: "Тарифы и оплата", body: [
         "Доступны тарифы Trial (бесплатно, 14 дней, один раз на аккаунт), Starter ($19 в месяц или $182.40 в год) и Custom ($29 в месяц или $278.40 в год). При оплате за год действует скидка 20%. Состав тарифов указан на странице тарифов и в кабинете.",
-        "Заказ и оплату обрабатывает наш реселлер Paddle.com, который выступает официальным продавцом (Merchant of Record) и отвечает за приём платежей, налоги и выставление счетов. К оплате применяются также условия покупателя Paddle (paddle.com/legal/checkout-buyer-terms).",
-        "Подписка продлевается автоматически каждый месяц или каждый год — в зависимости от выбранного периода оплаты, — пока вы её не отмените. Отменить можно в любой момент в разделе «Тариф и оплата» → «Оплата и счета»; доступ сохраняется до конца оплаченного периода.",
-        "При смене тарифа или периода оплаты разница пересчитывается пропорционально: при переходе на оплату за год неиспользованная часть текущего месяца засчитывается, а новый период начинается в день перехода. Лимит ответов ИИ при оплате за год обновляется каждый месяц. Цены могут меняться — об изменении мы сообщим заранее, новая цена применяется со следующего периода.",
+        "Оплата — в USDT (сеть TRON, TRC-20) или переводом по реквизитам, указанным на странице оплаты в кабинете. Оплата в USDT подтверждается автоматически, как только платёж точной суммы появится в блокчейне. После обычного перевода нажмите «Я оплатил»; тариф включается, когда мы найдём платёж (обычно в течение рабочего дня). Данные банковской карты сервис не запрашивает и не хранит.",
+        "Оплата — предоплата за месяц или за год, автоматических списаний нет. Чтобы продлить тариф, оплатите следующий период; оплата до окончания текущего периода продлевает его. Не продлили — по окончании периода ИИ перестаёт отвечать, данные сохраняются.",
+        "Новый тариф начинается в день подтверждения оплаты. Лимит ответов ИИ при оплате за год обновляется каждый месяц. Цены могут меняться — новая цена применяется к следующей оплате.",
       ] },
       { title: "Лимиты", body: ["Каждый тариф включает лимит ответов ИИ в месяц. Когда лимит исчерпан или подписка закончилась, ИИ перестаёт отвечать посетителям, а форма заявки продолжает работать."] },
       { title: "Ответы ИИ", body: ["ИИ может ошибаться. Ответы формируются на основе ваших знаний и страниц вашего сайта; сервис не гарантирует их полноту и точность, а также рост продаж или конверсии. Вы отвечаете за информацию, которую предоставляете ИИ, и за проверку важных сведений перед сделкой."] },
@@ -36,9 +36,9 @@ export function termsText(locale: "ru" | "en", c: LegalCompany): Doc {
       { title: "Account", body: ["You are responsible for accurate sign-up details, keeping your password safe and all activity in your account. The service is for people over 18 and organisations."] },
       { title: "Plans and payment", body: [
         "Plans: Trial (free, 14 days, once per account), Starter ($19 per month or $182.40 per year) and Custom ($29 per month or $278.40 per year). Paying yearly saves 20%. What each plan includes is listed on the pricing page and in the cabinet.",
-        "Our order process is conducted by our online reseller Paddle.com. Paddle.com is the Merchant of Record for all our orders and handles payments, taxes and invoicing. Paddle's buyer terms also apply (paddle.com/legal/checkout-buyer-terms).",
-        "Subscriptions renew automatically every month or every year, depending on the billing period you chose, until cancelled. You can cancel at any time in Plan & billing → Billing & invoices; access continues until the end of the paid period.",
-        "Plan and billing period changes are prorated: when you move to yearly billing, the unused part of the current month is credited and the new period starts that day. On yearly billing the AI reply allowance resets every month. Prices may change — we will tell you in advance and the new price applies from the next period.",
+        "Payment is in USDT (TRON, TRC-20) or by bank transfer to the details shown on the checkout page in the cabinet. A USDT payment is confirmed automatically once a transfer of the exact amount appears on the blockchain. After a bank transfer, press “I've paid”; the plan switches on once we find the payment (usually within a business day). We never ask for or store card details.",
+        "Payment is prepaid for a month or a year; there are no automatic charges. To continue, pay for the next period; paying before the current one ends extends it. If not renewed, the AI stops answering when the period ends and your data is kept.",
+        "A new plan starts on the day the payment is confirmed. On yearly billing the AI reply allowance resets every month. Prices may change — a new price applies to the next payment.",
       ] },
       { title: "Limits", body: ["Each plan includes a monthly AI reply allowance. When it is used up or the subscription ends, the AI stops answering visitors while the request form keeps working."] },
       { title: "AI answers", body: ["AI can make mistakes. Answers are based on your knowledge and your website pages; we do not guarantee their completeness or accuracy, nor any growth in sales or conversion. You are responsible for the information you give the AI and for checking important facts before a deal."] },
@@ -58,14 +58,13 @@ export function privacyText(locale: "ru" | "en", c: LegalCompany): Doc {
     sections: [
       { title: "Какие данные мы обрабатываем", body: [[
         "Данные аккаунта: имя, email, название компании, хэш пароля, язык и часовой пояс.",
-        "Платёжные данные: ФИО плательщика, адрес, страна, компания и налоговый номер — для счетов. Данные карты вводятся только в форме Paddle; Lemeri их не получает и не хранит.",
+        "Платёжные данные: имя отправителя перевода, сумма, дата и комментарий — чтобы найти платёж. Данные банковской карты мы не получаем и не храним.",
         "Содержимое: база знаний, тексты страниц вашего сайта, прочитанные ИИ, настройки ИИ-сотрудника и карточки.",
         "Данные посетителей вашего сайта: сообщения в чате, адрес страницы, на которой открыт чат, и контакты, которые посетитель оставил в заявке с согласием.",
         "Технические данные: IP-адрес и браузер — для защиты от злоупотреблений (ограничения частоты запросов) и журналов безопасности.",
       ]] },
-      { title: "Зачем", body: [["Предоставлять сервис: ответы ИИ, заявки, кабинет.", "Принимать оплату и выставлять счета (через Paddle).", "Защищать сервис от злоупотреблений и сбоев.", "Связываться с вами по поводу аккаунта и важных изменений."]] },
+      { title: "Зачем", body: [["Предоставлять сервис: ответы ИИ, заявки, кабинет.", "Принимать и подтверждать оплату.", "Защищать сервис от злоупотреблений и сбоев.", "Связываться с вами по поводу аккаунта и важных изменений."]] },
       { title: "Кому передаются данные", body: [[
-        "Paddle.com — приём платежей и налоги (Merchant of Record).",
         "Поставщик ИИ-моделей (OpenAI) — тексты сообщений и фрагменты знаний — только для генерации ответа.",
         "Cloudflare (хостинг), Neon (база данных), Resend (письма).",
       ], "Мы не продаём персональные данные и не используем их для рекламы."] },
@@ -81,14 +80,13 @@ export function privacyText(locale: "ru" | "en", c: LegalCompany): Doc {
     sections: [
       { title: "Data we process", body: [[
         "Account data: name, email, company name, password hash, language and time zone.",
-        "Billing data: payer's full name, address, country, company and tax ID — for invoices. Card details are entered only in Paddle's form; Lemeri never receives or stores them.",
+        "Billing data: the sender's name, amount, date and comment of a transfer — to find the payment. We never receive or store card details.",
         "Content: knowledge base, text of your website pages read by the AI, AI employee and card settings.",
         "Your website visitors' data: chat messages, the address of the page where the chat is open, and contacts a visitor left in a request with consent.",
         "Technical data: IP address and browser — for abuse protection (rate limits) and security logs.",
       ]] },
-      { title: "Why", body: [["To provide the service: AI answers, requests, cabinet.", "To take payments and issue invoices (via Paddle).", "To protect the service from abuse and failures.", "To contact you about your account and important changes."]] },
+      { title: "Why", body: [["To provide the service: AI answers, requests, cabinet.", "To take and confirm payments.", "To protect the service from abuse and failures.", "To contact you about your account and important changes."]] },
       { title: "Who receives data", body: [[
-        "Paddle.com — payments and taxes (Merchant of Record).",
         "AI model provider (OpenAI) — message text and knowledge snippets, only to generate answers.",
         "Cloudflare (hosting), Neon (database), Resend (email).",
       ], "We do not sell personal data or use it for advertising."] },
@@ -104,23 +102,23 @@ export function privacyText(locale: "ru" | "en", c: LegalCompany): Doc {
 export function refundText(locale: "ru" | "en", c: LegalCompany): Doc {
   return locale === "ru" ? {
     title: "Правила возврата",
-    intro: `Мы хотим, чтобы Lemeri AI приносил пользу. Если сервис вам не подошёл, деньги можно вернуть. Платежи принимает Paddle.com — официальный продавец, поэтому возврат проводит Paddle.`,
+    intro: `Мы хотим, чтобы Lemeri AI приносил пользу. Если сервис вам не подошёл, деньги можно вернуть.`,
     sections: [
       { title: "Бесплатный период", body: ["Перед оплатой доступен Trial на 14 дней — попробуйте ИИ-продавца на своём сайте без оплаты."] },
       { title: "14 дней на возврат", body: ["Вы можете запросить полный возврат в течение 14 дней с даты любого платежа (первого или продления). Причину указывать не обязательно."] },
-      { title: "После 14 дней", body: ["Платежи старше 14 дней не возвращаются, но вы можете отменить подписку в любой момент — следующее списание не произойдёт, а доступ сохранится до конца оплаченного периода."] },
-      { title: "Как запросить возврат", body: [["Через paddle.net — найдите покупку по email и нажмите «Request refund».", c.email ? `Или напишите нам на ${c.email}, указав email аккаунта и дату платежа.` : "Или напишите нам через раздел «Настройки» в кабинете, указав email аккаунта и дату платежа."], "Деньги возвращаются на ту же карту, обычно за 5–10 рабочих дней."] },
-      { title: "Смена тарифа", body: ["При переходе Starter ⇄ Custom разница пересчитывается пропорционально автоматически."] },
+      { title: "После 14 дней", body: ["Платежи старше 14 дней не возвращаются. Автоматических списаний нет: если не оплачивать следующий период, тариф просто закончится в конце оплаченного."] },
+      { title: "Как запросить возврат", body: [c.email ? `Напишите нам на ${c.email}, указав email аккаунта, дату и сумму перевода и код платежа.` : "Напишите нам через поддержку в кабинете, указав email аккаунта, дату и сумму перевода и код платежа.", "Деньги возвращаются тем же способом: переводом на те же реквизиты или в USDT на указанный вами адрес TRC-20, обычно за 5 рабочих дней."] },
+      { title: "Смена тарифа", body: ["Если вы оплатили другой тариф, а текущий ещё действует, напишите нам — пересчитаем неиспользованную часть."] },
     ],
   } : {
     title: "Refund Policy",
-    intro: `We want Lemeri AI to be useful. If it is not right for you, you can get your money back. Payments are processed by Paddle.com, the Merchant of Record, so refunds are issued by Paddle.`,
+    intro: `We want Lemeri AI to be useful. If it is not right for you, you can get your money back.`,
     sections: [
       { title: "Free trial", body: ["A 14-day Trial is available before paying — try the AI seller on your website for free."] },
       { title: "14 days to request a refund", body: ["You can request a full refund within 14 days of any payment (first or renewal). No reason is required."] },
-      { title: "After 14 days", body: ["Payments older than 14 days are not refunded, but you can cancel at any time — you will not be charged again and access continues until the end of the paid period."] },
-      { title: "How to request", body: [["Via paddle.net — find the purchase by email and click “Request refund”.", c.email ? `Or email us at ${c.email} with your account email and payment date.` : "Or write to us via Settings in the cabinet with your account email and payment date."], "Money goes back to the same card, usually within 5–10 business days."] },
-      { title: "Plan changes", body: ["Switching between Starter and Custom is prorated automatically."] },
+      { title: "After 14 days", body: ["Payments older than 14 days are not refunded. There are no automatic charges: if you don't pay for the next period, the plan simply ends with the paid one."] },
+      { title: "How to request", body: [c.email ? `Email us at ${c.email} with your account email, the transfer date and amount, and the payment code.` : "Write to us via support in the cabinet with your account email, the transfer date and amount, and the payment code.", "Money is returned the same way: by transfer to the account it came from, or in USDT to a TRC-20 address you give us, usually within 5 business days."] },
+      { title: "Plan changes", body: ["If you paid for a different plan while the current one is still active, write to us and we will credit the unused part."] },
     ],
   };
 }

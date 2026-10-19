@@ -23,6 +23,9 @@ async function status(auth: Auth) {
     inThisWorkspace: Boolean(employee && employee.workspaceId === auth.workspaceId),
     stats: { dialogs, leads },
     model: { provider: process.env.AI_PROVIDER ?? "mock", configured: Boolean(process.env.OPENAI_API_KEY?.trim()), name: process.env.OPENAI_RESPONSE_MODEL || "gpt-4.1-mini" },
+    // P2P transfers waiting for a decision, then the latest decisions.
+    payments: await (await import("@/lib/billing/p2p-store")).adminPayments().catch(() => []),
+    p2pConfigured: await import("@/lib/billing/p2p").then(m => m.p2pConfig().configured || m.cryptoConfig().configured),
   };
 }
 
@@ -37,6 +40,12 @@ export async function platformAdminPost(auth: Auth, body: unknown) {
   if (v.action === "provision") {
     const { provisionAdminWorkspace } = await import("./admin");
     await provisionAdminWorkspace({ userId: auth.user.id, workspaceId: auth.workspaceId, locale: auth.locale });
+  } else if (v.action === "payment") {
+    if (typeof v.id !== "string" || (v.decision !== "confirm" && v.decision !== "reject")) return NextResponse.json({ error: "INVALID_REQUEST" }, { status: 400 });
+    const { decidePayment } = await import("@/lib/billing/p2p-store");
+    const decided = await decidePayment(v.id, v.decision, auth.user.id);
+    if (!decided) return NextResponse.json({ error: "ALREADY_DECIDED" }, { status: 409 });
+    return NextResponse.json(await status(auth));
   } else if (v.action === "assistant") {
     const patch: { landing?: boolean; app?: boolean } = {};
     if (typeof v.landing === "boolean") patch.landing = v.landing;

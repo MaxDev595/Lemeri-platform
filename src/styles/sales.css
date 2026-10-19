@@ -264,7 +264,7 @@ input[type=color] { width: 36px; height: 30px; padding: 2px; border: 1px solid v
 .sxStudyToggle svg.up { transform: rotate(180deg); }
 .sxStudyOverview { max-height: 360px; overflow: auto; padding-top: 6px; color: var(--text-2); line-height: 1.55; white-space: pre-wrap; }
 .sxStudyOverview ul { margin: 4px 0; padding-left: 18px; }
-/* Checkout (Paddle) */
+/* Checkout (P2P transfer) */
 .ckPage { min-height: 100vh; background: var(--bg); color: var(--text); }
 .ckTop { display: flex; align-items: center; gap: 16px; max-width: 1120px; margin: 0 auto; padding: 18px 20px; }
 .ckBack { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); font-size: var(--fs-14); text-decoration: none; }
@@ -298,7 +298,15 @@ input[type=color] { width: 36px; height: 30px; padding: 2px; border: 1px solid v
 .ckCard.on { display: grid; gap: 10px; }
 .ckCard h2 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: var(--fs-16); }
 .ckNote { display: flex; align-items: flex-start; gap: 8px; margin: 0; color: var(--text-2); font-size: var(--fs-13); line-height: 1.5; }
-.ckFrame { min-height: 120px; }
+.ckDetails { display: grid; gap: 2px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.ckRow { display: grid; grid-template-columns: 150px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 10px 12px; background: var(--bg); font-size: var(--fs-14); }
+.ckRow span { color: var(--text-3); font-size: var(--fs-13); }
+.ckRow b { overflow-wrap: anywhere; font-weight: 600; }
+.ckRow b.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .02em; }
+.ckCopy { display: inline-flex; align-items: center; gap: 5px; padding: 5px 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--text-2); font: inherit; font-size: var(--fs-12); cursor: pointer; }
+.ckCopy:hover { color: var(--text); border-color: var(--line-strong); }
+.ckCard .linkButton { display: inline-flex; align-items: center; gap: 6px; justify-self: start; }
+@media (max-width: 560px) { .ckRow { grid-template-columns: 1fr auto; } .ckRow span { grid-column: 1 / -1; } }
 .ckSummary { position: sticky; top: 20px; display: grid; gap: 10px; padding: 20px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); }
 .ckSummary h2 { margin: 0; font-size: var(--fs-16); }
 .ckSummary small { color: var(--text-3); font-size: var(--fs-12); line-height: 1.45; }
@@ -352,3 +360,35 @@ input[type=color] { width: 36px; height: 30px; padding: 2px; border: 1px solid v
 .sxPlan.promo { border-color: color-mix(in srgb, var(--ok) 45%, var(--line)); }
 .sxBadge.promo { background: var(--ok); }
 .sxPromo { padding: 7px 9px; border-radius: 9px; background: color-mix(in srgb, var(--ok) 11%, transparent); color: var(--text); font-size: var(--fs-13); font-weight: 600; line-height: 1.4; }
+/* Trial countdown in the cabinet banner */
+.sxBanner.trial > span { display: grid; gap: 7px; flex: 1; }
+.sxTrialBar { display: block; height: 5px; max-width: 340px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 14%, transparent); overflow: hidden; }
+.sxTrialBar b { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
+/* Trial / subscription ended: choose a plan (PlanEnded in plan-panel.tsx) */
+.sxEndOverlay { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 16px; background: rgba(12, 13, 18, .55); backdrop-filter: blur(3px); animation: sxEndFade .2s ease both; }
+.sxEnd { display: grid; gap: 12px; width: min(680px, 100%); max-height: calc(100vh - 32px); overflow: auto; padding: 24px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); box-shadow: 0 30px 80px -20px rgba(0, 0, 0, .45); }
+.sxEnd h2 { margin: 0; font-size: 1.35rem; letter-spacing: -0.02em; }
+.sxEnd > p { margin: 0; color: var(--text-2); font-size: var(--fs-14); line-height: 1.55; }
+.sxEndPlans { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 4px; }
+.sxEndPlan { display: flex; flex-direction: column; gap: 8px; padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface-2); }
+.sxEndPlan.featured { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); background: var(--surface); }
+.sxEndPlan h3 { margin: 0; color: var(--text-2); font-size: var(--fs-14); }
+.sxEndPlan p { margin: 0; color: var(--text-3); font-size: var(--fs-13); line-height: 1.5; }
+.sxEndPlan ul { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; flex: 1; }
+.sxEndPlan li { display: flex; gap: 6px; align-items: flex-start; color: var(--text-2); font-size: var(--fs-13); line-height: 1.4; }
+.sxEndPlan li svg { flex: none; margin-top: 2px; color: var(--ok); }
+.sxEndPlan > button { width: 100%; min-height: 40px; }
+.sxEndFoot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px; }
+@keyframes sxEndFade { from { opacity: 0; } to { opacity: 1; } }
+@media (max-width: 600px) { .sxEndPlans { grid-template-columns: 1fr; } .sxEnd { padding: 18px; } }
+
+/* Admin: payments by transfer */
+.adminPayments { display: grid; gap: 8px; }
+.adminPayment { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border: 1px solid var(--line-soft); border-radius: 12px; background: var(--surface-2); }
+.adminPayment.pending { border-color: var(--accent, #6d5efc); }
+.adminPayment > div:first-child { display: grid; gap: 2px; min-width: 0; }
+.adminPayment small { color: var(--muted, #8a8f98); overflow-wrap: anywhere; }
+.adminPayment .primary { display: inline-flex; align-items: center; gap: 6px; }
+.adminTag { font-size: 12px; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line-soft); color: var(--muted, #8a8f98); }
+.ckMethod { margin-bottom: 14px; }
+.ckMethod button { display: inline-flex; align-items: center; gap: 6px; }

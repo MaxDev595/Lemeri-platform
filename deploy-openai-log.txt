@@ -1,0 +1,202 @@
+=== branch / status ===
+main
+ M .env.example
+ M README.md
+ M docs/CLAUDE_CONTEXT.md
+ M docs/PRODUCT_ROADMAP.md
+ M src/lib/ai/embeddings.ts
+ M src/lib/ai/endpoint.ts
+ M src/lib/ai/orchestrator.ts
+ M src/lib/ai/provider.ts
+ D src/lib/ai/providers/groq.ts
+ M src/lib/ai/providers/openai.ts
+ M src/lib/legal/texts.ts
+ M src/lib/onboarding/test-attestation.ts
+ M src/lib/runtime-config.ts
+ M src/lib/team/catalog.ts
+ D tests/groq-provider.test.ts
+ M tests/onboarding-attestation.test.ts
+ M tests/openai-provider.test.ts
+ M tests/run.ts
+ M tests/runtime-config.test.ts
+ M wrangler.jsonc
+?? deploy-openai-log.txt
+?? deploy-openai.cmd
+
+=== cloudflare secrets ===
+[
+  {
+    "name": "CREDENTIALS_ENCRYPTION_KEY",
+    "type": "secret_text"
+  },
+  {
+    "name": "CRON_SECRET",
+    "type": "secret_text"
+  },
+  {
+    "name": "DATABASE_URL",
+    "type": "secret_text"
+  },
+  {
+    "name": "OPENAI_API_KEY",
+    "type": "secret_text"
+  },
+  {
+    "name": "PADDLE_API_KEY",
+    "type": "secret_text"
+  },
+  {
+    "name": "PADDLE_CLIENT_TOKEN",
+    "type": "secret_text"
+  },
+  {
+    "name": "PADDLE_CUSTOM_PRICE_ID",
+    "type": "secret_text"
+  },
+  {
+    "name": "PADDLE_CUSTOM_YEARLY_PRICE_ID",
+    "type": "secret_text"
+  },
+  {
+    "name": "PADDLE_ENVIRONMENT",
+    "type": "secret_text"
+  },
+  {
+    "name": "PADDLE_STARTER_PRICE_ID",
+    "type": "secret_text"
+  },
+  {
+    "name": "PADDLE_STARTER_YEARLY_PRICE_ID",
+    "type": "secret_text"
+  },
+  {
+    "name": "PADDLE_WEBHOOK_SECRET",
+    "type": "secret_text"
+  },
+  {
+    "name": "PUBLIC_APP_URL",
+    "type": "secret_text"
+  }
+]
+
+=== tests ===
+
+> lemiri-ai-platform@0.2.0 test
+> node --experimental-strip-types tests/run.ts
+
+✔ password hashes are salted and verify in constant-time comparison path (351.3572ms)
+✔ provider hands off instead of inventing without knowledge (0.226ms)
+✔ provider cites relevant knowledge (0.9088ms)
+✔ connector credentials use authenticated encryption (1.949ms)
+✔ telegram webhook secret is verified and message is normalized (2.8964ms)
+✔ stripe webhook signature validates payload and timestamp (0.5468ms)
+✔ stripe event cursor rejects duplicates and older events but permits equal-second distinct events (0.1684ms)
+✔ stripe accepts any valid v1 signature during secret rotation and maps only configured prices (0.2963ms)
+✔ plan catalog: Trial $0, Starter $19, Custom $29; legacy keys map to new plans (0.1869ms)
+✔ origin validation rejects cross-site and malformed origins (0.275ms)
+✔ automation conditions require every configured condition (0.1772ms)
+✔ extracts output text from Responses API (0.1431ms)
+✔ OpenAI provider validates citations against retrieved chunks (4.4722ms)
+✔ OpenAI provider accepts only explicitly allowed action requests (1.1317ms)
+✔ embeddings preserve API index order (0.5836ms)
+OpenAI answer failed, retrying once OpenAI Responses API failed (500): Server error
+✔ OpenAI provider retries once after a failed answer (0.8028ms)
+✔ WhatsApp verifies Meta signature and normalizes text messages (0.7469ms)
+✔ knowledge chunking preserves content and bounds long paragraphs (0.2764ms)
+✔ plain knowledge documents are decoded without persistence (0.574ms)
+✔ website ingestion honors the most specific robots.txt rule (0.4439ms)
+✔ workspace RBAC capability matrix (0.1408ms)
+✔ development configuration permits optional providers (0.1671ms)
+✔ production configuration fails closed for missing providers and insecure origin (0.1973ms)
+✔ explicit local smoke mode is restricted to loopback origins (0.1536ms)
+✔ production accepts OpenAI responses with OpenAI embeddings (0.111ms)
+✔ production rejects the removed Groq provider (0.0892ms)
+✔ workspace translations support Russian, English and interpolation (0.1624ms)
+✔ active workspace can only be selected from the user's memberships (0.1392ms)
+✔ widget token is bound to employee, browser-observed parent origin and expiry (0.429ms)
+✔ password reset tokens are random and domain-separated from session hashes (0.1899ms)
+✔ password reset uses a dedicated persisted model and atomically consumes tokens (1.4916ms)
+✔ employee validation normalizes legacy labels to stable business keys and rejects unknown roles (0.7673ms)
+✔ stable employee keys are rendered as localized business language (0.1375ms)
+✔ onboarding publication attestation is configuration-bound and expires (0.374ms)
+✔ onboarding publication attestation can use the configured OpenAI secret in production (0.2431ms)
+✔ OpenAI provider receives business instructions and handoff rules (0.523ms)
+✔ public locale links preserve existing query parameters (0.1235ms)
+✔ auth return paths only allow same-origin absolute paths (0.0945ms)
+✔ database unique constraint races are recognized without swallowing other errors (0.1268ms)
+✔ legacy entitlement helpers still map old plans (0.1214ms)
+✔ trial lasts 14 days from the owner's sign-up and is granted once (1.2076ms)
+✔ paid plans: active, past due grace, cancelled, design tiers (0.5388ms)
+✔ message limits are configurable and enforced per period (0.1856ms)
+✔ source files contain no common UTF-8 mojibake sequences (166.607ms)
+✔ only operational workspace roles can receive assignments (0.1891ms)
+✔ assignment persistence is member-based and tenant-scoped (0.4257ms)
+✔ human replies require takeover and atomically enqueue external delivery (0.2135ms)
+✔ website reply polling is bound to signed employee and visitor conversation (0.1926ms)
+✔ conversation events are tenant scoped and tolerate invalid cursors (0.0809ms)
+✔ conversation event stream prevents overlapping polls and stays alive (0.0781ms)
+✔ conversation UI subscribes to events and releases the connection (0.1554ms)
+✔ docked card follows the viewport corner (0.2355ms)
+✔ dropping near an edge or corner docks the card (0.1354ms)
+✔ closing a docked card keeps the launcher on that edge or corner (0.1564ms)
+✔ closing a free-floating card attaches the launcher to the nearest edge (0.208ms)
+✔ launcher never leaves the screen and card reopens next to a moved launcher (0.1897ms)
+✔ resizing respects minimum size and screen bounds on every side (0.156ms)
+✔ stored layout is sanitized and the runtime is shippable as source text (0.5993ms)
+✔ design input is clamped and never carries markup (1.2792ms)
+✔ avatars accept https or small images only (0.4242ms)
+✔ the card shows what the plan allows; Custom work survives a downgrade (0.5113ms)
+✔ sales profile is validated and stored next to legacy handoff rules (0.3599ms)
+✔ open access: everyone gets Custom while testing, nothing changes when it is off (0.1825ms)
+✔ premium settings are validated and older saved designs get defaults (1.9734ms)
+✔ site tokens: brand colour, fonts, radii and theme are read from HTML/CSS (5.3407ms)
+✔ AI patch is applied safely (1.9173ms)
+✔ sales prompt asks for contacts briefly and only in context (0.5598ms)
+✔ stem matching handles word forms (0.7681ms)
+✔ site root comes from allowed sites, then from where the card was seen (0.5375ms)
+✔ visitor page path stays on the site origin (0.1318ms)
+✔ overview keeps only facts and links of the studied site (0.6274ms)
+✔ address normalisation and HTML cleaning (0.7529ms)
+✔ crawler: robots, sitemap, useful pages first, no login pages, menu text dropped (84.1222ms)
+✔ page documents keep their address for the overview (0.8602ms)
+✔ feature matrix: what each plan gets (0.7457ms)
+✔ paddle webhook signature (8.5244ms)
+✔ paddle prices, statuses and card guard (1.153ms)
+✔ yearly billing: 20% off, yearly price ids, monthly AI allowance (3.5267ms)
+ℹ tests 78
+ℹ suites 0
+ℹ pass 78
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 679.1412
+TESTS_EXIT=0
+
+=== commit + push ===
+warning: in the working copy of '.env.example', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/CLAUDE_CONTEXT.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/PRODUCT_ROADMAP.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/lib/ai/embeddings.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/lib/ai/endpoint.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/lib/ai/orchestrator.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/lib/ai/provider.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/lib/ai/providers/openai.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/lib/legal/texts.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/lib/onboarding/test-attestation.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/lib/runtime-config.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/lib/team/catalog.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/onboarding-attestation.test.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/openai-provider.test.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/run.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/runtime-config.test.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'wrangler.jsonc', LF will be replaced by CRLF the next time Git touches it
+[main 0ab677d] Switch AI to OpenAI, remove Groq; never 500 when the AI provider is misconfigured
+ 20 files changed, 87 insertions(+), 189 deletions(-)
+ delete mode 100644 src/lib/ai/providers/groq.ts
+ delete mode 100644 tests/groq-provider.test.ts
+To https://github.com/MaxDev595/Lemeri-platform.git
+   bd1993d..0ab677d  main -> main
+PUSH_EXIT=0
+0ab677d Switch AI to OpenAI, remove Groq; never 500 when the AI provider is misconfigured

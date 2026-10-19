@@ -27,5 +27,5 @@ import "./widget-design.test.ts";
 import "./sales-profile.test.ts";
 import "./open-access-and-site-match.test.ts";
 import "./site-study.test.ts";
-import "./billing-paddle.test.ts";
+import "./billing-p2p.test.ts";
 import "./platform-admin.test.ts";

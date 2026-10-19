@@ -22,6 +22,6 @@ test("Lemeri's own workspace has Custom without a reply allowance", () => {
   const now = new Date("2026-10-17T10:00:00Z");
   const access = resolveAccess({ subscription: { plan: "CUSTOM", status: "ACTIVE", provider: "platform", currentPeriodStart: now, currentPeriodEnd: new Date("2100-01-01T00:00:00Z") }, now, env: {} });
   assert.equal(access.plan, "CUSTOM"); assert.equal(access.design, "custom"); assert.equal(access.messageLimit, PLATFORM_MESSAGE_LIMIT);
-  const paddle = resolveAccess({ subscription: { plan: "CUSTOM", status: "ACTIVE", provider: "PADDLE", currentPeriodStart: now, currentPeriodEnd: new Date("2026-11-17T10:00:00Z") }, now, env: {} });
-  assert.equal(paddle.messageLimit, 2000);
+  const paid = resolveAccess({ subscription: { plan: "CUSTOM", status: "ACTIVE", provider: "P2P", currentPeriodStart: now, currentPeriodEnd: new Date("2026-11-17T10:00:00Z") }, now, env: {} });
+  assert.equal(paid.messageLimit, 2000);
 });

@@ -2,20 +2,22 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Check, Clock3, CreditCard, ExternalLink, Sparkles, Gift } from "lucide-react";
-import type { Access } from "@/lib/billing/plans";
+import { TRIAL_DAYS, type Access } from "@/lib/billing/plans";
 import { COMING_SOON, PLAN_OFFER, planPriceText, TRIAL_PROMO, YEARLY_SAVE_PERCENT } from "@/lib/billing/offer";
 import { FEATURE_MATRIX } from "@/lib/billing/features";
 import { Minus } from "lucide-react";
 
 // Subscription: current plan and trial, AI reply allowance, Trial / Starter / Custom,
 // billed monthly or yearly (−20%; the switch above the plans).
-// Payments go through Paddle: a new subscription opens /app/checkout (payer details +
-// Paddle's card frame), an existing one is switched in place with proration, and the
-// Paddle portal handles cards, invoices and cancellation. The comparison table comes
+// Payments are P2P transfers: «Выбрать» / «Продлить» opens /app/checkout with the
+// amount, recipient and payment code; the plan switches on when a platform admin
+// confirms the transfer. Prepaid periods don't renew by themselves — the panel and
+// the dashboard banner remind the owner before the end. The comparison table comes
 // from FEATURE_MATRIX — the same list the server enforces.
 
 type Interval = "month" | "year";
-type Billing = { access: Access; used: number; subscription: { plan: string; status: string; interval?: Interval; currentPeriodEnd: string; cancelAtPeriodEnd: boolean; portal: boolean } | null; configured: { stripe?: boolean; paddle?: boolean; starter: boolean; custom: boolean; yearly?: boolean }; provider?: "paddle" | "stripe" };
+type Billing = { access: Access; used: number; subscription: { plan: string; status: string; provider?: string; interval?: Interval; currentPeriodEnd: string; cancelAtPeriodEnd: boolean; portal: boolean } | null; configured: { stripe?: boolean; p2p?: boolean; starter: boolean; custom: boolean; yearly?: boolean }; provider?: "p2p" | "stripe"; p2p?: { pending: { plan: string; interval: Interval; amount: number; currency: string; createdAt: string } | null } | null };
+const P2P_REMIND_DAYS = 5;
 
 export function PlanPanel({ locale, notify, isOwner }: { locale: string; notify: (text: string) => void; isOwner: boolean }) {
   const ru = locale !== "en";
@@ -44,21 +46,22 @@ export function PlanPanel({ locale, notify, isOwner }: { locale: string; notify:
   const share = Math.min(100, Math.round((data.used / Math.max(1, access.messageLimit)) * 100));
   const stateText = access.openAccess ? (ru ? "Идёт тестирование: все тарифы и функции открыты бесплатно. Об окончании предупредим заранее." : "Testing period: every plan and feature is free. We'll tell you before it ends.")
     : access.state === "trial" ? (ru ? `Пробный период: осталось ${daysLeft} дн. (до ${date(access.trialEndsAt)})` : `Trial: ${daysLeft} days left (until ${date(access.trialEndsAt)})`)
+    : access.state === "active" && data.subscription?.provider === "P2P" ? (ru ? `Оплачено до ${date(data.subscription.currentPeriodEnd)}. Продление — новым переводом, напомним заранее.` : `Paid until ${date(data.subscription.currentPeriodEnd)}. Renew with a new transfer — we'll remind you.`)
     : access.state === "active" ? (data.subscription?.cancelAtPeriodEnd ? (ru ? `Активна до ${date(data.subscription.currentPeriodEnd)}, затем отменится` : `Active until ${date(data.subscription.currentPeriodEnd)}, then cancels`) : (ru ? `Подписка активна${data.subscription ? ` · продление ${date(data.subscription.currentPeriodEnd)}` : ""}` : `Subscription active${data.subscription ? ` · renews ${date(data.subscription.currentPeriodEnd)}` : ""}`))
-    : access.state === "past_due" ? (ru ? "Не удалось списать оплату — обновите карту, иначе ИИ остановится" : "Payment failed — update your card or the AI will stop")
+    : access.state === "past_due" ? (ru ? "Оплата не продлена — оплатите следующий период, иначе ИИ остановится" : "Payment overdue — pay for the next period or the AI will stop")
     : (ru ? "Нет активного тарифа: ИИ не отвечает посетителям, они могут оставить заявку" : "No active plan: the AI is paused, visitors can still leave requests");
   const period: Interval = interval ?? "month";
   const currentInterval: Interval = access.interval ?? "month";
   const choose = async (plan: "STARTER" | "CUSTOM") => {
-    // New subscription with Paddle: payer details and card on the checkout page.
-    if (data.provider !== "stripe" && !paidActive) { window.location.assign(`/app/checkout?plan=${plan}${period === "year" ? "&interval=year" : ""}`); return; }
+    // P2P: new plan, renewal and switching all go through the transfer page.
+    if (data.provider !== "stripe") { window.location.assign(`/app/checkout?plan=${plan}${period === "year" ? "&interval=year" : ""}`); return; }
     setBusy(plan);
     try {
       const response = await fetch("/api/billing", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "checkout", plan, interval: period }) });
       const body = await response.json().catch(() => ({})) as { url?: string; changed?: boolean; error?: string };
       if (body.url) { window.location.assign(body.url); return; }
       if (body.changed) { notify(ru ? "Тариф изменён — разница пересчитается в следующем счёте" : "Plan changed — the difference is prorated"); await load(); return; }
-      notify(body.error === "BILLING_PROVIDER_NOT_CONFIGURED" ? (ru ? "Оплата ещё не подключена" : "Payments are not set up yet") : body.error === "PAST_DUE" ? (ru ? "Сначала обновите карту в «Оплата и счета»" : "Update your card in “Billing & invoices” first") : (ru ? "Не удалось открыть оплату" : "Couldn't open checkout"));
+      notify(body.error === "BILLING_PROVIDER_NOT_CONFIGURED" ? (ru ? "Оплата ещё не подключена" : "Payments are not set up yet") : body.error === "PAST_DUE" ? (ru ? "Сначала оплатите текущий период" : "Pay for the current period first") : (ru ? "Не удалось открыть оплату" : "Couldn't open checkout"));
     } finally { setBusy(""); }
   };
   const portal = async () => {
@@ -75,7 +78,8 @@ export function PlanPanel({ locale, notify, isOwner }: { locale: string; notify:
       {data.subscription?.portal && isOwner && <button className="btn" disabled={busy === "portal"} onClick={portal}><ExternalLink size={14}/>{ru ? "Оплата и счета" : "Billing & invoices"}</button>}
     </section>
     {access.openAccess && <p className="sxNote sxOpen"><Sparkles size={14}/>{ru ? "На время тестов вам доступно всё из Custom: полный редактор карточки, ИИ-подбор дизайна под сайт и повышенный лимит ответов. Оплата отключена." : "During testing you get everything in Custom: the full card editor, AI design matching and the higher reply limit. Payments are off."}</p>}
-    {!access.openAccess && !(data.configured.paddle ?? data.configured.stripe) && <p className="sxNote">{ru ? "Онлайн-оплата пока не подключена." : "Online payments aren't set up yet."}</p>}
+    {!access.openAccess && !(data.configured.p2p ?? data.configured.stripe) && <p className="sxNote">{ru ? "Оплата пока не подключена." : "Payments aren't set up yet."}</p>}
+    {!access.openAccess && data.p2p?.pending && <p className="sxNote"><Clock3 size={14}/>{ru ? `Проверяем ваш перевод (${offer[data.p2p.pending.plan === "CUSTOM" ? "CUSTOM" : "STARTER"].name}, ${data.p2p.pending.interval === "year" ? "за год" : "за месяц"}). Тариф включится после подтверждения — обычно в течение 24 часов.` : `We're checking your transfer (${offer[data.p2p.pending.plan === "CUSTOM" ? "CUSTOM" : "STARTER"].name}, ${data.p2p.pending.interval === "year" ? "yearly" : "monthly"}). The plan switches on once confirmed — usually within 24 hours.`} <a href={`/app/checkout?plan=${data.p2p.pending.plan}`}>{ru ? "Подробнее" : "Details"}</a></p>}
     <div className="sxInterval" role="group" aria-label={ru ? "Период оплаты" : "Billing period"}>
       <div className="sxSegmented">
         <button type="button" className={period === "month" ? "on" : ""} aria-pressed={period === "month"} onClick={() => setBillingInterval("month")}>{ru ? "Помесячно" : "Monthly"}</button>
@@ -103,6 +107,7 @@ export function PlanPanel({ locale, notify, isOwner }: { locale: string; notify:
           <ul>{plan.features.map(feature => <li key={feature}><Check size={14}/>{feature}</li>)}</ul>
           {access.openAccess ? <button className="btn" disabled><Check size={14}/>{ru ? "Открыто на время тестов" : "Unlocked for testing"}</button>
             : key === "TRIAL" ? <button className="btn" disabled>{access.state === "trial" ? (ru ? "Сейчас активен" : "Active now") : (ru ? "Один раз на аккаунт" : "Once per account")}</button>
+            : current && data.provider !== "stripe" ? <button className="btn" disabled={!isOwner || !configured} onClick={() => void choose(key)}><Check size={14}/>{ru ? "Ваш тариф · продлить" : "Your plan · renew"}</button>
             : current ? <button className="btn" disabled><Check size={14}/>{ru ? "Ваш тариф" : "Your plan"}</button>
             : <button className={key === "CUSTOM" ? "primary" : "btn"} disabled={!isOwner || !configured || Boolean(busy)} onClick={() => void choose(key)}>{busy === key ? "…" : !configured ? (ru ? "Оплата скоро" : "Coming soon") : samePlan ? (period === "year" ? (ru ? "Перейти на оплату за год" : "Switch to yearly") : (ru ? "Перейти на помесячную оплату" : "Switch to monthly")) : paidActive ? (ru ? `Перейти на ${plan.name}` : `Switch to ${plan.name}`) : (ru ? `Выбрать ${plan.name}` : `Choose ${plan.name}`)}</button>}
         </article>;
@@ -130,18 +135,66 @@ function PlanCompare({ ru, current }: { ru: boolean; current: "TRIAL" | "STARTER
 export function PlanBanner({ locale, onOpen }: { locale: string; onOpen: () => void }) {
   const ru = locale !== "en";
   const [data, setData] = useState<Billing | null>(null);
-  useEffect(() => { fetch("/api/billing", { cache: "no-store" }).then(r => (r.ok ? r.json() : null)).then(setData).catch(() => undefined); }, []);
+  // Re-render every minute so the trial countdown stays current while the cabinet is open.
+  const [, tick] = useState(0);
+  useEffect(() => { fetch("/api/billing", { cache: "no-store" }).then(r => (r.ok ? r.json() : null)).then(setData).catch(() => undefined); const timer = window.setInterval(() => tick(n => n + 1), 60_000); return () => window.clearInterval(timer); }, []);
   if (!data) return null;
   const { access } = data;
   const share = data.used / Math.max(1, access.messageLimit);
-  const days = Math.max(0, Math.ceil((new Date(access.trialEndsAt).getTime() - Date.now()) / 86400_000));
+  const left = Math.max(0, new Date(access.trialEndsAt).getTime() - Date.now());
+  const days = Math.floor(left / 86400_000), hours = Math.floor((left % 86400_000) / 3600_000);
+  const endDate = new Date(access.trialEndsAt).toLocaleDateString(ru ? "ru-RU" : "en-US", { day: "numeric", month: "long" });
+  const trialLeft = ru ? (days > 0 ? `${days} дн. ${hours} ч.` : `${hours} ч.`) : (days > 0 ? `${days}d ${hours}h` : `${hours}h`);
+  // Paid subscriptions that ended fall back to "expired" too; the wording follows what ended.
+  const hadPaid = Boolean(data.subscription && data.subscription.plan !== "TRIAL");
+  const prepaidEndsSoon = access.state === "active" && data.subscription?.provider === "P2P" && !data.p2p?.pending && new Date(data.subscription.currentPeriodEnd).getTime() - Date.now() < P2P_REMIND_DAYS * 86400_000;
   const text = access.openAccess ? (share >= 0.8 ? (ru ? `Использовано ${Math.round(Math.min(1, share) * 100)}% ответов ИИ в этом периоде.` : `${Math.round(Math.min(1, share) * 100)}% of AI replies used.`) : (ru ? "Тестовый период: все тарифы и функции открыты бесплатно." : "Testing period: every plan and feature is free."))
-    : access.state === "expired" ? (ru ? "Пробный период закончился — ИИ не отвечает посетителям. Выберите тариф, чтобы продолжить." : "Your trial ended — the AI is paused. Choose a plan to continue.")
-    : access.state === "past_due" ? (ru ? "Не удалось списать оплату. Обновите карту, чтобы ИИ не остановился." : "Payment failed. Update your card to keep the AI running.")
+    : access.state === "expired" ? (hadPaid ? (ru ? "Подписка закончилась — ИИ не отвечает посетителям. Выберите тариф, чтобы продолжить." : "Your subscription ended — the AI is paused. Choose a plan to continue.") : (ru ? "Пробный период закончился — ИИ не отвечает посетителям. Выберите тариф, чтобы продолжить." : "Your trial ended — the AI is paused. Choose a plan to continue."))
+    : access.state === "past_due" ? (ru ? "Оплата не продлена. Оплатите следующий период, чтобы ИИ не остановился." : "Payment overdue. Pay for the next period to keep the AI running.")
     : share >= 1 ? (ru ? "Лимит ответов ИИ в этом периоде исчерпан — посетители видят просьбу оставить контакты." : "AI reply limit reached — visitors are asked to leave contacts.")
     : share >= 0.8 ? (ru ? `Использовано ${Math.round(share * 100)}% ответов ИИ в этом периоде.` : `${Math.round(share * 100)}% of AI replies used this period.`)
-    : access.state === "trial" ? (ru ? `Пробный период: осталось ${days} дн.` : `Trial: ${days} days left.`) : "";
+    : access.state === "trial" ? (ru ? `Пробный период: осталось ${trialLeft} · до ${endDate}` : `Trial: ${trialLeft} left · until ${endDate}`)
+    : prepaidEndsSoon ? (ru ? `Оплаченный период заканчивается ${new Date(data.subscription!.currentPeriodEnd).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })} — продлите переводом, чтобы ИИ не остановился.` : `Your paid period ends on ${new Date(data.subscription!.currentPeriodEnd).toLocaleDateString("en-US", { day: "numeric", month: "long" })} — renew with a transfer to keep the AI running.`) : "";
   if (!text) return null;
   const tone = access.openAccess ? (share >= 1 ? "bad" : "info") : access.state === "expired" || access.state === "past_due" || share >= 1 ? "bad" : "info";
-  return <div className={`sxBanner ${tone}`} role="status"><span>{text}</span><button className={tone === "bad" ? "primary" : "btn"} onClick={onOpen}>{ru ? "Тарифы" : "Plans"}</button></div>;
+  const trialShare = access.state === "trial" && !access.openAccess ? Math.min(1, Math.max(0, 1 - left / (TRIAL_DAYS * 86400_000))) : null;
+  return <>
+    <div className={`sxBanner ${tone}${trialShare !== null ? " trial" : ""}`} role="status"><span>{text}{trialShare !== null && <i className="sxTrialBar" aria-hidden="true"><b style={{ width: `${Math.round(trialShare * 100)}%` }}/></i>}</span><button className={tone === "bad" || (trialShare !== null && days < 3) ? "primary" : "btn"} onClick={onOpen}>{ru ? "Тарифы" : "Plans"}</button></div>
+  </>;
+}
+
+/** Mounted once in the cabinet: after the trial or a subscription ends, every visit asks to choose a plan. */
+export function PlanGate({ locale, isOwner, onPlans }: { locale: string; isOwner: boolean; onPlans: () => void }) {
+  const [state, setState] = useState<{ expired: boolean; hadPaid: boolean } | null>(null);
+  useEffect(() => { fetch("/api/billing", { cache: "no-store" }).then(r => (r.ok ? r.json() : null)).then((body: Billing | null) => { if (body) setState({ expired: body.access.state === "expired" && !body.access.openAccess, hadPaid: Boolean(body.subscription && body.subscription.plan !== "TRIAL") }); }).catch(() => undefined); }, []);
+  return state?.expired ? <PlanEnded ru={locale !== "en"} hadPaid={state.hadPaid} isOwner={isOwner} onPlans={onPlans}/> : null;
+}
+
+/**
+ * Shown on every visit after the trial or a subscription has ended: the AI is
+ * paused until the owner buys Starter or Custom. Closing it only hides it until
+ * the next page load; knowledge, settings and conversations are kept.
+ */
+function PlanEnded({ ru, hadPaid, isOwner, onPlans }: { ru: boolean; hadPaid: boolean; isOwner: boolean; onPlans: () => void }) {
+  const [open, setOpen] = useState(true);
+  useEffect(() => { const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); }; addEventListener("keydown", onKey); return () => removeEventListener("keydown", onKey); }, []);
+  if (!open) return null;
+  const offer = PLAN_OFFER[ru ? "ru" : "en"];
+  const card = (key: "STARTER" | "CUSTOM") => <article className={key === "CUSTOM" ? "sxEndPlan featured" : "sxEndPlan"}>
+    <h3>{offer[key].name}</h3>
+    <div className="sxPrice"><strong>{planPriceText(key, "month", ru ? "ru" : "en").price}</strong><small>{ru ? "в месяц" : "per month"}</small></div>
+    <p>{offer[key].copy}</p>
+    <ul>{offer[key].features.slice(0, 3).map(feature => <li key={feature}><Check size={13}/>{feature}</li>)}</ul>
+    {isOwner ? <button className={key === "CUSTOM" ? "primary" : "btn"} onClick={() => window.location.assign(`/app/checkout?plan=${key}`)}>{ru ? `Оформить ${offer[key].name}` : `Get ${offer[key].name}`}</button> : null}
+  </article>;
+  return <div className="sxEndOverlay" role="dialog" aria-modal="true" aria-labelledby="sx-end-title" onMouseDown={() => setOpen(false)}>
+    <section className="sxEnd" onMouseDown={event => event.stopPropagation()}>
+      <span className="pageKicker"><CreditCard size={13}/>{ru ? "Тариф" : "Plan"}</span>
+      <h2 id="sx-end-title">{hadPaid ? (ru ? "Подписка закончилась" : "Your subscription has ended") : (ru ? "Пробный период закончился" : "Your free trial has ended")}</h2>
+      <p>{ru ? "ИИ-продавец на вашем сайте остановлен: посетители видят форму заявки, ответы ИИ отключены. Выберите тариф, чтобы продолжить — знания, настройки карточки и диалоги сохранены." : "The AI seller on your site is paused: visitors see the request form, AI replies are off. Choose a plan to continue — your knowledge, card settings and conversations are kept."}</p>
+      <div className="sxEndPlans">{card("STARTER")}{card("CUSTOM")}</div>
+      {!isOwner && <p className="sxMuted">{ru ? "Оформить тариф может владелец пространства." : "Only the workspace owner can choose a plan."}</p>}
+      <div className="sxEndFoot"><button className="linkButton" onClick={() => { setOpen(false); onPlans(); }}>{ru ? "Сравнить тарифы и оплату за год" : "Compare plans and yearly billing"}</button><button className="btn" onClick={() => setOpen(false)}>{ru ? "Позже" : "Later"}</button></div>
+    </section>
+  </div>;
 }

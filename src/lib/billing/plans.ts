@@ -135,7 +135,9 @@ export function resolveAccess(input: { subscription: SubscriptionLike; ownerCrea
     const usageEnd = interval === "year" && end > monthEnd ? monthEnd : end;
     // Lemeri's own workspace (platform admin): no reply allowance — it answers Lemeri's own visitors.
     if (sub.provider === "platform" && (status === "ACTIVE" || status === "TRIALING")) return { ...make(paid, "active", monthStart, monthEnd), messageLimit: PLATFORM_MESSAGE_LIMIT };
-    if (status === "ACTIVE" || status === "TRIALING") return { ...make(paid, "active", usageStart, usageEnd), interval };
+    // P2P plans are prepaid: they stay active only until the paid period ends (no automatic renewal).
+    const prepaidOver = String(sub.provider ?? "").toUpperCase() === "P2P" && (!periodEnd || now >= periodEnd);
+    if (!prepaidOver && (status === "ACTIVE" || status === "TRIALING")) return { ...make(paid, "active", usageStart, usageEnd), interval };
     if (status === "PAST_DUE" && periodEnd && now.getTime() < periodEnd.getTime() + PAST_DUE_GRACE_DAYS * DAY) return { ...make(paid, "past_due", usageStart, usageEnd), interval };
   }
   if (now < trialEnd) return make("TRIAL", "trial", new Date(trialEnd.getTime() - TRIAL_DAYS * DAY), trialEnd);
