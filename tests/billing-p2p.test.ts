@@ -138,5 +138,16 @@ test("crypto: unique USDT amounts and on-chain matching (USDT on TON)", async ()
   assert.deepEqual(matchCryptoPayments(invoices, transfers, bounceable), [{ invoiceId: "a", txId: "tx_ok" }]);
   assert.deepEqual(matchCryptoPayments(invoices, transfers, wallet, new Set(["tx_ok"])), []);
   assert.deepEqual(matchCryptoPayments([{ id: "late", amount: 19.0137, createdAt: new Date((at(-4 * 60)) * 1000) }], transfers, wallet), []);
+  // Wallets that round the amount or take their fee out of it: ≥ plan price pays the only invoice waiting.
+  const rounded = parseTonTransfers({ operations: [op("tx_round", "19000000", 2), op("tx_short", "18000000", 3)] });
+  assert.deepEqual(matchCryptoPayments([{ id: "s", amount: 19.0137, base: 19, createdAt: created }], rounded, wallet), [{ invoiceId: "s", txId: "tx_round" }]);
+  assert.deepEqual(matchCryptoPayments([{ id: "s", amount: 19.0137, createdAt: created }], rounded, wallet), []); // no base → exact only
+  assert.deepEqual(matchCryptoPayments([{ id: "c", amount: 29.0137, base: 29, createdAt: created }], rounded, wallet), []); // less than the price
+  // Two invoices waiting at once: ambiguous, left for the admin.
+  assert.deepEqual(matchCryptoPayments([{ id: "s", amount: 19.0137, base: 19, createdAt: created }, { id: "t", amount: 19.0222, base: 19, createdAt: created }], rounded, wallet), []);
+  // …unless the other one was paid exactly.
+  const both = parseTonTransfers({ operations: [op("tx_exact", "19022200", 1), op("tx_round", "20000000", 2)] });
+  assert.deepEqual(matchCryptoPayments([{ id: "s", amount: 19.0137, base: 19, createdAt: created }, { id: "t", amount: 19.0222, base: 19, createdAt: created }], both, wallet), [{ invoiceId: "t", txId: "tx_exact" }, { invoiceId: "s", txId: "tx_round" }]);
+  assert.equal(rounded[0]!.from, undefined);
   assert.deepEqual(parseTonTransfers(null), []);
 });

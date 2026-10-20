@@ -352,7 +352,11 @@ input[type=color] { width: 36px; height: 30px; padding: 2px; border: 1px solid v
 .adminStat b { color: var(--text); font-size: var(--fs-16); }
 .adminActions { display: flex; flex-wrap: wrap; gap: 8px; }
 .adminActions .btn { display: inline-flex; align-items: center; gap: 6px; }
-@media (max-width: 640px) { .adminGrid { grid-template-columns: 1fr; } }
+.adminGrid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.adminGrant { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr); gap: 10px; align-items: end; width: 100%; }
+.adminGrant .adminActions { grid-column: 1 / -1; }
+.adminGrant select { height: 40px; appearance: auto; }
+@media (max-width: 640px) { .adminGrid, .adminGrid.three, .adminGrant { grid-template-columns: 1fr; } }
 .sxLauncher .sxBadge { position: absolute; top: -5px; right: -5px; display: grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; border: 2px solid #fff; border-radius: 999px; background: #e5484d; color: #fff; font-size: 11px; font-weight: 600; line-height: 1; }
 .sxLauncher em.sxTeaser span { display: grid; gap: 2px; }
 .sxLauncher em.sxTeaser small { font-size: 11px; font-weight: 600; opacity: .65; }

@@ -124,32 +124,51 @@ export function pickTail(used: Set<number>, random = Math.random) {
   return 1 + Math.floor(random() * 999);
 }
 
-export type ChainTransfer = { id: string; to: string; token: string; value: string; time: number };
-export type OpenInvoice = { id: string; amount: number; createdAt: string | Date };
+export type ChainTransfer = { id: string; to: string; token: string; value: string; time: number; from?: string; fromName?: string };
+/** `base` is the plan price without the tail: a transfer of at least that much still pays the invoice when it is the only one waiting. */
+export type OpenInvoice = { id: string; amount: number; createdAt: string | Date; base?: number };
 
 /** TonAPI /v2/jettons/{jetton}/accounts/{account}/history → incoming transfers (defensive parsing, raw addresses). */
 export function parseTonTransfers(body: unknown): ChainTransfer[] {
   const operations = (body as { operations?: unknown })?.operations;
   if (!Array.isArray(operations)) return [];
   return operations.flatMap(item => {
-    const row = item as { operation?: unknown; transaction_hash?: unknown; destination?: { address?: unknown }; amount?: unknown; utime?: unknown; jetton?: { address?: unknown } };
+    const row = item as { operation?: unknown; transaction_hash?: unknown; destination?: { address?: unknown }; source?: { address?: unknown; name?: unknown }; amount?: unknown; utime?: unknown; jetton?: { address?: unknown } };
     const to = tonRawAddress(row.destination?.address), token = tonRawAddress(row.jetton?.address);
     if (row.operation !== "transfer" || typeof row.transaction_hash !== "string" || typeof row.amount !== "string" || !to || !token) return [];
-    return [{ id: row.transaction_hash, to, token, value: row.amount, time: (Number(row.utime) || 0) * 1000 }];
+    const from = tonRawAddress(row.source?.address) ?? undefined, fromName = typeof row.source?.name === "string" ? row.source.name.slice(0, 60) : undefined;
+    return [{ id: row.transaction_hash, to, token, value: row.amount, time: (Number(row.utime) || 0) * 1000, from, fromName }];
   });
 }
 
-/** Pairs each open invoice with the first unused transfer of exactly its amount, sent to the wallet after it was created. */
+/**
+ * Pairs open invoices with incoming USDT transfers sent after they were created.
+ * 1) exact amount (the unique tail) — always safe;
+ * 2) otherwise a transfer of at least the plan price (wallets often round the amount
+ *    or take their fee out of it) pays an invoice only when it is the single
+ *    invoice it could belong to — anything ambiguous is left for the admin.
+ */
 export function matchCryptoPayments(invoices: OpenInvoice[], transfers: ChainTransfer[], address: string, usedTx: Set<string> = new Set()) {
   const wallet = tonRawAddress(address) ?? address;
   const taken = new Set(usedTx);
   const matches: Array<{ invoiceId: string; txId: string }> = [];
-  const ordered = [...transfers].sort((a, b) => a.time - b.time);
-  for (const invoice of [...invoices].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())) {
-    const from = new Date(invoice.createdAt).getTime() - 60_000, until = from + 60_000 + CRYPTO_INVOICE_MS;
+  const ordered = [...transfers].filter(t => t.to === wallet && t.token === USDT_TON_RAW).sort((a, b) => a.time - b.time);
+  const open = [...invoices].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  const inWindow = (invoice: OpenInvoice, t: ChainTransfer) => { const from = new Date(invoice.createdAt).getTime() - 60_000; return t.time >= from && t.time <= from + 60_000 + CRYPTO_INVOICE_MS; };
+  const paid = new Set<string>();
+  for (const invoice of open) {
     const units = String(Math.round(invoice.amount * 1_000_000));
-    const hit = ordered.find(t => !taken.has(t.id) && t.to === wallet && t.token === USDT_TON_RAW && t.value === units && t.time >= from && t.time <= until);
-    if (hit) { taken.add(hit.id); matches.push({ invoiceId: invoice.id, txId: hit.id }); }
+    const hit = ordered.find(t => !taken.has(t.id) && t.value === units && inWindow(invoice, t));
+    if (hit) { taken.add(hit.id); paid.add(invoice.id); matches.push({ invoiceId: invoice.id, txId: hit.id }); }
+  }
+  for (const t of ordered) {
+    if (taken.has(t.id) || !/^\d+$/.test(t.value)) continue;
+    const value = Number(t.value);
+    const fits = open.filter(invoice => !paid.has(invoice.id) && inWindow(invoice, t));
+    const candidates = fits.filter(invoice => invoice.base && value >= Math.round(invoice.base * 1_000_000));
+    // Several open invoices in the window: we can't tell whose transfer it is.
+    if (candidates.length !== 1 || fits.length !== 1) continue;
+    taken.add(t.id); paid.add(candidates[0]!.id); matches.push({ invoiceId: candidates[0]!.id, txId: t.id });
   }
   return matches;
 }

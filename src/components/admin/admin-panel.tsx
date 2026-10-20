@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { AppWindow, BookOpen, Bot, Check, MessageCircle, RefreshCw, X } from "lucide-react";
+import { AppWindow, BookOpen, Bot, Check, Link2, MessageCircle, RefreshCw, X } from "lucide-react";
 import { formatAmount } from "@/lib/billing/p2p";
-import { Section, Toggle } from "../sales/ui";
+import { Field, Section, Toggle } from "../sales/ui";
 
 // «Админка» — visible to Lemeri platform admins only (env LEMIRI_ADMIN_EMAILS).
 // Controls Lemeri's own assistant on the landing page and in every customer's
@@ -18,7 +18,10 @@ type Status = {
   model: { provider: string; configured: boolean; name: string };
   payments: Array<{ id: string; workspace: string; ownerEmail: string | null; plan: "STARTER" | "CUSTOM"; interval: "month" | "year"; amount: number; currency: string; code: string; payerName: string; note: string; status: "PENDING" | "CONFIRMED" | "REJECTED"; createdAt: string; decidedAt: string | null; method: "transfer" | "crypto"; txId: string | null }>;
   p2pConfigured: boolean;
+  sales: { total: number; month: number; count: number; monthCount: number; active: { STARTER: number; CUSTOM: number }; accounts: number } | null;
+  transfers: Array<{ txId: string; amount: number; time: string; fromName: string | null; from: string | null; requestId: string | null; workspace: string | null; ownerEmail: string | null; plan: string | null; status: string | null }> | null;
 };
+type Grant = { email: string; plan: "STARTER" | "CUSTOM"; interval: "month" | "year"; txId?: string };
 
 const T = {
   ru: {
@@ -36,6 +39,11 @@ const T = {
     payments: "Оплаты переводом", paymentsCopy: "Оплаты в USDT подтверждаются сами. Переводы — клиенты сообщили о переводе: найдите поступление в банке по сумме, коду и имени отправителя и подтвердите — тариф включится сразу. «Не найден» — клиент увидит, что перевод не нашли.",
     noPayments: "Заявок пока нет.", notConfigured: "Реквизиты не заданы: добавьте в Cloudflare LEMIRI_CRYPTO_USDT_TON (кошелёк USDT) или LEMIRI_P2P_RECIPIENT и LEMIRI_P2P_DETAILS — без них клиенты не видят, куда переводить.",
     confirm: "Подтвердить", reject: "Не найден", pending: "ждёт", confirmed: "подтверждено", rejected: "не найден", perYear: "год", perMonth: "месяц", from: "от",
+    sales: "Продажи", revenue: "Выручка всего", revenueMonth: "За 30 дней", purchases: "покупок", activeSubs: "Активные подписки", accounts: "Аккаунтов на платформе",
+    wallet: "Поступления на кошелёк", walletCopy: "Последние входящие USDT (TON). Платёж без счёта или с другой суммой привяжите к аккаунту — тариф включится сразу.", walletEmpty: "Поступлений пока нет.", walletFailed: "TonAPI не ответил — обновите страницу позже.",
+    paid: "оплатил", unlinked: "не привязан", link: "Привязать к аккаунту",
+    grant: "Выдать тариф", grantCopy: "Включить тариф аккаунту по email — например, если оплата пришла другим способом.", email: "Email аккаунта", plan: "Тариф", period: "Срок",
+    grantDo: "Включить тариф", cancel: "Отмена", errors: { USER_NOT_FOUND: "Аккаунт с таким email не найден", TX_NOT_FOUND: "Транзакция не найдена среди поступлений", TX_USED: "Эта транзакция уже засчитана", INVALID_REQUEST: "Проверьте email" } as Record<string, string>,
     confirmAsk: (amount: string, code: string) => `Подтвердить перевод ${amount} (${code})? Тариф включится сразу.`,
   },
   en: {
@@ -53,6 +61,11 @@ const T = {
     payments: "Payments by transfer", paymentsCopy: "USDT payments confirm themselves. Transfers: customers reported a transfer — find it in your bank by amount, code and sender name and confirm — the plan switches on immediately. «Not found» tells the customer the transfer wasn't found.",
     noPayments: "No requests yet.", notConfigured: "Payment details are missing: add LEMIRI_CRYPTO_USDT_TON (USDT wallet) or LEMIRI_P2P_RECIPIENT and LEMIRI_P2P_DETAILS in Cloudflare — without them customers don't see where to pay.",
     confirm: "Confirm", reject: "Not found", pending: "waiting", confirmed: "confirmed", rejected: "not found", perYear: "year", perMonth: "month", from: "from",
+    sales: "Sales", revenue: "Revenue, all time", revenueMonth: "Last 30 days", purchases: "purchases", activeSubs: "Active subscriptions", accounts: "Accounts on the platform",
+    wallet: "Wallet deposits", walletCopy: "Latest incoming USDT (TON). Link a payment that came without an invoice or with another amount to an account — the plan switches on immediately.", walletEmpty: "No deposits yet.", walletFailed: "TonAPI didn't respond — refresh later.",
+    paid: "paid", unlinked: "not linked", link: "Link to an account",
+    grant: "Grant a plan", grantCopy: "Switch a plan on for an account by email — e.g. when payment came another way.", email: "Account email", plan: "Plan", period: "Period",
+    grantDo: "Switch the plan on", cancel: "Cancel", errors: { USER_NOT_FOUND: "No account with this email", TX_NOT_FOUND: "Transaction not found among deposits", TX_USED: "This transaction is already used", INVALID_REQUEST: "Check the email" } as Record<string, string>,
     confirmAsk: (amount: string, code: string) => `Confirm the ${amount} transfer (${code})? The plan switches on immediately.`,
   },
 } as const;
@@ -68,11 +81,24 @@ export function AdminPanel({ locale, notify, onNavigate }: { locale: string; not
     catch { setFailed(true); }
   }, []);
   useEffect(() => { void load(); }, [load]);
+  const [grant, setGrant] = useState<Grant | null>(null);
   const post = async (body: Record<string, unknown>) => {
     setBusy(true);
-    try { const response = await fetch("/api/settings", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }); if (!response.ok) throw new Error(); setStatus(await response.json() as Status); notify(c.saved); }
-    catch { notify(c.saveFailed); } finally { setBusy(false); }
+    try {
+      const response = await fetch("/api/settings", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+      const data = await response.json().catch(() => null) as (Status & { error?: string }) | null;
+      if (!response.ok || !data) { notify((data?.error && c.errors[data.error]) || c.saveFailed); return false; }
+      setStatus(data); notify(c.saved); return true;
+    } catch { notify(c.saveFailed); return false; } finally { setBusy(false); }
   };
+  const when = (iso: string) => new Date(iso).toLocaleString(locale === "en" ? "en-GB" : "ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  const usd = (value: number) => `${Number.isInteger(value) ? value : value.toFixed(2)} USDT`;
+  const grantForm = (g: Grant) => <form className="adminGrant" onSubmit={event => { event.preventDefault(); void post({ action: "grant", ...g }).then(ok => { if (ok) setGrant(null); }); }}>
+    <Field label={c.email}><input type="email" required value={g.email} onChange={event => setGrant({ ...g, email: event.target.value })} placeholder="name@example.com" autoFocus/></Field>
+    <Field label={c.plan}><select value={g.plan} onChange={event => setGrant({ ...g, plan: event.target.value === "CUSTOM" ? "CUSTOM" : "STARTER" })}><option value="STARTER">Starter</option><option value="CUSTOM">Custom</option></select></Field>
+    <Field label={c.period}><select value={g.interval} onChange={event => setGrant({ ...g, interval: event.target.value === "year" ? "year" : "month" })}><option value="month">{c.perMonth}</option><option value="year">{c.perYear}</option></select></Field>
+    <div className="adminActions"><button type="submit" className="primary" disabled={busy}><Check size={15}/>{c.grantDo}</button><button type="button" className="btn" onClick={() => setGrant(null)}>{c.cancel}</button></div>
+  </form>;
   if (failed) return <div className="sxState"><p>{c.failed}</p><button className="btn" onClick={() => void load()}>{c.retry}</button></div>;
   if (!status) return <div className="sxState"><span className="sxSpinner"/>{c.loading}</div>;
   const e = status.employee;
@@ -95,6 +121,24 @@ export function AdminPanel({ locale, notify, onNavigate }: { locale: string; not
           <p className="adminStat"><b>{status.stats.leads}</b> {c.leads}</p>
         </div>
       </div>
+    </Section>
+    {status.sales && <Section title={c.sales}>
+      <div className="adminGrid three">
+        <div className="adminCard"><small>{c.revenue}</small><p className="adminStat"><b>{usd(status.sales.total)}</b></p><p className="adminStat">{status.sales.count} {c.purchases}</p></div>
+        <div className="adminCard"><small>{c.revenueMonth}</small><p className="adminStat"><b>{usd(status.sales.month)}</b></p><p className="adminStat">{status.sales.monthCount} {c.purchases}</p></div>
+        <div className="adminCard"><small>{c.activeSubs}</small>{row("Starter", String(status.sales.active.STARTER))}{row("Custom", String(status.sales.active.CUSTOM))}{row(c.accounts, String(status.sales.accounts))}</div>
+      </div>
+    </Section>}
+    <Section title={c.wallet} copy={c.walletCopy}>
+      {status.transfers === null ? <p className="sxMuted">{c.walletFailed}</p> : status.transfers.length ? <div className="adminPayments">{status.transfers.map(item => <div key={item.txId} className={`adminPayment ${item.requestId ? "confirmed" : "pending"}`}>
+        <div><b>{item.amount.toFixed(item.amount % 1 ? 4 : 0)} USDT</b><small>{when(item.time)}{item.fromName ? ` · ${item.fromName}` : ""} · <a href={`https://tonviewer.com/transaction/${item.txId}`} target="_blank" rel="noreferrer">{item.txId.slice(0, 10)}…</a></small>
+          {item.requestId ? <small>{c.paid}: {item.workspace}{item.ownerEmail ? ` · ${item.ownerEmail}` : ""}{item.plan ? ` · ${item.plan === "CUSTOM" ? "Custom" : "Starter"}` : ""}</small> : null}</div>
+        {item.requestId ? <span className="adminTag">{item.status === "CONFIRMED" ? c.confirmed : item.status === "PENDING" ? c.pending : c.rejected}</span>
+          : grant?.txId === item.txId ? grantForm(grant) : <div className="adminActions"><span className="adminTag">{c.unlinked}</span><button type="button" className="primary" disabled={busy} onClick={() => setGrant({ email: "", plan: item.amount >= 29 ? "CUSTOM" : "STARTER", interval: item.amount >= 150 ? "year" : "month", txId: item.txId })}><Link2 size={15}/>{c.link}</button></div>}
+      </div>)}</div> : <p className="sxMuted">{c.walletEmpty}</p>}
+    </Section>
+    <Section title={c.grant} copy={c.grantCopy}>
+      {grant && !grant.txId ? grantForm(grant) : <div className="adminActions"><button type="button" className="btn" disabled={busy} onClick={() => setGrant({ email: "", plan: "STARTER", interval: "month" })}><Check size={15}/>{c.grant}</button></div>}
     </Section>
     <Section title={c.payments} copy={status.p2pConfigured ? c.paymentsCopy : c.notConfigured}>
       {status.payments.length ? <div className="adminPayments">{status.payments.map(item => {

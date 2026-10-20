@@ -23,7 +23,7 @@ if errorlevel 1 (
   echo === commit + push ===
   git add -u
   git add src tests docs
-  git commit -m "Crypto payments: USDT on TON (TonAPI) instead of TRON"
+  git commit -m "Admin: sales stats, wallet deposits, link payment to account; USDT accepted at plan price or more"
   git push
   echo PUSH_EXIT=%ERRORLEVEL%
   git log -1 --oneline

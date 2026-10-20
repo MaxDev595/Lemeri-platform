@@ -24,7 +24,10 @@ async function status(auth: Auth) {
     stats: { dialogs, leads },
     model: { provider: process.env.AI_PROVIDER ?? "mock", configured: Boolean(process.env.OPENAI_API_KEY?.trim()), name: process.env.OPENAI_RESPONSE_MODEL || "gpt-4.1-mini" },
     // P2P transfers waiting for a decision, then the latest decisions.
-    payments: await (await import("@/lib/billing/p2p-store")).adminPayments().catch(() => []),
+    ...await Promise.all([import("@/lib/billing/p2p-store"), import("@/lib/billing/p2p-admin")]).then(async ([store, admin]) => {
+      const [payments, stats, transfers] = await Promise.all([store.adminPayments().catch(() => []), admin.paymentStats().catch(() => null), admin.walletTransfers().catch(() => null)]);
+      return { payments, sales: stats, transfers };
+    }),
     p2pConfigured: await import("@/lib/billing/p2p").then(m => m.p2pConfig().configured || m.cryptoConfig().configured),
   };
 }
@@ -45,6 +48,15 @@ export async function platformAdminPost(auth: Auth, body: unknown) {
     const { decidePayment } = await import("@/lib/billing/p2p-store");
     const decided = await decidePayment(v.id, v.decision, auth.user.id);
     if (!decided) return NextResponse.json({ error: "ALREADY_DECIDED" }, { status: 409 });
+    return NextResponse.json(await status(auth));
+  } else if (v.action === "grant") {
+    // Switch a plan on by account email (optionally for a received USDT transfer).
+    const plan = v.plan === "CUSTOM" ? "CUSTOM" : v.plan === "STARTER" ? "STARTER" : null;
+    const interval = v.interval === "year" ? "year" : v.interval === "month" ? "month" : null;
+    if (typeof v.email !== "string" || !v.email.includes("@") || v.email.length > 200 || !plan || !interval || (v.txId !== undefined && (typeof v.txId !== "string" || !/^[0-9a-f]{64}$/i.test(v.txId)))) return NextResponse.json({ error: "INVALID_REQUEST" }, { status: 400 });
+    const { grantPlan } = await import("@/lib/billing/p2p-admin");
+    const result = await grantPlan({ email: v.email, plan, interval, txId: typeof v.txId === "string" ? v.txId.toLowerCase() : undefined, adminUserId: auth.user.id });
+    if ("error" in result) return NextResponse.json({ error: result.error }, { status: result.error === "USER_NOT_FOUND" || result.error === "TX_NOT_FOUND" ? 404 : 409 });
     return NextResponse.json(await status(auth));
   } else if (v.action === "assistant") {
     const patch: { landing?: boolean; app?: boolean } = {};

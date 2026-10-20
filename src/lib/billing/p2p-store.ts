@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { adminEmails } from "@/lib/platform/access";
-import { normalizePlan, type BillingInterval } from "./plans";
-import { CRYPTO_INVOICE_MS, cryptoAmount, cryptoConfig, formatAmount, matchCryptoPayments, p2pAmount, p2pConfig, p2pPeriod, parseTonTransfers, paymentCode, pickTail, USDT_TON_MASTER, type P2PPlan } from "./p2p";
+import { normalizePlan, planPriceUsd, type BillingInterval } from "./plans";
+import { CRYPTO_INVOICE_MS, cryptoAmount, cryptoConfig, formatAmount, matchCryptoPayments, p2pAmount, p2pConfig, p2pPeriod, parseTonTransfers, paymentCode, pickTail, tonRawAddress, USDT_TON_MASTER, USDT_TON_RAW, type ChainTransfer, type P2PPlan } from "./p2p";
 
 // Payment requests for P2P transfers: the customer says «Я оплатил», an admin
 // confirms (plan switched on) or rejects. The table is additive and created on
@@ -13,7 +13,7 @@ export type PaymentRequest = { id: string; workspaceId: string; plan: P2PPlan; i
 type Row = { id: string; workspaceId: string; plan: string; interval: string; amount: string | number; currency: string; code: string; payerName: string; note: string | null; status: string; createdAt: Date; decidedAt: Date | null; method: string | null; txId: string | null };
 
 let ready: Promise<unknown> | undefined;
-function ensureTable() {
+export function ensureTable() {
   ready ??= db.$executeRawUnsafe(`CREATE TABLE IF NOT EXISTS "PaymentRequest" ("id" TEXT PRIMARY KEY, "workspaceId" TEXT NOT NULL, "userId" TEXT, "plan" TEXT NOT NULL, "interval" TEXT NOT NULL, "amount" NUMERIC(14,2) NOT NULL, "currency" TEXT NOT NULL, "code" TEXT NOT NULL, "payerName" TEXT NOT NULL, "note" TEXT, "status" TEXT NOT NULL DEFAULT 'PENDING', "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "decidedAt" TIMESTAMP(3), "decidedBy" TEXT)`)
     .then(() => db.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "PaymentRequest_workspace_status" ON "PaymentRequest" ("workspaceId", "status", "createdAt")`))
     // Crypto invoices: method, the paying transaction (used once) and 4-decimal amounts.
@@ -82,15 +82,16 @@ export async function checkCryptoPayments(force = false) {
   if (!config.configured || (!force && Date.now() - lastCheck < 15_000)) return 0;
   lastCheck = Date.now();
   await ensureTable();
-  const open = await db.$queryRawUnsafe<Array<{ id: string; amount: string | number; createdAt: Date }>>(`SELECT "id","amount","createdAt" FROM "PaymentRequest" WHERE "method" = 'crypto' AND "status" = 'PENDING' AND "createdAt" > $1 ORDER BY "createdAt" LIMIT 100`, new Date(Date.now() - CRYPTO_INVOICE_MS - 3_600_000));
+  const open = await db.$queryRawUnsafe<Array<{ id: string; amount: string | number; createdAt: Date; plan: string; interval: string }>>(`SELECT "id","amount","createdAt","plan","interval" FROM "PaymentRequest" WHERE "method" = 'crypto' AND "status" = 'PENDING' AND "createdAt" > $1 ORDER BY "createdAt" LIMIT 100`, new Date(Date.now() - CRYPTO_INVOICE_MS - 3_600_000));
   if (!open.length) return 0;
   const since = Math.min(...open.map(row => new Date(row.createdAt).getTime())) - 60_000;
-  const url = `https://tonapi.io/v2/jettons/${USDT_TON_MASTER}/accounts/${encodeURIComponent(config.address)}/history?limit=100&start_date=${Math.floor(since / 1000)}`;
-  const key = process.env.TONAPI_API_KEY?.trim();
-  const response = await fetch(url, { headers: key ? { authorization: `Bearer ${key}` } : {}, signal: AbortSignal.timeout(8000) });
-  if (!response.ok) return 0;
-  const transfers = parseTonTransfers(await response.json().catch(() => null));
-  const matches = matchCryptoPayments(open.map(row => ({ id: row.id, amount: Number(row.amount), createdAt: row.createdAt })), transfers, config.address);
+  const transfers = await fetchTonTransfers(config.address, since);
+  if (!transfers) return 0;
+  // Transactions already used by another request (e.g. linked by an admin) can't pay again.
+  const ids = transfers.map(t => t.id);
+  const used = ids.length ? await db.$queryRawUnsafe<Array<{ txId: string }>>(`SELECT "txId" FROM "PaymentRequest" WHERE "txId" = ANY($1::text[])`, ids) : [];
+  const base = (row: { plan: string; interval: string }) => planPriceUsd(normalizePlan(row.plan) === "CUSTOM" ? "CUSTOM" : "STARTER", row.interval === "year" ? "year" : "month");
+  const matches = matchCryptoPayments(open.map(row => ({ id: row.id, amount: Number(row.amount), createdAt: row.createdAt, base: base(row) })), transfers, config.address, new Set(used.map(row => row.txId)));
   let confirmed = 0;
   for (const match of matches) {
     // The unique index on txId makes sure one transaction pays one invoice.
@@ -98,6 +99,18 @@ export async function checkCryptoPayments(force = false) {
     if (claimed && await decidePayment(match.invoiceId, "confirm", null)) confirmed++;
   }
   return confirmed;
+}
+
+/** Incoming USDT transfers of the wallet from TonAPI (newest last page first), or null when TonAPI is unreachable. */
+export async function fetchTonTransfers(address: string, since?: number, limit = 100): Promise<ChainTransfer[] | null> {
+  const url = `https://tonapi.io/v2/jettons/${USDT_TON_MASTER}/accounts/${encodeURIComponent(address)}/history?limit=${limit}${since ? `&start_date=${Math.floor(since / 1000)}` : ""}`;
+  const key = process.env.TONAPI_API_KEY?.trim();
+  try {
+    const response = await fetch(url, { headers: key ? { authorization: `Bearer ${key}` } : {}, signal: AbortSignal.timeout(8000) });
+    if (!response.ok) return null;
+    const raw = tonRawAddress(address);
+    return parseTonTransfers(await response.json().catch(() => null)).filter(t => t.to === raw && t.token === USDT_TON_RAW);
+  } catch { return null; }
 }
 
 export type AdminPayment = PaymentRequest & { workspace: string; ownerEmail: string | null };
