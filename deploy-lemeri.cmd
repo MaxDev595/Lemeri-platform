@@ -23,7 +23,7 @@ if errorlevel 1 (
   echo === commit + push ===
   git add -u
   git add src tests docs
-  git commit -m "Trial countdown in the cabinet and a choose-a-plan dialog after the trial or subscription ends"
+  git commit -m "Crypto payments: USDT on TON (TonAPI) instead of TRON"
   git push
   echo PUSH_EXIT=%ERRORLEVEL%
   git log -1 --oneline

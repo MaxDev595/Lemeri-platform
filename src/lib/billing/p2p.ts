@@ -76,21 +76,40 @@ export function daysLeft(periodEnd: Date | string, now = new Date()) {
   return Math.max(0, Math.ceil((new Date(periodEnd).getTime() - now.getTime()) / 86_400_000));
 }
 
-// ── Crypto: USDT on TRON (TRC-20), confirmed automatically ─────────────────────
+// ── Crypto: USDT on TON (jetton), confirmed automatically ──────────────────────
 // The customer gets an invoice with a unique amount (price + 0.0001…0.0999 USDT).
-// The server reads incoming USDT transfers of LEMIRI_CRYPTO_USDT_TRC20 from
-// TronGrid (cron every 5 min + while the checkout page is open) and confirms the
-// invoice whose exact amount arrived — the plan switches on without an admin.
-//   LEMIRI_CRYPTO_USDT_TRC20  receiving wallet (public address, starts with T)
-//   LEMIRI_TRONGRID_KEY       optional TronGrid API key (higher rate limit)
+// The server reads incoming USDT transfers of LEMIRI_CRYPTO_USDT_TON from TonAPI
+// (cron every 5 min + while the checkout page is open) and confirms the invoice
+// whose exact amount arrived — the plan switches on without an admin.
+//   LEMIRI_CRYPTO_USDT_TON  receiving wallet (public address: UQ…/EQ… or 0:…)
+//   TONAPI_API_KEY          optional TonAPI key (higher rate limit)
 
-export const USDT_TRC20_CONTRACT = "TR7NHqjeKQxGTCi8q8ZY4pL8otSLjLj6t";
+/** USDT (Tether) jetton master on TON; 6 decimals like on other chains. */
+export const USDT_TON_MASTER = "EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs";
+export const USDT_TON_RAW = "0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe";
 /** Transfers are matched within this time after the invoice was created. */
 export const CRYPTO_INVOICE_MS = 3 * 3_600_000;
 
+/** Any TON address form (UQ…/EQ… with checksum, or raw 0:hex) → raw "wc:hex", or null when invalid. */
+export function tonRawAddress(value: unknown): string | null {
+  const text = String(value ?? "").trim();
+  const raw = /^(-?\d{1,3}):([0-9a-fA-F]{64})$/.exec(text);
+  if (raw) return `${raw[1]}:${raw[2]!.toLowerCase()}`;
+  if (!/^[A-Za-z0-9_\-+/]{48}$/.test(text)) return null;
+  let bytes: number[];
+  try { bytes = [...atob(text.replace(/-/g, "+").replace(/_/g, "/"))].map(ch => ch.charCodeAt(0)); } catch { return null; }
+  if (bytes.length !== 36) return null;
+  let crc = 0;
+  for (const byte of bytes.slice(0, 34)) { crc ^= byte << 8; for (let bit = 0; bit < 8; bit++) crc = crc & 0x8000 ? ((crc << 1) ^ 0x1021) & 0xffff : (crc << 1) & 0xffff; }
+  if (crc !== (bytes[34]! << 8 | bytes[35]!)) return null;
+  const workchain = bytes[1]! > 127 ? bytes[1]! - 256 : bytes[1]!;
+  return `${workchain}:${bytes.slice(2, 34).map(byte => byte.toString(16).padStart(2, "0")).join("")}`;
+}
+
 export function cryptoConfig(e: Env = env()) {
-  const address = (e.LEMIRI_CRYPTO_USDT_TRC20 ?? "").trim();
-  return { configured: /^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(address), address, asset: "USDT", network: "TRON (TRC-20)" };
+  const address = (e.LEMIRI_CRYPTO_USDT_TON ?? "").trim();
+  const raw = tonRawAddress(address);
+  return { configured: Boolean(raw), address, raw: raw ?? "", asset: "USDT", network: "TON" };
 }
 
 /** Invoice amount: the USD price plus a tail of `tail`/10000 USDT (tail 1…999) that identifies the invoice. */
@@ -108,26 +127,28 @@ export function pickTail(used: Set<number>, random = Math.random) {
 export type ChainTransfer = { id: string; to: string; token: string; value: string; time: number };
 export type OpenInvoice = { id: string; amount: number; createdAt: string | Date };
 
-/** TronGrid /v1/accounts/{address}/transactions/trc20 → transfers (defensive parsing). */
-export function parseTronTransfers(body: unknown): ChainTransfer[] {
-  const data = (body as { data?: unknown })?.data;
-  if (!Array.isArray(data)) return [];
-  return data.flatMap(item => {
-    const row = item as { transaction_id?: unknown; to?: unknown; value?: unknown; block_timestamp?: unknown; type?: unknown; token_info?: { address?: unknown } };
-    if (typeof row.transaction_id !== "string" || typeof row.to !== "string" || typeof row.value !== "string" || (row.type && row.type !== "Transfer")) return [];
-    return [{ id: row.transaction_id, to: row.to, token: String(row.token_info?.address ?? ""), value: row.value, time: Number(row.block_timestamp) || 0 }];
+/** TonAPI /v2/jettons/{jetton}/accounts/{account}/history → incoming transfers (defensive parsing, raw addresses). */
+export function parseTonTransfers(body: unknown): ChainTransfer[] {
+  const operations = (body as { operations?: unknown })?.operations;
+  if (!Array.isArray(operations)) return [];
+  return operations.flatMap(item => {
+    const row = item as { operation?: unknown; transaction_hash?: unknown; destination?: { address?: unknown }; amount?: unknown; utime?: unknown; jetton?: { address?: unknown } };
+    const to = tonRawAddress(row.destination?.address), token = tonRawAddress(row.jetton?.address);
+    if (row.operation !== "transfer" || typeof row.transaction_hash !== "string" || typeof row.amount !== "string" || !to || !token) return [];
+    return [{ id: row.transaction_hash, to, token, value: row.amount, time: (Number(row.utime) || 0) * 1000 }];
   });
 }
 
 /** Pairs each open invoice with the first unused transfer of exactly its amount, sent to the wallet after it was created. */
 export function matchCryptoPayments(invoices: OpenInvoice[], transfers: ChainTransfer[], address: string, usedTx: Set<string> = new Set()) {
+  const wallet = tonRawAddress(address) ?? address;
   const taken = new Set(usedTx);
   const matches: Array<{ invoiceId: string; txId: string }> = [];
   const ordered = [...transfers].sort((a, b) => a.time - b.time);
   for (const invoice of [...invoices].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())) {
     const from = new Date(invoice.createdAt).getTime() - 60_000, until = from + 60_000 + CRYPTO_INVOICE_MS;
     const units = String(Math.round(invoice.amount * 1_000_000));
-    const hit = ordered.find(t => !taken.has(t.id) && t.to === address && t.token === USDT_TRC20_CONTRACT && t.value === units && t.time >= from && t.time <= until);
+    const hit = ordered.find(t => !taken.has(t.id) && t.to === wallet && t.token === USDT_TON_RAW && t.value === units && t.time >= from && t.time <= until);
     if (hit) { taken.add(hit.id); matches.push({ invoiceId: invoice.id, txId: hit.id }); }
   }
   return matches;

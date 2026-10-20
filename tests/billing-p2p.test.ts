@@ -100,12 +100,19 @@ test("p2p: paid periods, extension and expiry", () => {
   assert.notEqual(resolveAccess({ subscription: sub, now: new Date("2026-10-20T00:00:00Z"), env: {} }).state, "active");
 });
 
-test("crypto: unique USDT amounts and on-chain matching", async () => {
-  const { cryptoAmount, cryptoConfig, matchCryptoPayments, parseTronTransfers, pickTail, USDT_TRC20_CONTRACT } = await import("../src/lib/billing/p2p.ts");
-  const wallet = "TNPeeaaFB7K9cmo4uQpcU32zGK8G1NYqeL";
+test("crypto: unique USDT amounts and on-chain matching (USDT on TON)", async () => {
+  const { cryptoAmount, cryptoConfig, matchCryptoPayments, parseTonTransfers, pickTail, tonRawAddress, USDT_TON_MASTER, USDT_TON_RAW } = await import("../src/lib/billing/p2p.ts");
+  // The same wallet in its three forms: non-bounceable (wallets show UQ…), bounceable EQ… and raw 0:hex.
+  const wallet = "UQBfX19fX19fX19fX19fX19foaGhoaGhoaGhoaGhoaGhoRt6";
+  const bounceable = "EQBfX19fX19fX19fX19fX19foaGhoaGhoaGhoaGhoaGhoUa_";
+  const raw = "0:5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5fa1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1";
+  assert.equal(tonRawAddress(wallet), raw); assert.equal(tonRawAddress(bounceable), raw); assert.equal(tonRawAddress(raw.toUpperCase().replace("0X", "0x")), raw);
+  assert.equal(tonRawAddress(USDT_TON_MASTER), USDT_TON_RAW);
+  assert.equal(tonRawAddress("UQBfX19fX19fX19fX19fX19foaGhoaGhoaGhoaGhoaGhoRt7"), null); // broken checksum
   assert.equal(cryptoConfig({}).configured, false);
-  assert.equal(cryptoConfig({ LEMIRI_CRYPTO_USDT_TRC20: "0xabc" }).configured, false);
-  assert.equal(cryptoConfig({ LEMIRI_CRYPTO_USDT_TRC20: ` ${wallet} ` }).address, wallet);
+  assert.equal(cryptoConfig({ LEMIRI_CRYPTO_USDT_TON: "TNPeeaaFB7K9cmo4uQpcU32zGK8G1NYqeL" }).configured, false); // a TRON address is not accepted
+  assert.equal(cryptoConfig({ LEMIRI_CRYPTO_USDT_TON: ` ${wallet} ` }).address, wallet);
+  assert.equal(cryptoConfig({ LEMIRI_CRYPTO_USDT_TON: wallet }).network, "TON");
   assert.equal(cryptoAmount("STARTER", "month", 137), 19.0137);
   assert.equal(cryptoAmount("CUSTOM", "year", 5), 278.4005);
   assert.equal(pickTail(new Set([500]), () => 0.5), 1); // 500 is taken → first free tail
@@ -113,19 +120,23 @@ test("crypto: unique USDT amounts and on-chain matching", async () => {
   assert.equal(pickTail(all, () => 0), 999);
 
   const created = new Date("2026-10-19T10:00:00Z");
-  const at = (minutes: number) => created.getTime() + minutes * 60_000;
-  const transfers = parseTronTransfers({ data: [
-    { transaction_id: "tx_wrong_amount", to: wallet, value: "19000000", block_timestamp: at(2), type: "Transfer", token_info: { address: USDT_TRC20_CONTRACT } },
-    { transaction_id: "tx_fake_token", to: wallet, value: "19013700", block_timestamp: at(3), type: "Transfer", token_info: { address: "TFakeToken" } },
-    { transaction_id: "tx_before", to: wallet, value: "29001000", block_timestamp: at(-30), type: "Transfer", token_info: { address: USDT_TRC20_CONTRACT } },
-    { transaction_id: "tx_ok", to: wallet, value: "19013700", block_timestamp: at(4), type: "Transfer", token_info: { address: USDT_TRC20_CONTRACT } },
-    { transaction_id: 5, to: wallet },
+  const at = (minutes: number) => Math.floor((created.getTime() + minutes * 60_000) / 1000);
+  const op = (hash: string, amount: string, minutes: number, jetton = USDT_TON_RAW.toUpperCase(), to = raw.toUpperCase()) => ({ operation: "transfer", transaction_hash: hash, destination: { address: to }, amount, utime: at(minutes), jetton: { address: jetton } });
+  const transfers = parseTonTransfers({ operations: [
+    op("tx_wrong_amount", "19000000", 2),
+    op("tx_fake_token", "19013700", 3, "0:" + "11".repeat(32)),
+    op("tx_other_wallet", "19013700", 3, USDT_TON_RAW, "0:" + "22".repeat(32)),
+    op("tx_before", "29001000", -30),
+    op("tx_ok", "19013700", 4),
+    { operation: "burn", transaction_hash: "tx_burn", amount: "19013700", utime: at(5), jetton: { address: USDT_TON_RAW } },
+    { transaction_hash: 5 },
   ] });
-  assert.equal(transfers.length, 4);
+  assert.equal(transfers.length, 5);
   const invoices = [{ id: "a", amount: 19.0137, createdAt: created }, { id: "b", amount: 29.001, createdAt: created }, { id: "c", amount: 19.0137, createdAt: created }];
-  // Exact amount + real USDT + after the invoice; one transaction pays one invoice.
+  // Exact amount + real USDT + this wallet + after the invoice; one transaction pays one invoice.
   assert.deepEqual(matchCryptoPayments(invoices, transfers, wallet), [{ invoiceId: "a", txId: "tx_ok" }]);
+  assert.deepEqual(matchCryptoPayments(invoices, transfers, bounceable), [{ invoiceId: "a", txId: "tx_ok" }]);
   assert.deepEqual(matchCryptoPayments(invoices, transfers, wallet, new Set(["tx_ok"])), []);
-  assert.deepEqual(matchCryptoPayments([{ id: "late", amount: 19.0137, createdAt: new Date(at(-4 * 60)) }], transfers, wallet), []);
-  assert.deepEqual(parseTronTransfers(null), []);
+  assert.deepEqual(matchCryptoPayments([{ id: "late", amount: 19.0137, createdAt: new Date((at(-4 * 60)) * 1000) }], transfers, wallet), []);
+  assert.deepEqual(parseTonTransfers(null), []);
 });

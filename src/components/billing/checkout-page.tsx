@@ -9,7 +9,7 @@ import { LemiriGlyph } from "../logo";
 // Checkout by P2P transfer: the customer sees the amount, the recipient and the
 // details from LEMIRI_P2P_*, transfers the money with the payment code in the
 // comment and presses «Я оплатил». An admin confirms the transfer in the admin
-// panel and the plan switches on. Or pays in USDT (TRC-20): the invoice has a
+// panel and the plan switches on. Or pays in USDT (TON): the invoice has a
 // unique amount, the server finds it on-chain and the plan switches on by itself
 // (the page polls /api/billing every 15 s). No card data is ever entered on Lemeri.
 
@@ -38,7 +38,7 @@ const T = {
     byCrypto: "Криптой (USDT)", byTransfer: "Переводом", cryptoTitle: "Оплата в USDT", getInvoice: "Получить адрес и сумму",
     cryptoIntro: "Сумма будет уникальной — по ней платёж найдётся автоматически, и тариф включится сам, без ожидания.",
     send: "Отправьте ровно", network: "Сеть", wallet: "Адрес кошелька",
-    cryptoWarn: "Только USDT в сети TRON (TRC-20) и ровно эту сумму, до последней цифры. Если биржа вычитает комиссию из суммы — добавьте её сверху. Другая сеть или сумма не найдётся автоматически — тогда напишите в поддержку.",
+    cryptoWarn: "Только USDT в сети TON и ровно эту сумму, до последней цифры. Если биржа вычитает комиссию из суммы — добавьте её сверху. Другая сеть или сумма не найдётся автоматически — тогда напишите в поддержку.",
     waiting: "Ждём платёж — проверяем блокчейн каждые 15 секунд. Обычно это 1–3 минуты после отправки. Страницу можно закрыть: тариф включится сам.",
     cryptoExpired: "Прошло больше 3 часов. Если вы уже отправили USDT, напишите в поддержку — проверим вручную. Иначе создайте новый счёт.",
     newInvoice: "Новый счёт", paidTitle: "Оплата получена", paidCopy: "Тариф активен. Спасибо!", toCabinet: "В кабинет",
@@ -62,7 +62,7 @@ const T = {
     byCrypto: "Crypto (USDT)", byTransfer: "Bank transfer", cryptoTitle: "Pay in USDT", getInvoice: "Get address and amount",
     cryptoIntro: "The amount is unique — that's how the payment is found automatically and the plan switches on by itself.",
     send: "Send exactly", network: "Network", wallet: "Wallet address",
-    cryptoWarn: "Only USDT on TRON (TRC-20) and exactly this amount, to the last digit. If your exchange deducts the fee from the amount, add it on top. Another network or amount won't be found automatically — contact support then.",
+    cryptoWarn: "Only USDT on TON and exactly this amount, to the last digit. If your exchange deducts the fee from the amount, add it on top. Another network or amount won't be found automatically — contact support then.",
     waiting: "Waiting for the payment — we check the blockchain every 15 seconds. Usually 1–3 minutes after sending. You can close this page: the plan switches on by itself.",
     cryptoExpired: "More than 3 hours have passed. If you've already sent USDT, contact support and we'll check by hand. Otherwise create a new invoice.",
     newInvoice: "New invoice", paidTitle: "Payment received", paidCopy: "Your plan is active. Thank you!", toCabinet: "Go to cabinet",

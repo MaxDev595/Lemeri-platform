@@ -1,122 +1,111 @@
 === status ===
- M src/components/landing.tsx
- M src/components/sales/plan-panel.tsx
- M src/lib/billing/offer.ts
- M src/styles/landing.css
- M src/styles/sales.css
-?? deploy-lemeri-log.txt
-?? deploy-lemeri.cmd
-?? deploy-openai-log.txt
-?? deploy-openai.cmd
-?? paddle-live.cmd
+ M deploy-lemeri-log.txt
+ M deploy-lemeri.cmd
+ M docs/CLAUDE_CONTEXT.md
+ M src/app/api/billing/route.ts
+ M src/components/admin/admin-panel.tsx
+ M src/components/billing/checkout-page.tsx
+ M src/lib/billing/p2p-store.ts
+ M src/lib/billing/p2p.ts
+ M src/lib/legal/texts.ts
+ M src/lib/platform/lemeri-knowledge.ts
+ M tests/billing-p2p.test.ts
 
 === tests ===
 
 > lemiri-ai-platform@0.2.0 test
 > node --experimental-strip-types tests/run.ts
 
-✔ password hashes are salted and verify in constant-time comparison path (349.6515ms)
-✔ provider hands off instead of inventing without knowledge (0.2251ms)
-✔ provider cites relevant knowledge (0.8791ms)
-✔ connector credentials use authenticated encryption (1.3999ms)
-✔ telegram webhook secret is verified and message is normalized (2.7211ms)
-✔ stripe webhook signature validates payload and timestamp (0.5346ms)
-✔ stripe event cursor rejects duplicates and older events but permits equal-second distinct events (0.1762ms)
-✔ stripe accepts any valid v1 signature during secret rotation and maps only configured prices (0.2994ms)
-✔ plan catalog: Trial $0, Starter $19, Custom $29; legacy keys map to new plans (0.1954ms)
-✔ origin validation rejects cross-site and malformed origins (0.2861ms)
-✔ automation conditions require every configured condition (0.182ms)
-✔ extracts output text from Responses API (0.134ms)
-✔ OpenAI provider validates citations against retrieved chunks (3.4334ms)
-✔ OpenAI provider accepts only explicitly allowed action requests (0.7737ms)
-✔ embeddings preserve API index order (0.5941ms)
+✔ password hashes are salted and verify in constant-time comparison path (338.9543ms)
+✔ provider hands off instead of inventing without knowledge (0.2323ms)
+✔ provider cites relevant knowledge (0.8629ms)
+✔ connector credentials use authenticated encryption (1.4371ms)
+✔ telegram webhook secret is verified and message is normalized (2.7261ms)
+✔ stripe webhook signature validates payload and timestamp (0.5392ms)
+✔ stripe event cursor rejects duplicates and older events but permits equal-second distinct events (0.1763ms)
+✔ stripe accepts any valid v1 signature during secret rotation and maps only configured prices (0.3075ms)
+✔ plan catalog: Trial $0, Starter $19, Custom $29; legacy keys map to new plans (0.1899ms)
+✔ origin validation rejects cross-site and malformed origins (0.2945ms)
+✔ automation conditions require every configured condition (0.179ms)
+✔ extracts output text from Responses API (0.1426ms)
+✔ OpenAI provider validates citations against retrieved chunks (3.3155ms)
+✔ OpenAI provider accepts only explicitly allowed action requests (0.8401ms)
+✔ embeddings preserve API index order (0.6191ms)
 OpenAI answer failed, retrying once OpenAI Responses API failed (500): Server error
-✔ OpenAI provider retries once after a failed answer (0.8073ms)
-✔ WhatsApp verifies Meta signature and normalizes text messages (0.6965ms)
-✔ knowledge chunking preserves content and bounds long paragraphs (0.253ms)
-✔ plain knowledge documents are decoded without persistence (0.5589ms)
-✔ website ingestion honors the most specific robots.txt rule (0.4405ms)
-✔ workspace RBAC capability matrix (0.1086ms)
-✔ development configuration permits optional providers (0.1783ms)
-✔ production configuration fails closed for missing providers and insecure origin (0.1683ms)
-✔ explicit local smoke mode is restricted to loopback origins (0.1792ms)
-✔ production accepts OpenAI responses with OpenAI embeddings (0.1208ms)
-✔ production rejects the removed Groq provider (0.117ms)
-✔ workspace translations support Russian, English and interpolation (0.1889ms)
-✔ active workspace can only be selected from the user's memberships (0.1153ms)
-✔ widget token is bound to employee, browser-observed parent origin and expiry (0.4033ms)
-✔ password reset tokens are random and domain-separated from session hashes (0.1908ms)
-✔ password reset uses a dedicated persisted model and atomically consumes tokens (3.4006ms)
-✔ employee validation normalizes legacy labels to stable business keys and rejects unknown roles (0.6676ms)
-✔ stable employee keys are rendered as localized business language (0.1229ms)
-✔ onboarding publication attestation is configuration-bound and expires (0.3465ms)
-✔ onboarding publication attestation can use the configured OpenAI secret in production (0.2628ms)
-✔ OpenAI provider receives business instructions and handoff rules (0.4936ms)
-✔ public locale links preserve existing query parameters (0.0938ms)
-✔ auth return paths only allow same-origin absolute paths (0.1148ms)
-✔ database unique constraint races are recognized without swallowing other errors (0.1772ms)
-✔ legacy entitlement helpers still map old plans (0.1564ms)
-✔ trial lasts 14 days from the owner's sign-up and is granted once (1.2967ms)
-✔ paid plans: active, past due grace, cancelled, design tiers (0.3812ms)
-✔ message limits are configurable and enforced per period (0.1181ms)
-✔ source files contain no common UTF-8 mojibake sequences (286.8965ms)
-✔ only operational workspace roles can receive assignments (0.1493ms)
-✔ assignment persistence is member-based and tenant-scoped (0.3156ms)
-✔ human replies require takeover and atomically enqueue external delivery (0.1833ms)
-✔ website reply polling is bound to signed employee and visitor conversation (0.1713ms)
-✔ conversation events are tenant scoped and tolerate invalid cursors (0.0753ms)
-✔ conversation event stream prevents overlapping polls and stays alive (0.0754ms)
-✔ conversation UI subscribes to events and releases the connection (0.1367ms)
-✔ docked card follows the viewport corner (0.227ms)
-✔ dropping near an edge or corner docks the card (0.1328ms)
-✔ closing a docked card keeps the launcher on that edge or corner (0.156ms)
-✔ closing a free-floating card attaches the launcher to the nearest edge (0.2109ms)
-✔ launcher never leaves the screen and card reopens next to a moved launcher (0.1883ms)
-✔ resizing respects minimum size and screen bounds on every side (0.1547ms)
-✔ stored layout is sanitized and the runtime is shippable as source text (0.5917ms)
-✔ design input is clamped and never carries markup (1.2234ms)
-✔ avatars accept https or small images only (0.3634ms)
-✔ the card shows what the plan allows; Custom work survives a downgrade (0.5918ms)
-✔ the AI's first message: Starter and Custom, validated, never markup (0.2165ms)
-✔ sales profile is validated and stored next to legacy handoff rules (0.3584ms)
-✔ open access: everyone gets Custom while testing, nothing changes when it is off (0.2218ms)
-✔ premium settings are validated and older saved designs get defaults (1.6388ms)
-✔ site tokens: brand colour, fonts, radii and theme are read from HTML/CSS (4.6001ms)
-✔ AI patch is applied safely (1.4151ms)
-✔ sales prompt asks for contacts briefly and only in context (0.339ms)
-✔ stem matching handles word forms (0.5701ms)
-✔ site root comes from allowed sites, then from where the card was seen (0.452ms)
-✔ visitor page path stays on the site origin (0.1207ms)
-✔ overview keeps only facts and links of the studied site (0.5997ms)
-✔ address normalisation and HTML cleaning (0.7504ms)
-✔ crawler: robots, sitemap, useful pages first, no login pages, menu text dropped (85.0776ms)
-✔ page documents keep their address for the overview (0.3819ms)
-✔ feature matrix: what each plan gets (0.4718ms)
-✔ paddle webhook signature (7.7705ms)
-✔ paddle prices, statuses and card guard (0.5744ms)
-✔ yearly billing: 20% off, yearly price ids, monthly AI allowance (2.0821ms)
-✔ platform admins come only from LEMIRI_ADMIN_EMAILS, case-insensitive (0.2104ms)
-✔ assistant switches default to on and reject odd ids (0.2062ms)
-✔ Lemeri's own workspace has Custom without a reply allowance (0.1509ms)
-ℹ tests 82
+✔ OpenAI provider retries once after a failed answer (0.8433ms)
+✔ WhatsApp verifies Meta signature and normalizes text messages (0.7481ms)
+✔ knowledge chunking preserves content and bounds long paragraphs (0.2435ms)
+✔ plain knowledge documents are decoded without persistence (0.5659ms)
+✔ website ingestion honors the most specific robots.txt rule (0.4447ms)
+✔ workspace RBAC capability matrix (0.1297ms)
+✔ development configuration permits optional providers (0.1599ms)
+✔ production configuration fails closed for missing providers and insecure origin (0.1666ms)
+✔ explicit local smoke mode is restricted to loopback origins (0.1696ms)
+✔ production accepts OpenAI responses with OpenAI embeddings (0.1218ms)
+✔ production rejects the removed Groq provider (0.1191ms)
+✔ workspace translations support Russian, English and interpolation (0.2039ms)
+✔ active workspace can only be selected from the user's memberships (0.1132ms)
+✔ widget token is bound to employee, browser-observed parent origin and expiry (0.551ms)
+✔ password reset tokens are random and domain-separated from session hashes (0.2291ms)
+✔ password reset uses a dedicated persisted model and atomically consumes tokens (1.8ms)
+✔ employee validation normalizes legacy labels to stable business keys and rejects unknown roles (0.7122ms)
+✔ stable employee keys are rendered as localized business language (0.1347ms)
+✔ onboarding publication attestation is configuration-bound and expires (0.3797ms)
+✔ onboarding publication attestation can use the configured OpenAI secret in production (0.2597ms)
+✔ OpenAI provider receives business instructions and handoff rules (0.5188ms)
+✔ public locale links preserve existing query parameters (0.0975ms)
+✔ auth return paths only allow same-origin absolute paths (0.089ms)
+✔ database unique constraint races are recognized without swallowing other errors (0.1223ms)
+✔ legacy entitlement helpers still map old plans (0.9458ms)
+✔ trial lasts 14 days from the owner's sign-up and is granted once (1.2074ms)
+✔ paid plans: active, past due grace, cancelled, design tiers (0.3626ms)
+✔ message limits are configurable and enforced per period (0.1165ms)
+✔ source files contain no common UTF-8 mojibake sequences (152.4725ms)
+✔ only operational workspace roles can receive assignments (0.1438ms)
+✔ assignment persistence is member-based and tenant-scoped (0.3213ms)
+✔ human replies require takeover and atomically enqueue external delivery (0.1834ms)
+✔ website reply polling is bound to signed employee and visitor conversation (0.1712ms)
+✔ conversation events are tenant scoped and tolerate invalid cursors (0.0768ms)
+✔ conversation event stream prevents overlapping polls and stays alive (0.0784ms)
+✔ conversation UI subscribes to events and releases the connection (0.1419ms)
+✔ docked card follows the viewport corner (0.2261ms)
+✔ dropping near an edge or corner docks the card (0.1332ms)
+✔ closing a docked card keeps the launcher on that edge or corner (0.1555ms)
+✔ closing a free-floating card attaches the launcher to the nearest edge (0.2144ms)
+✔ launcher never leaves the screen and card reopens next to a moved launcher (0.1937ms)
+✔ resizing respects minimum size and screen bounds on every side (0.1691ms)
+✔ stored layout is sanitized and the runtime is shippable as source text (0.5805ms)
+✔ design input is clamped and never carries markup (1.2168ms)
+✔ avatars accept https or small images only (0.3518ms)
+✔ the card shows what the plan allows; Custom work survives a downgrade (0.57ms)
+✔ the AI's first message: Starter and Custom, validated, never markup (0.2089ms)
+✔ sales profile is validated and stored next to legacy handoff rules (0.3521ms)
+✔ open access: everyone gets Custom while testing, nothing changes when it is off (0.1788ms)
+✔ premium settings are validated and older saved designs get defaults (1.5768ms)
+✔ site tokens: brand colour, fonts, radii and theme are read from HTML/CSS (4.7451ms)
+✔ AI patch is applied safely (1.4186ms)
+✔ sales prompt asks for contacts briefly and only in context (0.3325ms)
+✔ stem matching handles word forms (0.5909ms)
+✔ site root comes from allowed sites, then from where the card was seen (0.4634ms)
+✔ visitor page path stays on the site origin (0.1197ms)
+✔ overview keeps only facts and links of the studied site (0.5793ms)
+✔ address normalisation and HTML cleaning (0.7807ms)
+✔ crawler: robots, sitemap, useful pages first, no login pages, menu text dropped (72.8598ms)
+✔ page documents keep their address for the overview (0.2554ms)
+✔ feature matrix: what each plan gets (0.3116ms)
+✔ yearly billing: 20% off, yearly price ids, monthly AI allowance (1.9021ms)
+✔ p2p: config from env, amounts and payment code (18.0636ms)
+✔ p2p: paid periods, extension and expiry (0.3667ms)
+✔ crypto: unique USDT amounts and on-chain matching (USDT on TON) (1.4485ms)
+✔ platform admins come only from LEMIRI_ADMIN_EMAILS, case-insensitive (0.1564ms)
+✔ assistant switches default to on and reject odd ids (0.1688ms)
+✔ Lemeri's own workspace has Custom without a reply allowance (0.1452ms)
+ℹ tests 83
 ℹ suites 0
-ℹ pass 82
+ℹ pass 83
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 792.6282
+ℹ duration_ms 647.8388
 TESTS_EXIT=0
-
-=== commit + push ===
-warning: in the working copy of 'src/components/landing.tsx', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'src/components/sales/plan-panel.tsx', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'src/lib/billing/offer.ts', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'src/styles/landing.css', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'src/styles/sales.css', LF will be replaced by CRLF the next time Git touches it
-[main bc534ff] Free plan: special offer badge (14 days free, no card)
- 5 files changed, 44 insertions(+), 6 deletions(-)
-To https://github.com/MaxDev595/Lemeri-platform.git
-   567ef78..bc534ff  main -> main
-PUSH_EXIT=0
-bc534ff Free plan: special offer badge (14 days free, no card)

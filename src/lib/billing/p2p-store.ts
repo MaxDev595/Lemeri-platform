@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { adminEmails } from "@/lib/platform/access";
 import { normalizePlan, type BillingInterval } from "./plans";
-import { CRYPTO_INVOICE_MS, cryptoAmount, cryptoConfig, formatAmount, matchCryptoPayments, p2pAmount, p2pConfig, p2pPeriod, parseTronTransfers, paymentCode, pickTail, USDT_TRC20_CONTRACT, type P2PPlan } from "./p2p";
+import { CRYPTO_INVOICE_MS, cryptoAmount, cryptoConfig, formatAmount, matchCryptoPayments, p2pAmount, p2pConfig, p2pPeriod, parseTonTransfers, paymentCode, pickTail, USDT_TON_MASTER, type P2PPlan } from "./p2p";
 
 // Payment requests for P2P transfers: the customer says «Я оплатил», an admin
 // confirms (plan switched on) or rejects. The table is additive and created on
@@ -73,7 +73,7 @@ export async function createCryptoInvoice(input: { workspaceId: string; userId: 
 
 let lastCheck = 0;
 /**
- * Reads incoming USDT (TRC-20) transfers of the wallet and confirms the open
+ * Reads incoming USDT (TON jetton) transfers of the wallet and confirms the open
  * crypto invoices they pay. Called by cron and while a checkout page is open;
  * at most once per 15 s per isolate. Returns the number of confirmed invoices.
  */
@@ -85,11 +85,11 @@ export async function checkCryptoPayments(force = false) {
   const open = await db.$queryRawUnsafe<Array<{ id: string; amount: string | number; createdAt: Date }>>(`SELECT "id","amount","createdAt" FROM "PaymentRequest" WHERE "method" = 'crypto' AND "status" = 'PENDING' AND "createdAt" > $1 ORDER BY "createdAt" LIMIT 100`, new Date(Date.now() - CRYPTO_INVOICE_MS - 3_600_000));
   if (!open.length) return 0;
   const since = Math.min(...open.map(row => new Date(row.createdAt).getTime())) - 60_000;
-  const url = `https://api.trongrid.io/v1/accounts/${config.address}/transactions/trc20?only_to=true&only_confirmed=true&limit=200&order_by=block_timestamp,asc&contract_address=${USDT_TRC20_CONTRACT}&min_timestamp=${since}`;
-  const key = process.env.LEMIRI_TRONGRID_KEY?.trim();
-  const response = await fetch(url, { headers: key ? { "TRON-PRO-API-KEY": key } : {}, signal: AbortSignal.timeout(8000) });
+  const url = `https://tonapi.io/v2/jettons/${USDT_TON_MASTER}/accounts/${encodeURIComponent(config.address)}/history?limit=100&start_date=${Math.floor(since / 1000)}`;
+  const key = process.env.TONAPI_API_KEY?.trim();
+  const response = await fetch(url, { headers: key ? { authorization: `Bearer ${key}` } : {}, signal: AbortSignal.timeout(8000) });
   if (!response.ok) return 0;
-  const transfers = parseTronTransfers(await response.json().catch(() => null));
+  const transfers = parseTonTransfers(await response.json().catch(() => null));
   const matches = matchCryptoPayments(open.map(row => ({ id: row.id, amount: Number(row.amount), createdAt: row.createdAt })), transfers, config.address);
   let confirmed = 0;
   for (const match of matches) {

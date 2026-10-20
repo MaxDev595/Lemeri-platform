@@ -34,7 +34,7 @@ const T = {
     repair: "Настроить заново", repairHint: "Создаст недостающее: пространство «Lemeri AI», тариф Custom без лимита ответов, ИИ-сотрудника и карточку. Существующие настройки не меняются.",
     saved: "Сохранено", saveFailed: "Не удалось сохранить",
     payments: "Оплаты переводом", paymentsCopy: "Оплаты в USDT подтверждаются сами. Переводы — клиенты сообщили о переводе: найдите поступление в банке по сумме, коду и имени отправителя и подтвердите — тариф включится сразу. «Не найден» — клиент увидит, что перевод не нашли.",
-    noPayments: "Заявок пока нет.", notConfigured: "Реквизиты не заданы: добавьте в Cloudflare LEMIRI_CRYPTO_USDT_TRC20 (кошелёк USDT) или LEMIRI_P2P_RECIPIENT и LEMIRI_P2P_DETAILS — без них клиенты не видят, куда переводить.",
+    noPayments: "Заявок пока нет.", notConfigured: "Реквизиты не заданы: добавьте в Cloudflare LEMIRI_CRYPTO_USDT_TON (кошелёк USDT) или LEMIRI_P2P_RECIPIENT и LEMIRI_P2P_DETAILS — без них клиенты не видят, куда переводить.",
     confirm: "Подтвердить", reject: "Не найден", pending: "ждёт", confirmed: "подтверждено", rejected: "не найден", perYear: "год", perMonth: "месяц", from: "от",
     confirmAsk: (amount: string, code: string) => `Подтвердить перевод ${amount} (${code})? Тариф включится сразу.`,
   },
@@ -51,7 +51,7 @@ const T = {
     repair: "Set up again", repairHint: "Creates whatever is missing: the «Lemeri AI» workspace, Custom plan without a reply limit, the AI employee and the card. Existing settings stay as they are.",
     saved: "Saved", saveFailed: "Couldn't save",
     payments: "Payments by transfer", paymentsCopy: "USDT payments confirm themselves. Transfers: customers reported a transfer — find it in your bank by amount, code and sender name and confirm — the plan switches on immediately. «Not found» tells the customer the transfer wasn't found.",
-    noPayments: "No requests yet.", notConfigured: "Payment details are missing: add LEMIRI_CRYPTO_USDT_TRC20 (USDT wallet) or LEMIRI_P2P_RECIPIENT and LEMIRI_P2P_DETAILS in Cloudflare — without them customers don't see where to pay.",
+    noPayments: "No requests yet.", notConfigured: "Payment details are missing: add LEMIRI_CRYPTO_USDT_TON (USDT wallet) or LEMIRI_P2P_RECIPIENT and LEMIRI_P2P_DETAILS in Cloudflare — without them customers don't see where to pay.",
     confirm: "Confirm", reject: "Not found", pending: "waiting", confirmed: "confirmed", rejected: "not found", perYear: "year", perMonth: "month", from: "from",
     confirmAsk: (amount: string, code: string) => `Confirm the ${amount} transfer (${code})? The plan switches on immediately.`,
   },
@@ -100,7 +100,7 @@ export function AdminPanel({ locale, notify, onNavigate }: { locale: string; not
       {status.payments.length ? <div className="adminPayments">{status.payments.map(item => {
         const amount = item.currency === "USDT" ? `${item.amount.toFixed(4)} USDT` : formatAmount(item.amount, item.currency, locale === "en" ? "en" : "ru");
         return <div key={item.id} className={`adminPayment ${item.status.toLowerCase()}`}>
-          <div><b>{amount}</b> · {item.plan === "CUSTOM" ? "Custom" : "Starter"} · {item.interval === "year" ? c.perYear : c.perMonth}<small>{item.workspace}{item.ownerEmail ? ` · ${item.ownerEmail}` : ""}</small><small>{item.method === "crypto" ? <>USDT TRC-20{item.txId ? <> · <a href={`https://tronscan.org/#/transaction/${item.txId}`} target="_blank" rel="noreferrer">{item.txId.slice(0, 10)}…</a></> : ""}</> : <>{c.from} {item.payerName}</>} · {item.code} · {new Date(item.createdAt).toLocaleString(locale === "en" ? "en-GB" : "ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}{item.note ? ` · «${item.note}»` : ""}</small></div>
+          <div><b>{amount}</b> · {item.plan === "CUSTOM" ? "Custom" : "Starter"} · {item.interval === "year" ? c.perYear : c.perMonth}<small>{item.workspace}{item.ownerEmail ? ` · ${item.ownerEmail}` : ""}</small><small>{item.method === "crypto" ? <>USDT TON{item.txId ? <> · <a href={`https://tonviewer.com/transaction/${item.txId}`} target="_blank" rel="noreferrer">{item.txId.slice(0, 10)}…</a></> : ""}</> : <>{c.from} {item.payerName}</>} · {item.code} · {new Date(item.createdAt).toLocaleString(locale === "en" ? "en-GB" : "ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}{item.note ? ` · «${item.note}»` : ""}</small></div>
           {item.status === "PENDING" ? <div className="adminActions"><button type="button" className="primary" disabled={busy} onClick={() => { if (window.confirm(c.confirmAsk(amount, item.code))) void post({ action: "payment", id: item.id, decision: "confirm" }); }}><Check size={15}/>{c.confirm}</button><button type="button" className="btn" disabled={busy} onClick={() => void post({ action: "payment", id: item.id, decision: "reject" })}><X size={15}/>{c.reject}</button></div>
             : <span className="adminTag">{item.status === "CONFIRMED" ? c.confirmed : c.rejected}</span>}
         </div>;

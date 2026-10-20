@@ -10,8 +10,8 @@ import { cryptoConfig, p2pAmount, p2pConfig, paymentCode } from "@/lib/billing/p
 // resolveAccess() — the same function the widget and the AI use.
 // Payments: P2P transfers (default). The customer transfers the price to the
 // recipient from LEMIRI_P2P_*, presses «Я оплатил», and a platform admin confirms
-// it in the admin panel (lib/billing/p2p-store.ts). Or pays in USDT (TRC-20) to
-// LEMIRI_CRYPTO_USDT_TRC20: the exact invoice amount is found on-chain and the
+// it in the admin panel (lib/billing/p2p-store.ts). Or pays in USDT (TON) to
+// LEMIRI_CRYPTO_USDT_TON: the exact invoice amount is found on-chain and the
 // plan switches on automatically (checkCryptoPayments). Stripe stays as an optional
 // fallback (BILLING_PROVIDER=stripe).
 
