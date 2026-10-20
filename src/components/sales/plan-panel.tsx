@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Check, Clock3, CreditCard, ExternalLink, Sparkles, Gift } from "lucide-react";
+import { Check, Clock3, CreditCard, ExternalLink, Sparkles, Gift, RotateCcw } from "lucide-react";
+import { SUPPORT_EMAIL } from "@/lib/billing/p2p";
 import { TRIAL_DAYS, type Access } from "@/lib/billing/plans";
 import { COMING_SOON, PLAN_OFFER, planPriceText, TRIAL_PROMO, YEARLY_SAVE_PERCENT } from "@/lib/billing/offer";
 import { FEATURE_MATRIX } from "@/lib/billing/features";
@@ -16,7 +17,8 @@ import { Minus } from "lucide-react";
 // from FEATURE_MATRIX — the same list the server enforces.
 
 type Interval = "month" | "year";
-type Billing = { access: Access; used: number; subscription: { plan: string; status: string; provider?: string; interval?: Interval; currentPeriodEnd: string; cancelAtPeriodEnd: boolean; portal: boolean } | null; configured: { stripe?: boolean; p2p?: boolean; starter: boolean; custom: boolean; yearly?: boolean }; provider?: "p2p" | "stripe"; p2p?: { pending: { plan: string; interval: Interval; amount: number; currency: string; createdAt: string } | null } | null };
+type Billing = { access: Access; used: number; subscription: { plan: string; status: string; provider?: string; interval?: Interval; currentPeriodEnd: string; cancelAtPeriodEnd: boolean; portal: boolean } | null; configured: { stripe?: boolean; p2p?: boolean; starter: boolean; custom: boolean; yearly?: boolean }; provider?: "p2p" | "stripe"; p2p?: { pending: { plan: string; interval: Interval; amount: number; currency: string; createdAt: string } | null; refund?: Refund | null } | null };
+type Refund = { id: string; status: "PENDING" | "CONFIRMED" | "REJECTED" | "CANCELED"; comment: string; createdAt: string; decidedAt: string | null };
 const P2P_REMIND_DAYS = 5;
 
 export function PlanPanel({ locale, notify, isOwner }: { locale: string; notify: (text: string) => void; isOwner: boolean }) {
@@ -80,6 +82,7 @@ export function PlanPanel({ locale, notify, isOwner }: { locale: string; notify:
     {access.openAccess && <p className="sxNote sxOpen"><Sparkles size={14}/>{ru ? "На время тестов вам доступно всё из Custom: полный редактор карточки, ИИ-подбор дизайна под сайт и повышенный лимит ответов. Оплата отключена." : "During testing you get everything in Custom: the full card editor, AI design matching and the higher reply limit. Payments are off."}</p>}
     {!access.openAccess && !(data.configured.p2p ?? data.configured.stripe) && <p className="sxNote">{ru ? "Оплата пока не подключена." : "Payments aren't set up yet."}</p>}
     {!access.openAccess && data.p2p?.pending && <p className="sxNote"><Clock3 size={14}/>{ru ? `Проверяем ваш перевод (${offer[data.p2p.pending.plan === "CUSTOM" ? "CUSTOM" : "STARTER"].name}, ${data.p2p.pending.interval === "year" ? "за год" : "за месяц"}). Тариф включится после подтверждения — обычно в течение 24 часов.` : `We're checking your transfer (${offer[data.p2p.pending.plan === "CUSTOM" ? "CUSTOM" : "STARTER"].name}, ${data.p2p.pending.interval === "year" ? "yearly" : "monthly"}). The plan switches on once confirmed — usually within 24 hours.`} <a href={`/app/checkout?plan=${data.p2p.pending.plan}`}>{ru ? "Подробнее" : "Details"}</a></p>}
+    {!access.openAccess && data.provider !== "stripe" && <PaymentCancel ru={ru} notify={notify} reload={load} refund={data.p2p?.refund ?? null} canRequest={isOwner && access.state === "active" && data.subscription?.provider === "P2P"}/>}
     <div className="sxInterval" role="group" aria-label={ru ? "Период оплаты" : "Billing period"}>
       <div className="sxSegmented">
         <button type="button" className={period === "month" ? "on" : ""} aria-pressed={period === "month"} onClick={() => setBillingInterval("month")}>{ru ? "Помесячно" : "Monthly"}</button>
@@ -117,6 +120,44 @@ export function PlanPanel({ locale, notify, isOwner }: { locale: string; notify:
     {!isOwner && <p className="sxMuted">{ru ? "Менять тариф может только владелец." : "Only the owner can change the plan."}</p>}
     <section className="sxSoon"><h3><Clock3 size={15}/>{ru ? "Скоро появится" : "Coming soon"}</h3><p>{ru ? "Не входит в тарифы сейчас — расскажем, когда будет готово." : "Not part of any plan yet."}</p><ul>{COMING_SOON[ru ? "ru" : "en"].map(item => <li key={item}>{item}</li>)}</ul></section>
   </div>;
+}
+
+/**
+ * «Отменить оплату»: the owner sends a cancellation request with a comment; a
+ * platform admin approves it in «Админка» (plan ends, money returned) or declines.
+ */
+function PaymentCancel({ ru, notify, reload, refund, canRequest }: { ru: boolean; notify: (text: string) => void; reload: () => Promise<void>; refund: Refund | null; canRequest: boolean }) {
+  const [open, setOpen] = useState(false);
+  const [comment, setComment] = useState("");
+  const [sending, setSending] = useState(false);
+  const day = (iso: string) => new Date(iso).toLocaleDateString(ru ? "ru-RU" : "en-GB", { day: "numeric", month: "long" });
+  const support = <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>;
+  const hint = <small className="sxCancelHint">{ru ? "Если отмена не прошла, обратитесь на " : "If the cancellation didn't go through, write to "}{support}</small>;
+  const recent = refund?.decidedAt && Date.now() - new Date(refund.decidedAt).getTime() < 30 * 86_400_000;
+  if (refund?.status === "PENDING") return <div className="sxNote sxCancel"><Clock3 size={14}/><span>{ru ? `Запрос на отмену оплаты отправлен ${day(refund.createdAt)} и ждёт подтверждения администратора — обычно в течение рабочего дня. Тариф работает до решения.` : `Your cancellation request was sent on ${day(refund.createdAt)} and is waiting for an admin — usually within a business day. The plan keeps working until then.`}{hint}</span></div>;
+  const decided = recent && refund?.status === "REJECTED" ? <div className="sxNote sxCancel warn"><RotateCcw size={14}/><span>{ru ? "Отмена не прошла: администратор отклонил запрос. " : "The cancellation didn't go through: the request was declined. "}{refund.comment.includes("\n— ") ? refund.comment.split("\n— ").slice(1).join(" ") + " " : ""}{ru ? "Обратитесь на " : "Write to "}{support}</span></div>
+    : recent && refund?.status === "CONFIRMED" ? <div className="sxNote sxCancel"><Check size={14}/><span>{ru ? `Оплата отменена ${day(refund.decidedAt!)}. Деньги вернём тем же способом, которым вы платили.` : `Payment cancelled on ${day(refund.decidedAt!)}. We'll return the money the way you paid.`}{hint}</span></div> : null;
+  if (!canRequest) return decided;
+  const send = async () => {
+    setSending(true);
+    try {
+      const response = await fetch("/api/billing", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "refund_request", comment }) });
+      const body = await response.json().catch(() => ({})) as { error?: string };
+      if (!response.ok) { notify(body.error === "ALREADY_REQUESTED" ? (ru ? "Запрос уже отправлен" : "Request already sent") : body.error === "NO_PAID_PLAN" ? (ru ? "Нет оплаченного тарифа для отмены" : "No paid plan to cancel") : (ru ? `Не удалось отправить запрос. Напишите на ${SUPPORT_EMAIL}` : `Couldn't send the request. Write to ${SUPPORT_EMAIL}`)); return; }
+      notify(ru ? "Запрос на отмену отправлен" : "Cancellation request sent"); setOpen(false); setComment(""); await reload();
+    } catch { notify(ru ? `Не удалось отправить запрос. Напишите на ${SUPPORT_EMAIL}` : `Couldn't send the request. Write to ${SUPPORT_EMAIL}`); }
+    finally { setSending(false); }
+  };
+  return <>
+    {decided}
+    {open ? <form className="sxCancelForm" onSubmit={event => { event.preventDefault(); void send(); }}>
+      <h3><RotateCcw size={15}/>{ru ? "Отменить оплату" : "Cancel payment"}</h3>
+      <p>{ru ? "Напишите, почему отменяете. Запрос подтвердит администратор: после этого тариф выключится, а деньги вернём тем же способом, которым вы платили, — по условиям возврата." : "Tell us why you're cancelling. An admin confirms the request: then the plan switches off and we return the money the way you paid, under the refund terms."} <a href="/legal/refund" target="_blank" rel="noreferrer">{ru ? "Условия возврата" : "Refund terms"}</a></p>
+      <label className="sxField wide"><span>{ru ? "Комментарий к отмене" : "Comment"}</span><textarea required minLength={3} maxLength={500} rows={3} value={comment} onChange={event => setComment(event.target.value)} placeholder={ru ? "Например: не подошло для нашего сайта" : "E.g. not a fit for our site"} autoFocus/></label>
+      <div className="sxCancelActions"><button type="submit" className="primary" disabled={sending || comment.trim().length < 3}>{sending ? "…" : (ru ? "Отправить запрос на отмену" : "Send cancellation request")}</button><button type="button" className="btn" onClick={() => setOpen(false)}>{ru ? "Не отменять" : "Keep my plan"}</button></div>
+      {hint}
+    </form> : <div className="sxCancelRow"><button type="button" className="btn" onClick={() => setOpen(true)}><RotateCcw size={14}/>{ru ? "Отменить оплату" : "Cancel payment"}</button>{hint}</div>}
+  </>;
 }
 
 /** Feature-by-feature comparison, drawn from the same matrix the API enforces. */

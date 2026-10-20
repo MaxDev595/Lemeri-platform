@@ -23,6 +23,7 @@ const actionSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("p2p_claim"), plan, interval, payerName: z.string().trim().min(2).max(120), note: z.string().trim().max(300).optional().default("") }),
   z.object({ action: z.literal("crypto_invoice"), plan, interval }),
   z.object({ action: z.literal("p2p_cancel") }),
+  z.object({ action: z.literal("refund_request"), comment: z.string().trim().min(3).max(500) }),
   z.object({ action: z.literal("portal") }),
 ]);
 const LIVE = ["ACTIVE", "TRIALING", "PAST_DUE"];
@@ -41,7 +42,8 @@ export async function GET() {
   ]);
   const used = await aiRepliesUsed(auth.workspaceId, access);
   const config = p2pConfig();
-  const payments = provider() === "p2p" ? await (await import("@/lib/billing/p2p-store")).workspacePayments(auth.workspaceId).catch(() => null) : null;
+  const store = provider() === "p2p" ? await import("@/lib/billing/p2p-store") : null;
+  const [payments, refund] = store ? await Promise.all([store.workspacePayments(auth.workspaceId).catch(() => null), store.workspaceRefund(auth.workspaceId).catch(() => null)]) : [null, null];
   // P2P periods can be extended early, so the period length alone may look «yearly»: use what was paid for.
   const paidInterval = subscription?.provider === "P2P" && payments?.lastConfirmed ? payments.lastConfirmed.interval : null;
   return NextResponse.json({
@@ -52,7 +54,7 @@ export async function GET() {
     p2p: provider() === "p2p" ? {
       configured: config.configured || crypto.configured, transfer: config.configured, crypto: crypto.configured ? { address: crypto.address, asset: crypto.asset, network: crypto.network } : null, recipient: config.recipient, details: config.details, currency: config.currency, note: config.note, code: paymentCode(auth.workspaceId),
       amounts: { STARTER: { month: p2pAmount("STARTER", "month", config), year: p2pAmount("STARTER", "year", config) }, CUSTOM: { month: p2pAmount("CUSTOM", "month", config), year: p2pAmount("CUSTOM", "year", config) } },
-      pending: payments?.pending ?? null, last: payments?.last ?? null,
+      pending: payments?.pending ?? null, last: payments?.last ?? null, refund,
     } : null,
     configured: provider() === "p2p" ? (on => ({ p2p: on, starter: on, custom: on, yearly: on }))(config.configured || crypto.configured)
       : await (async () => { const { priceIdFor } = await import("@/lib/billing/stripe"); return { stripe: Boolean(process.env.STRIPE_SECRET_KEY), starter: Boolean(priceIdFor("STARTER")), custom: Boolean(priceIdFor("CUSTOM")), yearly: Boolean(process.env.STRIPE_SECRET_KEY && priceIdFor("STARTER", process.env, "year") && priceIdFor("CUSTOM", process.env, "year")) }; })(),
@@ -84,6 +86,10 @@ export async function POST(request: Request) {
     if (provider() === "p2p") {
       const store = await import("@/lib/billing/p2p-store");
       if (data.action === "p2p_cancel") { await store.cancelPaymentClaim(auth.workspaceId); return NextResponse.json({ canceled: true }); }
+      if (data.action === "refund_request") {
+        const result = await store.createRefundRequest({ workspaceId: auth.workspaceId, userId: auth.user.id, comment: data.comment });
+        return "error" in result ? NextResponse.json({ error: result.error }, { status: 409 }) : NextResponse.json({ refundRequested: true });
+      }
       const transfer = p2pConfig().configured, crypto = cryptoConfig().configured;
       if (!transfer && !crypto) return NextResponse.json({ error: "BILLING_PROVIDER_NOT_CONFIGURED" }, { status: 503 });
       if (data.action === "crypto_invoice") {

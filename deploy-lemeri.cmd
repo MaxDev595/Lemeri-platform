@@ -23,7 +23,7 @@ if errorlevel 1 (
   echo === commit + push ===
   git add -u
   git add src tests docs
-  git commit -m "Admin: sales stats, wallet deposits, link payment to account; USDT accepted at plan price or more"
+  git commit -m "Payment cancellation: customer request with comment, admin approval; fix admin payment lists"
   git push
   echo PUSH_EXIT=%ERRORLEVEL%
   git log -1 --oneline

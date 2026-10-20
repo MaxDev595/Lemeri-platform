@@ -16,11 +16,13 @@ type Status = {
   cardConnected: boolean; inThisWorkspace: boolean;
   stats: { dialogs: number; leads: number };
   model: { provider: string; configured: boolean; name: string };
-  payments: Array<{ id: string; workspace: string; ownerEmail: string | null; plan: "STARTER" | "CUSTOM"; interval: "month" | "year"; amount: number; currency: string; code: string; payerName: string; note: string; status: "PENDING" | "CONFIRMED" | "REJECTED"; createdAt: string; decidedAt: string | null; method: "transfer" | "crypto"; txId: string | null }>;
+  payments: Array<{ id: string; workspace: string; ownerEmail: string | null; plan: "STARTER" | "CUSTOM"; interval: "month" | "year"; amount: number; currency: string; code: string; payerName: string; note: string; status: "PENDING" | "CONFIRMED" | "REJECTED" | "REFUNDED"; createdAt: string; decidedAt: string | null; method: "transfer" | "crypto"; txId: string | null }>;
   p2pConfigured: boolean;
-  sales: { total: number; month: number; count: number; monthCount: number; active: { STARTER: number; CUSTOM: number }; accounts: number } | null;
+  sales: { total: number; month: number; count: number; monthCount: number; active: { STARTER: number; CUSTOM: number }; accounts: number; refunded?: number; refunds?: number } | null;
+  refunds?: RefundItem[];
   transfers: Array<{ txId: string; amount: number; time: string; fromName: string | null; from: string | null; requestId: string | null; workspace: string | null; ownerEmail: string | null; plan: string | null; status: string | null }> | null;
 };
+type RefundItem = { id: string; workspace: string; ownerEmail: string | null; plan: string; interval: string; amount: number; currency: string; comment: string; status: string; createdAt: string; decidedAt: string | null; paidMethod: string | null; paidTx: string | null; paidFrom: string | null; periodEnd: string | null };
 type Grant = { email: string; plan: "STARTER" | "CUSTOM"; interval: "month" | "year"; txId?: string };
 
 const T = {
@@ -39,6 +41,9 @@ const T = {
     payments: "Оплаты переводом", paymentsCopy: "Оплаты в USDT подтверждаются сами. Переводы — клиенты сообщили о переводе: найдите поступление в банке по сумме, коду и имени отправителя и подтвердите — тариф включится сразу. «Не найден» — клиент увидит, что перевод не нашли.",
     noPayments: "Заявок пока нет.", notConfigured: "Реквизиты не заданы: добавьте в Cloudflare LEMIRI_CRYPTO_USDT_TON (кошелёк USDT) или LEMIRI_P2P_RECIPIENT и LEMIRI_P2P_DETAILS — без них клиенты не видят, куда переводить.",
     confirm: "Подтвердить", reject: "Не найден", pending: "ждёт", confirmed: "подтверждено", rejected: "не найден", perYear: "год", perMonth: "месяц", from: "от",
+    refundsTitle: "Отмены оплаты", refundsCopy: "Клиент нажал «Отменить оплату» и оставил комментарий. «Подтвердить отмену» сразу выключит тариф и пометит платёж как возвращённый — деньги верните вручную тем же способом. «Отклонить» — клиент увидит, что отмена не прошла, и адрес поддержки.",
+    noRefunds: "Запросов на отмену нет.", approveRefund: "Подтвердить отмену", rejectRefund: "Отклонить", reasonPh: "Ответ клиенту (необязательно)", paidWith: "оплата", refundedTag: "отменено", declinedTag: "отклонено", until: "до",
+    refundAsk: (amount: string, who: string) => `Отменить оплату ${amount} (${who})? Тариф выключится сразу, деньги нужно вернуть вручную.`, refundedStat: "возвратов",
     sales: "Продажи", revenue: "Выручка всего", revenueMonth: "За 30 дней", purchases: "покупок", activeSubs: "Активные подписки", accounts: "Аккаунтов на платформе",
     wallet: "Поступления на кошелёк", walletCopy: "Последние входящие USDT (TON). Платёж без счёта или с другой суммой привяжите к аккаунту — тариф включится сразу.", walletEmpty: "Поступлений пока нет.", walletFailed: "TonAPI не ответил — обновите страницу позже.",
     paid: "оплатил", unlinked: "не привязан", link: "Привязать к аккаунту",
@@ -61,6 +66,9 @@ const T = {
     payments: "Payments by transfer", paymentsCopy: "USDT payments confirm themselves. Transfers: customers reported a transfer — find it in your bank by amount, code and sender name and confirm — the plan switches on immediately. «Not found» tells the customer the transfer wasn't found.",
     noPayments: "No requests yet.", notConfigured: "Payment details are missing: add LEMIRI_CRYPTO_USDT_TON (USDT wallet) or LEMIRI_P2P_RECIPIENT and LEMIRI_P2P_DETAILS in Cloudflare — without them customers don't see where to pay.",
     confirm: "Confirm", reject: "Not found", pending: "waiting", confirmed: "confirmed", rejected: "not found", perYear: "year", perMonth: "month", from: "from",
+    refundsTitle: "Payment cancellations", refundsCopy: "The customer pressed «Cancel payment» and left a comment. «Approve cancellation» switches the plan off right away and marks the payment refunded — return the money by hand the same way. «Decline» shows the customer that it didn't go through, with the support address.",
+    noRefunds: "No cancellation requests.", approveRefund: "Approve cancellation", rejectRefund: "Decline", reasonPh: "Reply to the customer (optional)", paidWith: "paid", refundedTag: "cancelled", declinedTag: "declined", until: "until",
+    refundAsk: (amount: string, who: string) => `Cancel the ${amount} payment (${who})? The plan switches off at once; return the money by hand.`, refundedStat: "refunds",
     sales: "Sales", revenue: "Revenue, all time", revenueMonth: "Last 30 days", purchases: "purchases", activeSubs: "Active subscriptions", accounts: "Accounts on the platform",
     wallet: "Wallet deposits", walletCopy: "Latest incoming USDT (TON). Link a payment that came without an invoice or with another amount to an account — the plan switches on immediately.", walletEmpty: "No deposits yet.", walletFailed: "TonAPI didn't respond — refresh later.",
     paid: "paid", unlinked: "not linked", link: "Link to an account",
@@ -82,6 +90,7 @@ export function AdminPanel({ locale, notify, onNavigate }: { locale: string; not
   }, []);
   useEffect(() => { void load(); }, [load]);
   const [grant, setGrant] = useState<Grant | null>(null);
+  const [reasons, setReasons] = useState<Record<string, string>>({});
   const post = async (body: Record<string, unknown>) => {
     setBusy(true);
     try {
@@ -124,16 +133,32 @@ export function AdminPanel({ locale, notify, onNavigate }: { locale: string; not
     </Section>
     {status.sales && <Section title={c.sales}>
       <div className="adminGrid three">
-        <div className="adminCard"><small>{c.revenue}</small><p className="adminStat"><b>{usd(status.sales.total)}</b></p><p className="adminStat">{status.sales.count} {c.purchases}</p></div>
+        <div className="adminCard"><small>{c.revenue}</small><p className="adminStat"><b>{usd(status.sales.total)}</b></p><p className="adminStat">{status.sales.count} {c.purchases}{status.sales.refunds ? ` · ${status.sales.refunds} ${c.refundedStat} (${usd(status.sales.refunded ?? 0)})` : ""}</p></div>
         <div className="adminCard"><small>{c.revenueMonth}</small><p className="adminStat"><b>{usd(status.sales.month)}</b></p><p className="adminStat">{status.sales.monthCount} {c.purchases}</p></div>
         <div className="adminCard"><small>{c.activeSubs}</small>{row("Starter", String(status.sales.active.STARTER))}{row("Custom", String(status.sales.active.CUSTOM))}{row(c.accounts, String(status.sales.accounts))}</div>
       </div>
     </Section>}
+    <Section title={c.refundsTitle} copy={c.refundsCopy}>
+      {status.refunds?.length ? <div className="adminPayments">{status.refunds.map(item => {
+        const amount = item.currency === "USDT" ? usd(item.amount) : formatAmount(item.amount, item.currency, locale === "en" ? "en" : "ru");
+        return <div key={item.id} className={`adminPayment ${item.status === "PENDING" ? "pending" : "confirmed"}`}>
+          <div><b>{amount}</b> · {item.plan === "CUSTOM" ? "Custom" : "Starter"} · {item.interval === "year" ? c.perYear : c.perMonth}
+            <small>{item.workspace}{item.ownerEmail ? ` · ${item.ownerEmail}` : ""} · {when(item.createdAt)}{item.periodEnd && item.status === "PENDING" ? ` · ${c.until} ${new Date(item.periodEnd).toLocaleDateString(locale === "en" ? "en-GB" : "ru-RU")}` : ""}</small>
+            <small>{c.paidWith}: {item.paidMethod === "crypto" ? <>USDT TON{item.paidTx ? <> · <a href={`https://tonviewer.com/transaction/${item.paidTx}`} target="_blank" rel="noreferrer">{item.paidTx.slice(0, 10)}…</a></> : ""}</> : item.paidFrom ? `${c.from} ${item.paidFrom}` : "—"}</small>
+            <small className="adminNote">«{item.comment}»</small></div>
+          {item.status === "PENDING" ? <div className="adminActions">
+            <input className="adminRefundReason" maxLength={300} value={reasons[item.id] ?? ""} onChange={event => setReasons({ ...reasons, [item.id]: event.target.value })} placeholder={c.reasonPh}/>
+            <button type="button" className="primary" disabled={busy} onClick={() => { if (window.confirm(c.refundAsk(amount, item.ownerEmail ?? item.workspace))) void post({ action: "refund", id: item.id, decision: "approve", reason: reasons[item.id] ?? "" }); }}><Check size={15}/>{c.approveRefund}</button>
+            <button type="button" className="btn" disabled={busy} onClick={() => void post({ action: "refund", id: item.id, decision: "reject", reason: reasons[item.id] ?? "" })}><X size={15}/>{c.rejectRefund}</button>
+          </div> : <span className="adminTag">{item.status === "CONFIRMED" ? c.refundedTag : c.declinedTag}</span>}
+        </div>;
+      })}</div> : <p className="sxMuted">{c.noRefunds}</p>}
+    </Section>
     <Section title={c.wallet} copy={c.walletCopy}>
       {status.transfers === null ? <p className="sxMuted">{c.walletFailed}</p> : status.transfers.length ? <div className="adminPayments">{status.transfers.map(item => <div key={item.txId} className={`adminPayment ${item.requestId ? "confirmed" : "pending"}`}>
         <div><b>{item.amount.toFixed(item.amount % 1 ? 4 : 0)} USDT</b><small>{when(item.time)}{item.fromName ? ` · ${item.fromName}` : ""} · <a href={`https://tonviewer.com/transaction/${item.txId}`} target="_blank" rel="noreferrer">{item.txId.slice(0, 10)}…</a></small>
           {item.requestId ? <small>{c.paid}: {item.workspace}{item.ownerEmail ? ` · ${item.ownerEmail}` : ""}{item.plan ? ` · ${item.plan === "CUSTOM" ? "Custom" : "Starter"}` : ""}</small> : null}</div>
-        {item.requestId ? <span className="adminTag">{item.status === "CONFIRMED" ? c.confirmed : item.status === "PENDING" ? c.pending : c.rejected}</span>
+        {item.requestId ? <span className="adminTag">{item.status === "CONFIRMED" ? c.confirmed : item.status === "PENDING" ? c.pending : item.status === "REFUNDED" ? c.refundedTag : c.rejected}</span>
           : grant?.txId === item.txId ? grantForm(grant) : <div className="adminActions"><span className="adminTag">{c.unlinked}</span><button type="button" className="primary" disabled={busy} onClick={() => setGrant({ email: "", plan: item.amount >= 29 ? "CUSTOM" : "STARTER", interval: item.amount >= 150 ? "year" : "month", txId: item.txId })}><Link2 size={15}/>{c.link}</button></div>}
       </div>)}</div> : <p className="sxMuted">{c.walletEmpty}</p>}
     </Section>
@@ -146,7 +171,7 @@ export function AdminPanel({ locale, notify, onNavigate }: { locale: string; not
         return <div key={item.id} className={`adminPayment ${item.status.toLowerCase()}`}>
           <div><b>{amount}</b> · {item.plan === "CUSTOM" ? "Custom" : "Starter"} · {item.interval === "year" ? c.perYear : c.perMonth}<small>{item.workspace}{item.ownerEmail ? ` · ${item.ownerEmail}` : ""}</small><small>{item.method === "crypto" ? <>USDT TON{item.txId ? <> · <a href={`https://tonviewer.com/transaction/${item.txId}`} target="_blank" rel="noreferrer">{item.txId.slice(0, 10)}…</a></> : ""}</> : <>{c.from} {item.payerName}</>} · {item.code} · {new Date(item.createdAt).toLocaleString(locale === "en" ? "en-GB" : "ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}{item.note ? ` · «${item.note}»` : ""}</small></div>
           {item.status === "PENDING" ? <div className="adminActions"><button type="button" className="primary" disabled={busy} onClick={() => { if (window.confirm(c.confirmAsk(amount, item.code))) void post({ action: "payment", id: item.id, decision: "confirm" }); }}><Check size={15}/>{c.confirm}</button><button type="button" className="btn" disabled={busy} onClick={() => void post({ action: "payment", id: item.id, decision: "reject" })}><X size={15}/>{c.reject}</button></div>
-            : <span className="adminTag">{item.status === "CONFIRMED" ? c.confirmed : c.rejected}</span>}
+            : <span className="adminTag">{item.status === "CONFIRMED" ? c.confirmed : item.status === "REFUNDED" ? c.refundedTag : c.rejected}</span>}
         </div>;
       })}</div> : <p className="sxMuted">{c.noPayments}</p>}
     </Section>

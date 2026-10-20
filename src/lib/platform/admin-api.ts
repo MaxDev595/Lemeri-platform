@@ -25,8 +25,8 @@ async function status(auth: Auth) {
     model: { provider: process.env.AI_PROVIDER ?? "mock", configured: Boolean(process.env.OPENAI_API_KEY?.trim()), name: process.env.OPENAI_RESPONSE_MODEL || "gpt-4.1-mini" },
     // P2P transfers waiting for a decision, then the latest decisions.
     ...await Promise.all([import("@/lib/billing/p2p-store"), import("@/lib/billing/p2p-admin")]).then(async ([store, admin]) => {
-      const [payments, stats, transfers] = await Promise.all([store.adminPayments().catch(() => []), admin.paymentStats().catch(() => null), admin.walletTransfers().catch(() => null)]);
-      return { payments, sales: stats, transfers };
+      const [payments, stats, transfers, refunds] = await Promise.all([store.adminPayments().catch(() => []), admin.paymentStats().catch(() => null), admin.walletTransfers().catch(() => null), admin.refundRequests().catch(() => [])]);
+      return { payments, sales: stats, transfers, refunds };
     }),
     p2pConfigured: await import("@/lib/billing/p2p").then(m => m.p2pConfig().configured || m.cryptoConfig().configured),
   };
@@ -47,6 +47,12 @@ export async function platformAdminPost(auth: Auth, body: unknown) {
     if (typeof v.id !== "string" || (v.decision !== "confirm" && v.decision !== "reject")) return NextResponse.json({ error: "INVALID_REQUEST" }, { status: 400 });
     const { decidePayment } = await import("@/lib/billing/p2p-store");
     const decided = await decidePayment(v.id, v.decision, auth.user.id);
+    if (!decided) return NextResponse.json({ error: "ALREADY_DECIDED" }, { status: 409 });
+    return NextResponse.json(await status(auth));
+  } else if (v.action === "refund") {
+    if (typeof v.id !== "string" || (v.decision !== "approve" && v.decision !== "reject") || (v.reason !== undefined && (typeof v.reason !== "string" || v.reason.length > 300))) return NextResponse.json({ error: "INVALID_REQUEST" }, { status: 400 });
+    const { decideRefund } = await import("@/lib/billing/p2p-admin");
+    const decided = await decideRefund(v.id, v.decision, auth.user.id, typeof v.reason === "string" ? v.reason.trim() : "");
     if (!decided) return NextResponse.json({ error: "ALREADY_DECIDED" }, { status: 409 });
     return NextResponse.json(await status(auth));
   } else if (v.action === "grant") {

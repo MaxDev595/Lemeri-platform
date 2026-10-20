@@ -7,8 +7,8 @@ import { CRYPTO_INVOICE_MS, cryptoAmount, cryptoConfig, formatAmount, matchCrypt
 // confirms (plan switched on) or rejects. The table is additive and created on
 // first use (raw SQL, no Prisma migration).
 
-export type PaymentStatus = "PENDING" | "CONFIRMED" | "REJECTED" | "CANCELED";
-export type PaymentMethod = "transfer" | "crypto";
+export type PaymentStatus = "PENDING" | "CONFIRMED" | "REJECTED" | "CANCELED" | "REFUNDED";
+export type PaymentMethod = "transfer" | "crypto" | "refund";
 export type PaymentRequest = { id: string; workspaceId: string; plan: P2PPlan; interval: BillingInterval; amount: number; currency: string; code: string; payerName: string; note: string; status: PaymentStatus; createdAt: string; decidedAt: string | null; method: PaymentMethod; txId: string | null };
 type Row = { id: string; workspaceId: string; plan: string; interval: string; amount: string | number; currency: string; code: string; payerName: string; note: string | null; status: string; createdAt: Date; decidedAt: Date | null; method: string | null; txId: string | null };
 
@@ -27,14 +27,14 @@ const map = (row: Row): PaymentRequest => ({
   id: row.id, workspaceId: row.workspaceId, plan: normalizePlan(row.plan) === "CUSTOM" ? "CUSTOM" : "STARTER", interval: row.interval === "year" ? "year" : "month",
   amount: Number(row.amount), currency: row.currency, code: row.code, payerName: row.payerName, note: row.note ?? "", status: row.status as PaymentStatus,
   createdAt: new Date(row.createdAt).toISOString(), decidedAt: row.decidedAt ? new Date(row.decidedAt).toISOString() : null,
-  method: row.method === "crypto" ? "crypto" : "transfer", txId: row.txId ?? null,
+  method: row.method === "crypto" ? "crypto" : row.method === "refund" ? "refund" : "transfer", txId: row.txId ?? null,
 });
 const COLUMNS = `"id","workspaceId","plan","interval","amount","currency","code","payerName","note","status","createdAt","decidedAt","method","txId"`;
 
 /** The workspace's open request and its last decided one (to show «отклонено» once). */
 export async function workspacePayments(workspaceId: string) {
   await ensureTable();
-  const rows = await db.$queryRawUnsafe<Row[]>(`SELECT ${COLUMNS} FROM "PaymentRequest" WHERE "workspaceId" = $1 AND "status" <> 'CANCELED' ORDER BY "createdAt" DESC LIMIT 5`, workspaceId);
+  const rows = await db.$queryRawUnsafe<Row[]>(`SELECT ${COLUMNS} FROM "PaymentRequest" WHERE "workspaceId" = $1 AND "status" NOT IN ('CANCELED','REFUNDED') AND "method" <> 'refund' ORDER BY "createdAt" DESC LIMIT 5`, workspaceId);
   const all = rows.map(map);
   return { pending: all.find(item => item.status === "PENDING") ?? null, last: all.find(item => item.status !== "PENDING") ?? null, lastConfirmed: all.find(item => item.status === "CONFIRMED") ?? null };
 }
@@ -46,7 +46,7 @@ export async function createPaymentClaim(input: { workspaceId: string; userId: s
   const amount = p2pAmount(input.plan, input.interval, config);
   const id = crypto.randomUUID();
   const code = paymentCode(input.workspaceId);
-  await db.$executeRawUnsafe(`UPDATE "PaymentRequest" SET "status" = 'CANCELED', "decidedAt" = CURRENT_TIMESTAMP WHERE "workspaceId" = $1 AND "status" = 'PENDING'`, input.workspaceId);
+  await db.$executeRawUnsafe(`UPDATE "PaymentRequest" SET "status" = 'CANCELED', "decidedAt" = CURRENT_TIMESTAMP WHERE "workspaceId" = $1 AND "status" = 'PENDING' AND "method" <> 'refund'`, input.workspaceId);
   await db.$executeRawUnsafe(`INSERT INTO "PaymentRequest" ("id","workspaceId","userId","plan","interval","amount","currency","code","payerName","note") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
     id, input.workspaceId, input.userId, input.plan, input.interval, amount, config.currency, code, input.payerName, input.note || null);
   void notifyAdmins({ code, plan: input.plan, interval: input.interval, amount: formatAmount(amount, config.currency), payerName: input.payerName, id });
@@ -55,7 +55,7 @@ export async function createPaymentClaim(input: { workspaceId: string; userId: s
 
 export async function cancelPaymentClaim(workspaceId: string) {
   await ensureTable();
-  await db.$executeRawUnsafe(`UPDATE "PaymentRequest" SET "status" = 'CANCELED', "decidedAt" = CURRENT_TIMESTAMP WHERE "workspaceId" = $1 AND "status" = 'PENDING'`, workspaceId);
+  await db.$executeRawUnsafe(`UPDATE "PaymentRequest" SET "status" = 'CANCELED', "decidedAt" = CURRENT_TIMESTAMP WHERE "workspaceId" = $1 AND "status" = 'PENDING' AND "method" <> 'refund'`, workspaceId);
 }
 
 /** Crypto invoice: a unique USDT amount for this workspace; replaces any earlier open request. */
@@ -65,10 +65,39 @@ export async function createCryptoInvoice(input: { workspaceId: string; userId: 
   const used = new Set(open.map(row => Math.round((Number(row.amount) % 1) * 10_000) % 1000));
   const amount = cryptoAmount(input.plan, input.interval, pickTail(used));
   const id = crypto.randomUUID();
-  await db.$executeRawUnsafe(`UPDATE "PaymentRequest" SET "status" = 'CANCELED', "decidedAt" = CURRENT_TIMESTAMP WHERE "workspaceId" = $1 AND "status" = 'PENDING'`, input.workspaceId);
+  await db.$executeRawUnsafe(`UPDATE "PaymentRequest" SET "status" = 'CANCELED', "decidedAt" = CURRENT_TIMESTAMP WHERE "workspaceId" = $1 AND "status" = 'PENDING' AND "method" <> 'refund'`, input.workspaceId);
   await db.$executeRawUnsafe(`INSERT INTO "PaymentRequest" ("id","workspaceId","userId","plan","interval","amount","currency","code","payerName","method") VALUES ($1,$2,$3,$4,$5,$6,'USDT',$7,'','crypto')`,
     id, input.workspaceId, input.userId, input.plan, input.interval, amount, paymentCode(input.workspaceId));
   return id;
+}
+
+// ── Cancelling a payment (refund) ─────────────────────────────────────────────
+// The owner asks to cancel the paid plan with a comment; a platform admin approves
+// (plan ends now, the payment is marked REFUNDED, the money is returned by hand)
+// or rejects. Stored as a PaymentRequest row with method "refund".
+
+export type RefundRequest = { id: string; status: PaymentStatus; comment: string; createdAt: string; decidedAt: string | null };
+/** The workspace's open refund request, or the latest decided one. */
+export async function workspaceRefund(workspaceId: string): Promise<RefundRequest | null> {
+  await ensureTable();
+  const rows = await db.$queryRawUnsafe<Row[]>(`SELECT ${COLUMNS} FROM "PaymentRequest" WHERE "workspaceId" = $1 AND "method" = 'refund' AND "status" <> 'CANCELED' ORDER BY "createdAt" DESC LIMIT 1`, workspaceId);
+  const row = rows[0] ? map(rows[0]) : null;
+  return row ? { id: row.id, status: row.status, comment: row.note, createdAt: row.createdAt, decidedAt: row.decidedAt } : null;
+}
+
+export async function createRefundRequest(input: { workspaceId: string; userId: string; comment: string }) {
+  await ensureTable();
+  const subscription = await db.subscription.findUnique({ where: { workspaceId: input.workspaceId }, select: { provider: true, status: true, currentPeriodEnd: true } });
+  if (!subscription || subscription.provider !== "P2P" || subscription.status !== "ACTIVE" || subscription.currentPeriodEnd <= new Date()) return { error: "NO_PAID_PLAN" as const };
+  const open = await db.$queryRawUnsafe<Array<{ id: string }>>(`SELECT "id" FROM "PaymentRequest" WHERE "workspaceId" = $1 AND "method" = 'refund' AND "status" = 'PENDING' LIMIT 1`, input.workspaceId);
+  if (open.length) return { error: "ALREADY_REQUESTED" as const };
+  const paid = await db.$queryRawUnsafe<Row[]>(`SELECT ${COLUMNS} FROM "PaymentRequest" WHERE "workspaceId" = $1 AND "status" = 'CONFIRMED' AND "method" <> 'refund' ORDER BY "decidedAt" DESC NULLS LAST LIMIT 1`, input.workspaceId);
+  const last = paid[0] ? map(paid[0]) : null;
+  const id = crypto.randomUUID();
+  await db.$executeRawUnsafe(`INSERT INTO "PaymentRequest" ("id","workspaceId","userId","plan","interval","amount","currency","code","payerName","note","method","txId") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'',$9,'refund',NULL)`,
+    id, input.workspaceId, input.userId, last?.plan ?? "STARTER", last?.interval ?? "month", last?.amount ?? 0, last?.currency ?? "USDT", paymentCode(input.workspaceId), input.comment);
+  await db.auditLog.create({ data: { workspaceId: input.workspaceId, userId: input.userId, actorType: "USER", action: "BILLING_REFUND_REQUESTED", entityType: "Subscription", metadata: { requestId: id, paymentId: last?.id ?? null } } }).catch(() => undefined);
+  return { ok: true as const, id };
 }
 
 let lastCheck = 0;
@@ -119,8 +148,8 @@ export async function adminPayments(limit = 30): Promise<AdminPayment[]> {
   await ensureTable();
   const rows = await db.$queryRawUnsafe<Array<Row & { workspace: string; ownerEmail: string | null }>>(
     `SELECT p."id", p."workspaceId", p."plan", p."interval", p."amount", p."currency", p."code", p."payerName", p."note", p."status", p."createdAt", p."decidedAt", p."method", p."txId", w."name" AS "workspace",
-       (SELECT u."email" FROM "WorkspaceMember" m JOIN "User" u ON u."id" = m."userId" WHERE m."workspaceId" = p."workspaceId" AND m."role" = 'OWNER' ORDER BY m."createdAt" LIMIT 1) AS "ownerEmail"
-     FROM "PaymentRequest" p JOIN "Workspace" w ON w."id" = p."workspaceId" WHERE p."status" <> 'CANCELED'
+       (SELECT u."email" FROM "WorkspaceMember" m JOIN "User" u ON u."id" = m."userId" WHERE m."workspaceId" = p."workspaceId" AND m."role" = 'OWNER' ORDER BY m."id" LIMIT 1) AS "ownerEmail"
+     FROM "PaymentRequest" p JOIN "Workspace" w ON w."id" = p."workspaceId" WHERE p."status" <> 'CANCELED' AND p."method" <> 'refund'
      ORDER BY CASE WHEN p."status" = 'PENDING' THEN 0 ELSE 1 END, p."createdAt" DESC LIMIT $1`, limit);
   return rows.map(row => ({ ...map(row), workspace: row.workspace, ownerEmail: row.ownerEmail }));
 }

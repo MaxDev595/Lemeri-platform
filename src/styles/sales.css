@@ -396,3 +396,18 @@ input[type=color] { width: 36px; height: 30px; padding: 2px; border: 1px solid v
 .adminTag { font-size: 12px; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line-soft); color: var(--muted, #8a8f98); }
 .ckMethod { margin-bottom: 14px; }
 .ckMethod button { display: inline-flex; align-items: center; gap: 6px; }
+/* «Отменить оплату» (PaymentCancel in plan-panel.tsx) */
+.sxCancelRow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.sxCancelRow .btn { display: inline-flex; align-items: center; gap: 6px; }
+.sxCancelHint { color: var(--text-3); font-size: var(--fs-12); }
+.sxCancelHint a, .sxCancel a { color: inherit; text-decoration: underline; }
+.sxCancel > span { display: grid; gap: 4px; }
+.sxCancel.warn { border-color: color-mix(in srgb, var(--bad) 40%, var(--line)); }
+.sxCancelForm { display: grid; gap: 10px; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-2); }
+.sxCancelForm h3 { display: flex; align-items: center; gap: 6px; margin: 0; font-size: var(--fs-14); }
+.sxCancelForm p { margin: 0; color: var(--text-2); font-size: var(--fs-13); line-height: 1.5; }
+.sxCancelForm textarea { width: 100%; resize: vertical; }
+.sxCancelActions { display: flex; flex-wrap: wrap; gap: 8px; }
+/* Admin: refund requests */
+.adminPayment .adminNote { color: var(--text); white-space: pre-wrap; }
+.adminRefundReason { flex: 1 1 220px; min-width: 0; }

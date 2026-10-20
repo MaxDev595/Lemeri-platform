@@ -76,6 +76,9 @@ export function daysLeft(periodEnd: Date | string, now = new Date()) {
   return Math.max(0, Math.ceil((new Date(periodEnd).getTime() - now.getTime()) / 86_400_000));
 }
 
+/** Where customers write when a cancellation (refund) didn't go through. */
+export const SUPPORT_EMAIL = "support@lemeri.com";
+
 // ── Crypto: USDT on TON (jetton), confirmed automatically ──────────────────────
 // The customer gets an invoice with a unique amount (price + 0.0001…0.0999 USDT).
 // The server reads incoming USDT transfers of LEMIRI_CRYPTO_USDT_TON from TonAPI
