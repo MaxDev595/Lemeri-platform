@@ -1,17 +1,21 @@
 import { db } from "@/lib/db";
 import { planPriceUsd, normalizePlan, type BillingInterval } from "./plans";
-import { cryptoConfig, paymentCode, SUPPORT_EMAIL, type P2PPlan } from "./p2p";
+import { cryptoConfig, paymentCode, SUPPORT_EMAIL, tonFriendlyAddress, type P2PPlan } from "./p2p";
 import { decidePayment, ensureTable, fetchTonTransfers, type PaymentMethod } from "./p2p-store";
 
 // Admin-only billing views (sales stats, wallet deposits, manual grants). Kept out
 // of p2p-store so the code is bundled with the admin endpoint only.
 
-export type WalletTransfer = { txId: string; amount: number; time: string; fromName: string | null; from: string | null; requestId: string | null; workspace: string | null; ownerEmail: string | null; plan: string | null; status: string | null };
-/** Admin panel: the latest incoming USDT transfers and which payment (account) each one paid. */
-export async function walletTransfers(limit = 30): Promise<WalletTransfer[] | null> {
+export type WalletTransfer = { txId: string; direction: "in" | "out"; amount: number; time: string; fromName: string | null; from: string | null; counterparty: string | null; counterpartyName: string | null; comment: string | null; requestId: string | null; workspace: string | null; ownerEmail: string | null; plan: string | null; status: string | null };
+/**
+ * Admin panel: the wallet's latest USDT transactions in both directions — who sent
+ * (address in the UQ… form wallets show, and its TonAPI label such as «Wallet in
+ * Telegram»), the comment, and which payment (account) an incoming one paid.
+ */
+export async function walletTransfers(limit = 50): Promise<WalletTransfer[] | null> {
   const config = cryptoConfig();
   if (!config.configured) return [];
-  const transfers = await fetchTonTransfers(config.address, undefined, limit);
+  const transfers = await fetchTonTransfers(config.address, undefined, limit, true);
   if (!transfers) return null;
   await ensureTable();
   const ids = transfers.map(t => t.id);
@@ -21,7 +25,9 @@ export async function walletTransfers(limit = 30): Promise<WalletTransfer[] | nu
   const byTx = new Map(linked.map(row => [row.txId, row]));
   return transfers.sort((a, b) => b.time - a.time).map(t => {
     const row = byTx.get(t.id);
-    return { txId: t.id, amount: Number(t.value) / 1_000_000, time: new Date(t.time).toISOString(), fromName: t.fromName ?? null, from: t.from ?? null, requestId: row?.id ?? null, workspace: row?.workspace ?? null, ownerEmail: row?.ownerEmail ?? null, plan: row?.plan ?? null, status: row?.status ?? null };
+    const direction = t.to === config.raw ? "in" as const : "out" as const;
+    return { txId: t.id, direction, amount: Number(t.value) / 1_000_000, time: new Date(t.time).toISOString(), fromName: t.fromName ?? null, from: t.from ? tonFriendlyAddress(t.from) : null,
+      counterparty: tonFriendlyAddress(direction === "in" ? t.from : t.to), counterpartyName: (direction === "in" ? t.fromName : t.toName) ?? null, comment: t.comment ?? null, requestId: row?.id ?? null, workspace: row?.workspace ?? null, ownerEmail: row?.ownerEmail ?? null, plan: row?.plan ?? null, status: row?.status ?? null };
   });
 }
 

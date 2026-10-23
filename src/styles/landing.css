@@ -1268,11 +1268,24 @@ html.lenis {
   }
 }
 @media (max-width: 720px) {
+  /* Mobile header: logo · RU/EN · burger. Login and «Start» move into the sheet. */
+  .lnNavInner {
+    gap: 10px;
+  }
   .lnNavActions {
+    margin-left: auto;
+  }
+  .lnNavActions .lnLogin,
+  .lnNavActions .lnStart {
     display: none;
+  }
+  .lnLang span {
+    width: 34px;
+    height: 32px;
   }
   .lnBurger {
     display: grid;
+    margin-left: 0;
   }
   .lnNav.open {
     background: var(--surface);

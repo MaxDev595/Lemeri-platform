@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
-import { ArrowLeft, ArrowRightLeft, Check, CircleCheck, Clock3, Coins, Copy, ShieldCheck, User, XCircle } from "lucide-react";
+import { ArrowLeft, ArrowRightLeft, Check, CircleCheck, Clock3, Coins, Copy, CreditCard, ShieldCheck, User, XCircle } from "lucide-react";
 import { PLAN_OFFER, planPriceText, YEARLY_SAVE_PERCENT } from "@/lib/billing/offer";
 import { formatAmount } from "@/lib/billing/p2p";
 import { LemiriGlyph } from "../logo";
@@ -20,7 +20,7 @@ type P2P = { configured: boolean; transfer: boolean; crypto: { address: string; 
 
 const T = {
   ru: {
-    back: "К тарифам", title: "Оплата переводом", secure: "Без ввода карты на сайте",
+    back: "К тарифам", title: "Оплата переводом", secure: "Без ввода карты на сайте", cardPay: "Для оплаты картой напишите на почту",
     billing: "Период оплаты", monthly: "Помесячно", yearly: "За год",
     step1: "Переведите сумму", step2: "Сообщите об оплате",
     amount: "Сумма", recipient: "Получатель", details: "Реквизиты", code: "Комментарий к переводу", codeHint: "Обязательно укажите этот код в комментарии — по нему мы найдём ваш перевод.",
@@ -44,7 +44,7 @@ const T = {
     newInvoice: "Новый счёт", paidTitle: "Оплата получена", paidCopy: "Тариф активен. Спасибо!", toCabinet: "В кабинет",
   },
   en: {
-    back: "Back to plans", title: "Pay by transfer", secure: "No card entry on this site",
+    back: "Back to plans", title: "Pay by transfer", secure: "No card entry on this site", cardPay: "To pay by card, email",
     billing: "Billing period", monthly: "Monthly", yearly: "Yearly",
     step1: "Transfer the amount", step2: "Tell us you've paid",
     amount: "Amount", recipient: "Recipient", details: "Payment details", code: "Transfer comment", codeHint: "Put this code in the transfer comment — that's how we find your payment.",
@@ -115,6 +115,7 @@ export function CheckoutPage({ locale, plan, interval: initialInterval = "month"
     <div className="ckGrid">
       <section className="ckMain">
         <h1>{c.title}</h1>
+        <p className="ckNote ckCardPay"><CreditCard size={15}/><span>{c.cardPay} <a href="mailto:work@lemeriai.com">work@lemeriai.com</a></span></p>
         {failed ? <div className="sxState"><p>{c.failed}</p><button className="btn" onClick={() => void load()}>{c.retry}</button></div>
           : !p2p ? <div className="sxState"><span className="sxSpinner"/>{c.loading}</div>
           : !p2p.configured ? <p className="ckError">{c.notConfigured}</p>

@@ -109,3 +109,22 @@ OpenAI answer failed, retrying once OpenAI Responses API failed (500): Server er
 ℹ todo 0
 ℹ duration_ms 889.4019
 TESTS_EXIT=0
+
+=== commit + push ===
+warning: in the working copy of 'deploy-lemeri-log.txt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'deploy-lemeri.cmd', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/CLAUDE_CONTEXT.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/app/api/billing/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/admin/admin-panel.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/sales/plan-panel.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/lib/billing/p2p-admin.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/lib/billing/p2p-store.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/lib/billing/p2p.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/lib/platform/admin-api.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/styles/sales.css', LF will be replaced by CRLF the next time Git touches it
+[main bd4d6cf] Payment cancellation: customer request with comment, admin approval; fix admin payment lists
+ 11 files changed, 283 insertions(+), 116 deletions(-)
+To https://github.com/MaxDev595/Lemeri-platform.git
+   bc36c0f..bd4d6cf  main -> main
+PUSH_EXIT=0
+bd4d6cf Payment cancellation: customer request with comment, admin approval; fix admin payment lists

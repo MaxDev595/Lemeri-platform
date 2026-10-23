@@ -130,15 +130,15 @@ export async function checkCryptoPayments(force = false) {
   return confirmed;
 }
 
-/** Incoming USDT transfers of the wallet from TonAPI (newest last page first), or null when TonAPI is unreachable. */
-export async function fetchTonTransfers(address: string, since?: number, limit = 100): Promise<ChainTransfer[] | null> {
+/** USDT transfers of the wallet from TonAPI — incoming only, or both directions with `both`, or null when TonAPI is unreachable. */
+export async function fetchTonTransfers(address: string, since?: number, limit = 100, both = false): Promise<ChainTransfer[] | null> {
   const url = `https://tonapi.io/v2/jettons/${USDT_TON_MASTER}/accounts/${encodeURIComponent(address)}/history?limit=${limit}${since ? `&start_date=${Math.floor(since / 1000)}` : ""}`;
   const key = process.env.TONAPI_API_KEY?.trim();
   try {
     const response = await fetch(url, { headers: key ? { authorization: `Bearer ${key}` } : {}, signal: AbortSignal.timeout(8000) });
     if (!response.ok) return null;
     const raw = tonRawAddress(address);
-    return parseTonTransfers(await response.json().catch(() => null)).filter(t => t.to === raw && t.token === USDT_TON_RAW);
+    return parseTonTransfers(await response.json().catch(() => null)).filter(t => t.token === USDT_TON_RAW && (t.to === raw || (both && t.from === raw)));
   } catch { return null; }
 }
 

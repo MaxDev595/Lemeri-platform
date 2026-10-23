@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { AppWindow, BookOpen, Bot, Check, Link2, MessageCircle, RefreshCw, X } from "lucide-react";
+import { AppWindow, ArrowDownLeft, ArrowUpRight, BookOpen, Bot, Check, Copy, Link2, MessageCircle, RefreshCw, X } from "lucide-react";
 import { formatAmount } from "@/lib/billing/p2p";
 import { Field, Section, Toggle } from "../sales/ui";
 
@@ -20,7 +20,7 @@ type Status = {
   p2pConfigured: boolean;
   sales: { total: number; month: number; count: number; monthCount: number; active: { STARTER: number; CUSTOM: number }; accounts: number; refunded?: number; refunds?: number } | null;
   refunds?: RefundItem[];
-  transfers: Array<{ txId: string; amount: number; time: string; fromName: string | null; from: string | null; requestId: string | null; workspace: string | null; ownerEmail: string | null; plan: string | null; status: string | null }> | null;
+  transfers: Array<{ txId: string; direction?: "in" | "out"; counterparty?: string | null; counterpartyName?: string | null; comment?: string | null; amount: number; time: string; fromName: string | null; from: string | null; requestId: string | null; workspace: string | null; ownerEmail: string | null; plan: string | null; status: string | null }> | null;
 };
 type RefundItem = { id: string; workspace: string; ownerEmail: string | null; plan: string; interval: string; amount: number; currency: string; comment: string; status: string; createdAt: string; decidedAt: string | null; paidMethod: string | null; paidTx: string | null; paidFrom: string | null; periodEnd: string | null };
 type Grant = { email: string; plan: "STARTER" | "CUSTOM"; interval: "month" | "year"; txId?: string };
@@ -45,7 +45,8 @@ const T = {
     noRefunds: "Запросов на отмену нет.", approveRefund: "Подтвердить отмену", rejectRefund: "Отклонить", reasonPh: "Ответ клиенту (необязательно)", paidWith: "оплата", refundedTag: "отменено", declinedTag: "отклонено", until: "до",
     refundAsk: (amount: string, who: string) => `Отменить оплату ${amount} (${who})? Тариф выключится сразу, деньги нужно вернуть вручную.`, refundedStat: "возвратов",
     sales: "Продажи", revenue: "Выручка всего", revenueMonth: "За 30 дней", purchases: "покупок", activeSubs: "Активные подписки", accounts: "Аккаунтов на платформе",
-    wallet: "Поступления на кошелёк", walletCopy: "Последние входящие USDT (TON). Платёж без счёта или с другой суммой привяжите к аккаунту — тариф включится сразу.", walletEmpty: "Поступлений пока нет.", walletFailed: "TonAPI не ответил — обновите страницу позже.",
+    wallet: "Транзакции кошелька", walletCopy: "Последние USDT-переводы (TON) вашего кошелька: с какого адреса пришли деньги и куда ушли. Входящий платёж без счёта или с другой суммой привяжите к аккаунту — тариф включится сразу. Переводы из Кошелька Telegram приходят с его общего адреса «Wallet in Telegram» — по нему не узнать конкретного человека, аккаунт клиента видно по привязке к оплате.", walletEmpty: "Транзакций пока нет.",
+    all: "Все", incoming: "Входящие", outgoing: "Исходящие", received: "Получено", sent: "Отправлено", fromAddr: "с адреса", toAddr: "на адрес", copied: "Адрес скопирован", copyAddr: "Скопировать адрес", commentLabel: "комментарий", walletFailed: "TonAPI не ответил — обновите страницу позже.",
     paid: "оплатил", unlinked: "не привязан", link: "Привязать к аккаунту",
     grant: "Выдать тариф", grantCopy: "Включить тариф аккаунту по email — например, если оплата пришла другим способом.", email: "Email аккаунта", plan: "Тариф", period: "Срок",
     grantDo: "Включить тариф", cancel: "Отмена", errors: { USER_NOT_FOUND: "Аккаунт с таким email не найден", TX_NOT_FOUND: "Транзакция не найдена среди поступлений", TX_USED: "Эта транзакция уже засчитана", INVALID_REQUEST: "Проверьте email" } as Record<string, string>,
@@ -70,7 +71,8 @@ const T = {
     noRefunds: "No cancellation requests.", approveRefund: "Approve cancellation", rejectRefund: "Decline", reasonPh: "Reply to the customer (optional)", paidWith: "paid", refundedTag: "cancelled", declinedTag: "declined", until: "until",
     refundAsk: (amount: string, who: string) => `Cancel the ${amount} payment (${who})? The plan switches off at once; return the money by hand.`, refundedStat: "refunds",
     sales: "Sales", revenue: "Revenue, all time", revenueMonth: "Last 30 days", purchases: "purchases", activeSubs: "Active subscriptions", accounts: "Accounts on the platform",
-    wallet: "Wallet deposits", walletCopy: "Latest incoming USDT (TON). Link a payment that came without an invoice or with another amount to an account — the plan switches on immediately.", walletEmpty: "No deposits yet.", walletFailed: "TonAPI didn't respond — refresh later.",
+    wallet: "Wallet transactions", walletCopy: "Your wallet's latest USDT transfers (TON): which address the money came from and where it went. Link an incoming payment without an invoice or with another amount to an account — the plan switches on immediately. Transfers from Telegram Wallet come from its shared «Wallet in Telegram» address — it doesn't identify a person; the customer's account shows once the payment is linked.", walletEmpty: "No transactions yet.",
+    all: "All", incoming: "Incoming", outgoing: "Outgoing", received: "Received", sent: "Sent", fromAddr: "from", toAddr: "to", copied: "Address copied", copyAddr: "Copy address", commentLabel: "comment", walletFailed: "TonAPI didn't respond — refresh later.",
     paid: "paid", unlinked: "not linked", link: "Link to an account",
     grant: "Grant a plan", grantCopy: "Switch a plan on for an account by email — e.g. when payment came another way.", email: "Account email", plan: "Plan", period: "Period",
     grantDo: "Switch the plan on", cancel: "Cancel", errors: { USER_NOT_FOUND: "No account with this email", TX_NOT_FOUND: "Transaction not found among deposits", TX_USED: "This transaction is already used", INVALID_REQUEST: "Check the email" } as Record<string, string>,
@@ -91,6 +93,7 @@ export function AdminPanel({ locale, notify, onNavigate }: { locale: string; not
   useEffect(() => { void load(); }, [load]);
   const [grant, setGrant] = useState<Grant | null>(null);
   const [reasons, setReasons] = useState<Record<string, string>>({});
+  const [txFilter, setTxFilter] = useState<"all" | "in" | "out">("all");
   const post = async (body: Record<string, unknown>) => {
     setBusy(true);
     try {
@@ -155,12 +158,35 @@ export function AdminPanel({ locale, notify, onNavigate }: { locale: string; not
       })}</div> : <p className="sxMuted">{c.noRefunds}</p>}
     </Section>
     <Section title={c.wallet} copy={c.walletCopy}>
-      {status.transfers === null ? <p className="sxMuted">{c.walletFailed}</p> : status.transfers.length ? <div className="adminPayments">{status.transfers.map(item => <div key={item.txId} className={`adminPayment ${item.requestId ? "confirmed" : "pending"}`}>
-        <div><b>{item.amount.toFixed(item.amount % 1 ? 4 : 0)} USDT</b><small>{when(item.time)}{item.fromName ? ` · ${item.fromName}` : ""} · <a href={`https://tonviewer.com/transaction/${item.txId}`} target="_blank" rel="noreferrer">{item.txId.slice(0, 10)}…</a></small>
-          {item.requestId ? <small>{c.paid}: {item.workspace}{item.ownerEmail ? ` · ${item.ownerEmail}` : ""}{item.plan ? ` · ${item.plan === "CUSTOM" ? "Custom" : "Starter"}` : ""}</small> : null}</div>
-        {item.requestId ? <span className="adminTag">{item.status === "CONFIRMED" ? c.confirmed : item.status === "PENDING" ? c.pending : item.status === "REFUNDED" ? c.refundedTag : c.rejected}</span>
-          : grant?.txId === item.txId ? grantForm(grant) : <div className="adminActions"><span className="adminTag">{c.unlinked}</span><button type="button" className="primary" disabled={busy} onClick={() => setGrant({ email: "", plan: item.amount >= 29 ? "CUSTOM" : "STARTER", interval: item.amount >= 150 ? "year" : "month", txId: item.txId })}><Link2 size={15}/>{c.link}</button></div>}
-      </div>)}</div> : <p className="sxMuted">{c.walletEmpty}</p>}
+      {status.transfers === null ? <p className="sxMuted">{c.walletFailed}</p> : status.transfers.length ? (() => {
+        const list = status.transfers!;
+        const dir = (item: typeof list[number]) => item.direction ?? "in";
+        const sum = (d: "in" | "out") => list.filter(item => dir(item) === d).reduce((total, item) => total + item.amount, 0);
+        const shown = list.filter(item => txFilter === "all" || dir(item) === txFilter);
+        const short = (address: string) => `${address.slice(0, 6)}…${address.slice(-6)}`;
+        const copy = (address: string) => { void navigator.clipboard?.writeText(address).then(() => notify(c.copied), () => undefined); };
+        return <>
+          <div className="adminTxHead">
+            <div className="sxSegmented" role="group">{(["all", "in", "out"] as const).map(key => <button key={key} type="button" className={txFilter === key ? "on" : ""} aria-pressed={txFilter === key} onClick={() => setTxFilter(key)}>{key === "all" ? c.all : key === "in" ? c.incoming : c.outgoing}</button>)}</div>
+            <small>{c.received}: <b>{usd(Math.round(sum("in") * 10_000) / 10_000)}</b> · {c.sent}: <b>{usd(Math.round(sum("out") * 10_000) / 10_000)}</b></small>
+          </div>
+          <div className="adminPayments">{shown.map(item => {
+            const incoming = dir(item) === "in";
+            const address = item.counterparty ?? item.from;
+            const name = item.counterpartyName ?? (incoming ? item.fromName : null);
+            return <div key={`${item.txId}-${dir(item)}`} className={`adminPayment adminTx ${incoming ? (item.requestId ? "confirmed" : "pending") : "out"}`}>
+              <div>
+                <b className={incoming ? "txIn" : "txOut"}>{incoming ? <ArrowDownLeft size={15}/> : <ArrowUpRight size={15}/>}{incoming ? "+" : "−"}{item.amount.toFixed(item.amount % 1 ? 4 : 0)} USDT</b>
+                <small>{incoming ? c.fromAddr : c.toAddr}: {address ? <><a href={`https://tonviewer.com/${address}`} target="_blank" rel="noreferrer" title={address}><code>{short(address)}</code></a> <button type="button" className="adminCopy" title={c.copyAddr} aria-label={c.copyAddr} onClick={() => copy(address)}><Copy size={12}/></button></> : "—"}{name ? ` · ${name}` : ""}</small>
+                <small>{when(item.time)} · <a href={`https://tonviewer.com/transaction/${item.txId}`} target="_blank" rel="noreferrer">{item.txId.slice(0, 10)}…</a>{item.comment ? ` · ${c.commentLabel}: «${item.comment}»` : ""}</small>
+                {item.requestId ? <small>{c.paid}: {item.workspace}{item.ownerEmail ? ` · ${item.ownerEmail}` : ""}{item.plan ? ` · ${item.plan === "CUSTOM" ? "Custom" : "Starter"}` : ""}</small> : null}
+              </div>
+              {!incoming ? null : item.requestId ? <span className="adminTag">{item.status === "CONFIRMED" ? c.confirmed : item.status === "PENDING" ? c.pending : item.status === "REFUNDED" ? c.refundedTag : c.rejected}</span>
+                : grant?.txId === item.txId ? grantForm(grant) : <div className="adminActions"><span className="adminTag">{c.unlinked}</span><button type="button" className="primary" disabled={busy} onClick={() => setGrant({ email: "", plan: item.amount >= 29 ? "CUSTOM" : "STARTER", interval: item.amount >= 150 ? "year" : "month", txId: item.txId })}><Link2 size={15}/>{c.link}</button></div>}
+            </div>;
+          })}</div>
+        </>;
+      })() : <p className="sxMuted">{c.walletEmpty}</p>}
     </Section>
     <Section title={c.grant} copy={c.grantCopy}>
       {grant && !grant.txId ? grantForm(grant) : <div className="adminActions"><button type="button" className="btn" disabled={busy} onClick={() => setGrant({ email: "", plan: "STARTER", interval: "month" })}><Check size={15}/>{c.grant}</button></div>}

@@ -109,6 +109,18 @@ export function tonRawAddress(value: unknown): string | null {
   return `${workchain}:${bytes.slice(2, 34).map(byte => byte.toString(16).padStart(2, "0")).join("")}`;
 }
 
+/** Raw "wc:hex" → user-friendly base64url (UQ… non-bounceable by default, as wallets show it; EQ… bounceable). */
+export function tonFriendlyAddress(value: unknown, bounceable = false): string | null {
+  const raw = tonRawAddress(value);
+  if (!raw) return null;
+  const [wc, hex] = raw.split(":") as [string, string];
+  const bytes = [bounceable ? 0x11 : 0x51, Number(wc) & 0xff, ...hex.match(/../g)!.map(pair => parseInt(pair, 16))];
+  let crc = 0;
+  for (const byte of bytes) { crc ^= byte << 8; for (let bit = 0; bit < 8; bit++) crc = crc & 0x8000 ? ((crc << 1) ^ 0x1021) & 0xffff : (crc << 1) & 0xffff; }
+  bytes.push(crc >> 8, crc & 0xff);
+  return btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_");
+}
+
 export function cryptoConfig(e: Env = env()) {
   const address = (e.LEMIRI_CRYPTO_USDT_TON ?? "").trim();
   const raw = tonRawAddress(address);
@@ -127,20 +139,32 @@ export function pickTail(used: Set<number>, random = Math.random) {
   return 1 + Math.floor(random() * 999);
 }
 
-export type ChainTransfer = { id: string; to: string; token: string; value: string; time: number; from?: string; fromName?: string };
+export type ChainTransfer = { id: string; to: string; token: string; value: string; time: number; from?: string; fromName?: string; toName?: string; comment?: string };
 /** `base` is the plan price without the tail: a transfer of at least that much still pays the invoice when it is the only one waiting. */
 export type OpenInvoice = { id: string; amount: number; createdAt: string | Date; base?: number };
+
+/** A text comment inside a TonAPI jetton payload ({Value: {Text: "…"}} and similar), if any. */
+function payloadText(payload: unknown, depth = 0): string | undefined {
+  if (!payload || typeof payload !== "object" || depth > 4) return undefined;
+  for (const [key, value] of Object.entries(payload as Record<string, unknown>)) {
+    if (/^(text|comment)$/i.test(key) && typeof value === "string" && value.trim()) return value.trim().slice(0, 200);
+    const nested = payloadText(value, depth + 1);
+    if (nested) return nested;
+  }
+  return undefined;
+}
 
 /** TonAPI /v2/jettons/{jetton}/accounts/{account}/history → incoming transfers (defensive parsing, raw addresses). */
 export function parseTonTransfers(body: unknown): ChainTransfer[] {
   const operations = (body as { operations?: unknown })?.operations;
   if (!Array.isArray(operations)) return [];
   return operations.flatMap(item => {
-    const row = item as { operation?: unknown; transaction_hash?: unknown; destination?: { address?: unknown }; source?: { address?: unknown; name?: unknown }; amount?: unknown; utime?: unknown; jetton?: { address?: unknown } };
+    const row = item as { operation?: unknown; transaction_hash?: unknown; destination?: { address?: unknown; name?: unknown }; source?: { address?: unknown; name?: unknown }; amount?: unknown; utime?: unknown; jetton?: { address?: unknown }; payload?: unknown };
     const to = tonRawAddress(row.destination?.address), token = tonRawAddress(row.jetton?.address);
     if (row.operation !== "transfer" || typeof row.transaction_hash !== "string" || typeof row.amount !== "string" || !to || !token) return [];
     const from = tonRawAddress(row.source?.address) ?? undefined, fromName = typeof row.source?.name === "string" ? row.source.name.slice(0, 60) : undefined;
-    return [{ id: row.transaction_hash, to, token, value: row.amount, time: (Number(row.utime) || 0) * 1000, from, fromName }];
+    const toName = typeof row.destination?.name === "string" ? row.destination.name.slice(0, 60) : undefined;
+    return [{ id: row.transaction_hash, to, token, value: row.amount, time: (Number(row.utime) || 0) * 1000, from, fromName, toName, comment: payloadText(row.payload) }];
   });
 }
 

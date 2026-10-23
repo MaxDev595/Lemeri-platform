@@ -101,13 +101,17 @@ test("p2p: paid periods, extension and expiry", () => {
 });
 
 test("crypto: unique USDT amounts and on-chain matching (USDT on TON)", async () => {
-  const { cryptoAmount, cryptoConfig, matchCryptoPayments, parseTonTransfers, pickTail, tonRawAddress, USDT_TON_MASTER, USDT_TON_RAW } = await import("../src/lib/billing/p2p.ts");
+  const { cryptoAmount, cryptoConfig, matchCryptoPayments, parseTonTransfers, pickTail, tonFriendlyAddress, tonRawAddress, USDT_TON_MASTER, USDT_TON_RAW } = await import("../src/lib/billing/p2p.ts");
   // The same wallet in its three forms: non-bounceable (wallets show UQ…), bounceable EQ… and raw 0:hex.
   const wallet = "UQBfX19fX19fX19fX19fX19foaGhoaGhoaGhoaGhoaGhoRt6";
   const bounceable = "EQBfX19fX19fX19fX19fX19foaGhoaGhoaGhoaGhoaGhoUa_";
   const raw = "0:5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5fa1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1";
   assert.equal(tonRawAddress(wallet), raw); assert.equal(tonRawAddress(bounceable), raw); assert.equal(tonRawAddress(raw.toUpperCase().replace("0X", "0x")), raw);
   assert.equal(tonRawAddress(USDT_TON_MASTER), USDT_TON_RAW);
+  // raw → the UQ…/EQ… forms wallets show (sender addresses in the admin panel)
+  assert.equal(tonFriendlyAddress(raw), wallet); assert.equal(tonFriendlyAddress(raw, true), bounceable);
+  assert.equal(tonFriendlyAddress(USDT_TON_RAW, true), USDT_TON_MASTER); assert.equal(tonFriendlyAddress("nope"), null);
+  const real = "UQCG_hfNzvCRZ3gB_uJkhIbnTFMHi73MsBdDF_0XdVytg5vX"; assert.equal(tonFriendlyAddress(tonRawAddress(real)), real);
   assert.equal(tonRawAddress("UQBfX19fX19fX19fX19fX19foaGhoaGhoaGhoaGhoaGhoRt7"), null); // broken checksum
   assert.equal(cryptoConfig({}).configured, false);
   assert.equal(cryptoConfig({ LEMIRI_CRYPTO_USDT_TON: "TNPeeaaFB7K9cmo4uQpcU32zGK8G1NYqeL" }).configured, false); // a TRON address is not accepted
@@ -149,5 +153,7 @@ test("crypto: unique USDT amounts and on-chain matching (USDT on TON)", async ()
   const both = parseTonTransfers({ operations: [op("tx_exact", "19022200", 1), op("tx_round", "20000000", 2)] });
   assert.deepEqual(matchCryptoPayments([{ id: "s", amount: 19.0137, base: 19, createdAt: created }, { id: "t", amount: 19.0222, base: 19, createdAt: created }], both, wallet), [{ invoiceId: "t", txId: "tx_exact" }, { invoiceId: "s", txId: "tx_round" }]);
   assert.equal(rounded[0]!.from, undefined);
+  const named = parseTonTransfers({ operations: [{ ...op("tx_c", "1000000", 1), source: { address: "0:" + "23".repeat(32), name: "Wallet in Telegram" }, payload: { Value: { Text: "LM-ABC123" } } }] });
+  assert.equal(named[0]!.fromName, "Wallet in Telegram"); assert.equal(named[0]!.from, "0:" + "23".repeat(32)); assert.equal(named[0]!.comment, "LM-ABC123");
   assert.deepEqual(parseTonTransfers(null), []);
 });

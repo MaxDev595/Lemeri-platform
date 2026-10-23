@@ -224,13 +224,14 @@ export type StoredLook = {
   proactive?: Proactive;
 };
 /** First messages from the AI: shown with an unread badge on the closed card, then at the top of the chat. */
-export type Proactive = { enabled: boolean; messages: string[]; delay: number };
+/** language: what the owner picked for these messages; the AI writes and translates them into it. */
+export type Proactive = { enabled: boolean; messages: string[]; delay: number; language?: "ru" | "en" };
 export const DEFAULT_PROACTIVE: Proactive = { enabled: false, messages: [], delay: 6 };
 export function normalizeProactive(raw: unknown): Proactive {
   const v = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
   const messages = Array.isArray(v.messages) ? v.messages.map(item => typeof item === "string" ? item.replace(/[\u0000-\u0008\u000b-\u001f<>]/g, "").trim().slice(0, 300) : "").filter(Boolean).slice(0, 3) : [];
   const delay = Number(v.delay);
-  return { enabled: v.enabled === true && messages.length > 0, messages, delay: Number.isFinite(delay) ? Math.max(0, Math.min(120, Math.round(delay))) : DEFAULT_PROACTIVE.delay };
+  return { enabled: v.enabled === true && messages.length > 0, messages, delay: Number.isFinite(delay) ? Math.max(0, Math.min(120, Math.round(delay))) : DEFAULT_PROACTIVE.delay, ...(v.language === "ru" || v.language === "en" ? { language: v.language } : {}) };
 }
 /** What the card actually shows for a plan tier. Stored Custom settings stay untouched in the database after a downgrade. */
 export type ResolvedLook = {

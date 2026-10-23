@@ -12,7 +12,7 @@ export async function polishProactive(input: { messages: string[]; locale: "ru" 
     "Rules: friendly, short (max 140 characters each), no pressure, no promises of discounts or prices that are not in the context, no emoji spam (at most one emoji), plain text, no links.",
     "If the owner gave messages, keep their meaning and offers, fix grammar and make them warmer and clearer. Keep the same number of messages.",
     "If no messages were given, write 1 or 2 messages: a greeting with an offer of help that fits the business.",
-    `Language: ${ru ? "Russian" : "English"}. Reply with JSON {"messages": string[]}.`,
+    `Language: ${ru ? "Russian" : "English"}; if the owner wrote in another language, translate. Reply with JSON {"messages": string[]}.`,
   ].join(" ");
   const user = JSON.stringify({ company: input.company, assistantName: input.employee, goal: input.goal, business: input.overview.slice(0, 1500), ownerMessages: input.messages.slice(0, 3) });
   const result = await jsonCompletion<{ messages?: unknown }>(system, user, 400);
