@@ -6,6 +6,9 @@ import { PLAN_OFFER, planPriceText, YEARLY_SAVE_PERCENT } from "@/lib/billing/of
 import { formatAmount } from "@/lib/billing/p2p";
 import { LemiriGlyph } from "../logo";
 
+/** Card payments are arranged by email (no card form on the site). */
+const CARD_EMAIL = "work@lemeriai.com";
+
 // Checkout by P2P transfer: the customer sees the amount, the recipient and the
 // details from LEMIRI_P2P_*, transfers the money with the payment code in the
 // comment and presses «Я оплатил». An admin confirms the transfer in the admin
@@ -20,7 +23,7 @@ type P2P = { configured: boolean; transfer: boolean; crypto: { address: string; 
 
 const T = {
   ru: {
-    back: "К тарифам", title: "Оплата переводом", secure: "Без ввода карты на сайте", cardPay: "Для оплаты картой напишите на почту",
+    back: "К тарифам", title: "Оплата переводом", secure: "Без ввода карты на сайте",
     billing: "Период оплаты", monthly: "Помесячно", yearly: "За год",
     step1: "Переведите сумму", step2: "Сообщите об оплате",
     amount: "Сумма", recipient: "Получатель", details: "Реквизиты", code: "Комментарий к переводу", codeHint: "Обязательно укажите этот код в комментарии — по нему мы найдём ваш перевод.",
@@ -35,7 +38,7 @@ const T = {
     accept: "Оплачивая, вы принимаете", terms: "условия использования", refund: "правила возврата", and: "и", privacy: "политику конфиденциальности",
     errors: { BILLING_PROVIDER_NOT_CONFIGURED: "Оплата переводом пока не настроена", OPEN_ACCESS: "Сейчас идёт тестовый период — оплата не нужна", CARD_DATA_NOT_ACCEPTED: "Не вводите номер карты — он не нужен", FORBIDDEN: "Оплачивать может только владелец", INVALID_REQUEST: "Проверьте поля формы", default: "Не удалось отправить заявку. Попробуйте ещё раз." } as Record<string, string>,
     loading: "Загружаем…", failed: "Не удалось загрузить данные оплаты", retry: "Повторить",
-    byCrypto: "Криптой (USDT)", byTransfer: "Переводом", cryptoTitle: "Оплата в USDT", getInvoice: "Получить адрес и сумму",
+    byCrypto: "Криптой (USDT)", byTransfer: "Переводом", byCard: "Картой", cardTitle: "Оплата картой", cardIntro: "Оплату картой оформляем вручную. Напишите на почту, укажите тариф и код платежа — ответим и поможем оплатить.", email: "Почта", writeEmail: "Написать на почту", payCode: "Код платежа", mailSubject: "Оплата картой", cryptoTitle: "Оплата в USDT", getInvoice: "Получить адрес и сумму",
     cryptoIntro: "Сумма будет уникальной — по ней платёж найдётся автоматически, и тариф включится сам, без ожидания.",
     send: "Отправьте ровно", network: "Сеть", wallet: "Адрес кошелька",
     cryptoWarn: "Только USDT в сети TON. Лучше всего — ровно эту сумму. Кошелёк Telegram и биржи вычитают комиссию из суммы — добавьте её сверху: до вас должно дойти не меньше цены тарифа. Другая сеть не найдётся — тогда напишите в поддержку.",
@@ -44,7 +47,7 @@ const T = {
     newInvoice: "Новый счёт", paidTitle: "Оплата получена", paidCopy: "Тариф активен. Спасибо!", toCabinet: "В кабинет",
   },
   en: {
-    back: "Back to plans", title: "Pay by transfer", secure: "No card entry on this site", cardPay: "To pay by card, email",
+    back: "Back to plans", title: "Pay by transfer", secure: "No card entry on this site",
     billing: "Billing period", monthly: "Monthly", yearly: "Yearly",
     step1: "Transfer the amount", step2: "Tell us you've paid",
     amount: "Amount", recipient: "Recipient", details: "Payment details", code: "Transfer comment", codeHint: "Put this code in the transfer comment — that's how we find your payment.",
@@ -59,7 +62,7 @@ const T = {
     accept: "By paying you accept the", terms: "terms of service", refund: "refund policy", and: "and the", privacy: "privacy policy",
     errors: { BILLING_PROVIDER_NOT_CONFIGURED: "Payment by transfer isn't set up yet", OPEN_ACCESS: "Testing period — no payment needed", CARD_DATA_NOT_ACCEPTED: "Don't enter a card number — it isn't needed", FORBIDDEN: "Only the owner can pay", INVALID_REQUEST: "Check the form fields", default: "Couldn't send the request. Please try again." } as Record<string, string>,
     loading: "Loading…", failed: "Couldn't load payment details", retry: "Retry",
-    byCrypto: "Crypto (USDT)", byTransfer: "Bank transfer", cryptoTitle: "Pay in USDT", getInvoice: "Get address and amount",
+    byCrypto: "Crypto (USDT)", byTransfer: "Bank transfer", byCard: "Card", cardTitle: "Pay by card", cardIntro: "Card payments are handled by hand. Email us with the plan and the payment code — we'll reply and help you pay.", email: "Email", writeEmail: "Write an email", payCode: "Payment code", mailSubject: "Card payment", cryptoTitle: "Pay in USDT", getInvoice: "Get address and amount",
     cryptoIntro: "The amount is unique — that's how the payment is found automatically and the plan switches on by itself.",
     send: "Send exactly", network: "Network", wallet: "Wallet address",
     cryptoWarn: "Only USDT on TON. Best of all — exactly this amount. Telegram Wallet and exchanges take their fee out of the amount — add it on top: at least the plan price must arrive. Another network won't be found — contact support then.",
@@ -80,7 +83,7 @@ export function CheckoutPage({ locale, plan, interval: initialInterval = "month"
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState("");
-  const [method, setMethod] = useState<"crypto" | "transfer" | null>(null);
+  const [method, setMethod] = useState<"crypto" | "transfer" | "card" | null>(null);
   const load = useCallback(async () => {
     setFailed(false);
     try { const response = await fetch("/api/billing", { cache: "no-store" }); if (!response.ok) throw new Error(); const body = await response.json() as { p2p: P2P | null }; if (!body.p2p) throw new Error(); setP2p(body.p2p); }
@@ -90,7 +93,7 @@ export function CheckoutPage({ locale, plan, interval: initialInterval = "month"
   const cryptoPending = p2p?.pending?.method === "crypto";
   // An open USDT invoice is checked on-chain by the server on every load.
   useEffect(() => { if (!cryptoPending) return; const timer = window.setInterval(() => void load(), 15_000); return () => window.clearInterval(timer); }, [cryptoPending, load]);
-  const way = method ?? (p2p?.crypto ? "crypto" : "transfer");
+  const way = method ?? (p2p?.crypto ? "crypto" : p2p?.transfer ? "transfer" : "card");
   const justPaid = p2p?.last?.status === "CONFIRMED" && p2p.last.decidedAt && Date.now() - new Date(p2p.last.decidedAt).getTime() < 30 * 60_000;
 
   const copy = (key: string, text: string) => { void navigator.clipboard?.writeText(text).then(() => { setCopied(key); window.setTimeout(() => setCopied(value => (value === key ? "" : value)), 1500); }).catch(() => undefined); };
@@ -115,10 +118,8 @@ export function CheckoutPage({ locale, plan, interval: initialInterval = "month"
     <div className="ckGrid">
       <section className="ckMain">
         <h1>{c.title}</h1>
-        <p className="ckNote ckCardPay"><CreditCard size={15}/><span>{c.cardPay} <a href="mailto:work@lemeriai.com">work@lemeriai.com</a></span></p>
         {failed ? <div className="sxState"><p>{c.failed}</p><button className="btn" onClick={() => void load()}>{c.retry}</button></div>
           : !p2p ? <div className="sxState"><span className="sxSpinner"/>{c.loading}</div>
-          : !p2p.configured ? <p className="ckError">{c.notConfigured}</p>
           : cryptoPending && p2p.crypto && p2p.pending ? <section className="ckCard on">
               <h2><Coins size={17}/>{c.cryptoTitle}</h2>
               <div className="ckDetails">
@@ -145,11 +146,21 @@ export function CheckoutPage({ locale, plan, interval: initialInterval = "month"
             </section>
           : <>
             {p2p.last?.status === "REJECTED" && <p className="ckError" role="alert">{c.rejected}</p>}
-            {p2p.crypto && p2p.transfer && <div className="sxSegmented ckMethod" role="group">
-              <button type="button" className={way === "crypto" ? "on" : ""} aria-pressed={way === "crypto"} onClick={() => setMethod("crypto")}><Coins size={14}/>{c.byCrypto}</button>
-              <button type="button" className={way === "transfer" ? "on" : ""} aria-pressed={way === "transfer"} onClick={() => setMethod("transfer")}><ArrowRightLeft size={14}/>{c.byTransfer}</button>
+            {(p2p.crypto || p2p.transfer) && <div className="sxSegmented ckMethod" role="group">
+              {p2p.crypto && <button type="button" className={way === "crypto" ? "on" : ""} aria-pressed={way === "crypto"} onClick={() => setMethod("crypto")}><Coins size={14}/>{c.byCrypto}</button>}
+              {p2p.transfer && <button type="button" className={way === "transfer" ? "on" : ""} aria-pressed={way === "transfer"} onClick={() => setMethod("transfer")}><ArrowRightLeft size={14}/>{c.byTransfer}</button>}
+              <button type="button" className={way === "card" ? "on" : ""} aria-pressed={way === "card"} onClick={() => setMethod("card")}><CreditCard size={14}/>{c.byCard}</button>
             </div>}
-            {way === "crypto" && p2p.crypto ? <section className="ckCard on">
+            {way === "card" ? <section className="ckCard on">
+              <h2><CreditCard size={17}/>{c.cardTitle}</h2>
+              <p className="ckNote">{c.cardIntro}</p>
+              <div className="ckDetails">
+                {row("email", c.email, CARD_EMAIL)}
+                {row("code", c.payCode, p2p.code, true)}
+              </div>
+              <a className="primary ckSubmit" href={`mailto:${CARD_EMAIL}?subject=${encodeURIComponent(`${c.mailSubject} · Lemeri AI ${offer.name}`)}&body=${encodeURIComponent(`${offer.name} · ${interval === "year" ? c.yearly : c.monthly} · ${amount}\n${c.payCode}: ${p2p.code}`)}`}>{c.writeEmail}</a>
+            </section>
+            : way === "crypto" && p2p.crypto ? <section className="ckCard on">
               <h2><Coins size={17}/>{c.cryptoTitle}</h2>
               <p className="ckNote">{c.cryptoIntro}</p>
               <div className="ckDetails"><div className="ckRow"><span>{c.network}</span><b>{p2p.crypto.asset} · {p2p.crypto.network}</b></div></div>

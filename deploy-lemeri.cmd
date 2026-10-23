@@ -23,7 +23,7 @@ if errorlevel 1 (
   echo === commit + push ===
   git add -u
   git add src tests docs
-  git commit -m "Russian by default, RU/EN on mobile, first-message language, card payment by email"
+  git commit -m "Checkout: pay by card via work@lemeriai.com as a third payment method"
   git push
   echo PUSH_EXIT=%ERRORLEVEL%
   git log -1 --oneline
