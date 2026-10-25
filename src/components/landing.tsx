@@ -6,6 +6,8 @@ import { landingCopy } from "./landing-copy";
 import { COMING_SOON, PLAN_OFFER, planPriceText, TRIAL_PROMO } from "@/lib/billing/offer";
 import type { Locale } from "@/lib/i18n";
 import { localeHref } from "@/lib/locale-utils";
+import { LAUNCH_OFFER, launchOfferActive, WORK_EMAIL } from "@/lib/platform/contacts";
+import { ContactEmails, LaunchOffer, SocialLinks } from "./launch-offer";
 
 // Landing for the single product: an AI seller (consultant) for websites.
 const featureIcons = [MessagesSquare, ShoppingBag, ClipboardList, Headset];
@@ -18,6 +20,7 @@ export function Landing({ locale, signedIn = false, openAccess = false }: { loca
   const other = locale === "ru" ? "en" : "ru";
   const register = signedIn ? "/app" : localeHref("/register", locale);
   const login = localeHref("/login", locale);
+  const launch = launchOfferActive();
   const links = <>
     <a href="#features">{c.nav.features}</a>
     <a href="#how">{c.nav.how}</a>
@@ -43,7 +46,7 @@ export function Landing({ locale, signedIn = false, openAccess = false }: { loca
         <section className="lnHero">
           <div className="lnHeroBg" aria-hidden="true"><span className="lnOrb one" /><span className="lnOrb two" /><span className="lnGrid" /></div>
           <div className="lnHeroCopy">
-            <span className="lnPill"><i />{c.hero.pill}</span>
+            {launch ? <a className="lnPill lnPillLaunch" href="#launch"><Gift size={14} />{LAUNCH_OFFER[locale].headline}<ArrowRight size={14} /></a> : <span className="lnPill"><i />{c.hero.pill}</span>}
             <h1>{c.hero.title}</h1>
             <p>{c.hero.copy}</p>
             <div className="lnHeroCta">
@@ -102,6 +105,7 @@ export function Landing({ locale, signedIn = false, openAccess = false }: { loca
         {/* Pricing */}
         <section className="lnSection" id="pricing">
           <header className="lnHead lnHeadCenter reveal"><span className="lnKicker">{c.pricing.kicker}</span><h2>{c.pricing.title}</h2><p>{c.pricing.copy}</p>{openAccess && <span className="lnOpen"><Sparkles size={14} />{locale === "ru" ? "Сейчас идёт тестирование — все тарифы открыты бесплатно" : "We're testing — every plan is free right now"}</span>}</header>
+          {launch && <div className="reveal"><LaunchOffer locale={locale} id="launch" /></div>}
           <div className="lnPlans lnPlans3" data-stagger>
             {(["TRIAL", "STARTER", "CUSTOM"] as const).map(key => {
               const plan = plans[key]; const featured = key === "CUSTOM";
@@ -141,13 +145,13 @@ export function Landing({ locale, signedIn = false, openAccess = false }: { loca
           <p>{c.cta.copy}</p>
           <div className="lnHeroCta">
             <Link className="primary lnBig" href={register}>{c.cta.primary}<ArrowRight className="submitArrow" size={17} /></Link>
-            <a className="lnGhost lnBig" href="mailto:sales@lemeriai.com">{c.cta.secondary}</a>
+            <a className="lnGhost lnBig" href={`mailto:${WORK_EMAIL}`}>{c.cta.secondary}</a>
           </div>
         </section>
       </main>
 
       <footer className="lnFooter">
-        <div><Logo /><small>{c.footer.made}</small></div>
+        <div><Logo /><small>{c.footer.made}</small><ContactEmails locale={locale} className="contactEmails lnContacts" /><SocialLinks /></div>
         <nav>{links}</nav>
         <small>{c.footer.rights} · {c.footer.ai}</small>
         <nav className="lnLegal"><a href={`/legal/terms${locale === "en" ? "?lang=en" : ""}`}>{locale === "ru" ? "Условия" : "Terms"}</a><a href={`/legal/privacy${locale === "en" ? "?lang=en" : ""}`}>{locale === "ru" ? "Конфиденциальность" : "Privacy"}</a><a href={`/legal/refund${locale === "en" ? "?lang=en" : ""}`}>{locale === "ru" ? "Возвраты" : "Refunds"}</a></nav>

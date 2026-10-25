@@ -77,7 +77,7 @@ export function daysLeft(periodEnd: Date | string, now = new Date()) {
 }
 
 /** Where customers write when a cancellation (refund) didn't go through. */
-export const SUPPORT_EMAIL = "support@lemeri.com";
+export { SUPPORT_EMAIL } from "../platform/contacts.ts";
 
 // ── Crypto: USDT on TON (jetton), confirmed automatically ──────────────────────
 // The customer gets an invoice with a unique amount (price + 0.0001…0.0999 USDT).

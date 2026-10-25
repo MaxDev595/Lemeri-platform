@@ -5,9 +5,11 @@ import { ArrowLeft, ArrowRightLeft, Check, CircleCheck, Clock3, Coins, Copy, Cre
 import { PLAN_OFFER, planPriceText, YEARLY_SAVE_PERCENT } from "@/lib/billing/offer";
 import { formatAmount } from "@/lib/billing/p2p";
 import { LemiriGlyph } from "../logo";
+import { WORK_EMAIL } from "@/lib/platform/contacts";
+import { ContactEmails } from "../launch-offer";
 
 /** Card payments are arranged by email (no card form on the site). */
-const CARD_EMAIL = "work@lemeriai.com";
+const CARD_EMAIL = WORK_EMAIL;
 
 // Checkout by P2P transfer: the customer sees the amount, the recipient and the
 // details from LEMIRI_P2P_*, transfers the money with the payment code in the
@@ -34,16 +36,16 @@ const T = {
     cancel: "Отменить заявку", rejected: "Прошлый перевод не нашли. Проверьте сумму и код в комментарии и отправьте заявку ещё раз.",
     summary: "Ваш заказ", perMonth: "в месяц", total: "К переводу", once: "Разовый платёж: продление — новым переводом. Напомним заранее.",
     yearlyRenews: "Тариф на 12 месяцев. Лимит ответов ИИ обновляется каждый месяц.",
-    notConfigured: "Оплата переводом пока не настроена — напишите в поддержку.",
+    notConfigured: "Оплата переводом пока не настроена — напишите в поддержку: support@lemeriai.com.",
     accept: "Оплачивая, вы принимаете", terms: "условия использования", refund: "правила возврата", and: "и", privacy: "политику конфиденциальности",
     errors: { BILLING_PROVIDER_NOT_CONFIGURED: "Оплата переводом пока не настроена", OPEN_ACCESS: "Сейчас идёт тестовый период — оплата не нужна", CARD_DATA_NOT_ACCEPTED: "Не вводите номер карты — он не нужен", FORBIDDEN: "Оплачивать может только владелец", INVALID_REQUEST: "Проверьте поля формы", default: "Не удалось отправить заявку. Попробуйте ещё раз." } as Record<string, string>,
     loading: "Загружаем…", failed: "Не удалось загрузить данные оплаты", retry: "Повторить",
     byCrypto: "Криптой (USDT)", byTransfer: "Переводом", byCard: "Картой", cardTitle: "Оплата картой", cardIntro: "Оплату картой оформляем вручную. Напишите на почту, укажите тариф и код платежа — ответим и поможем оплатить.", email: "Почта", writeEmail: "Написать на почту", payCode: "Код платежа", mailSubject: "Оплата картой", cryptoTitle: "Оплата в USDT", getInvoice: "Получить адрес и сумму",
     cryptoIntro: "Сумма будет уникальной — по ней платёж найдётся автоматически, и тариф включится сам, без ожидания.",
     send: "Отправьте ровно", network: "Сеть", wallet: "Адрес кошелька",
-    cryptoWarn: "Только USDT в сети TON. Лучше всего — ровно эту сумму. Кошелёк Telegram и биржи вычитают комиссию из суммы — добавьте её сверху: до вас должно дойти не меньше цены тарифа. Другая сеть не найдётся — тогда напишите в поддержку.",
+    cryptoWarn: "Только USDT в сети TON. Лучше всего — ровно эту сумму. Кошелёк Telegram и биржи вычитают комиссию из суммы — добавьте её сверху: до вас должно дойти не меньше цены тарифа. Другая сеть не найдётся — тогда напишите в поддержку: support@lemeriai.com.",
     waiting: "Ждём платёж — проверяем блокчейн каждые 15 секунд. Обычно это 1–3 минуты после отправки. Страницу можно закрыть: тариф включится сам.",
-    cryptoExpired: "Прошло больше 3 часов. Если вы уже отправили USDT, напишите в поддержку — проверим вручную. Иначе создайте новый счёт.",
+    cryptoExpired: "Прошло больше 3 часов. Если вы уже отправили USDT, напишите в поддержку (support@lemeriai.com) — проверим вручную. Иначе создайте новый счёт.",
     newInvoice: "Новый счёт", paidTitle: "Оплата получена", paidCopy: "Тариф активен. Спасибо!", toCabinet: "В кабинет",
   },
   en: {
@@ -58,16 +60,16 @@ const T = {
     cancel: "Cancel request", rejected: "We couldn't find your last transfer. Check the amount and the code in the comment and send the request again.",
     summary: "Your order", perMonth: "per month", total: "To transfer", once: "One-off payment: renew with a new transfer. We'll remind you in advance.",
     yearlyRenews: "12-month plan. The AI reply allowance resets every month.",
-    notConfigured: "Payment by transfer isn't set up yet — please contact support.",
+    notConfigured: "Payment by transfer isn't set up yet — please contact support@lemeriai.com.",
     accept: "By paying you accept the", terms: "terms of service", refund: "refund policy", and: "and the", privacy: "privacy policy",
     errors: { BILLING_PROVIDER_NOT_CONFIGURED: "Payment by transfer isn't set up yet", OPEN_ACCESS: "Testing period — no payment needed", CARD_DATA_NOT_ACCEPTED: "Don't enter a card number — it isn't needed", FORBIDDEN: "Only the owner can pay", INVALID_REQUEST: "Check the form fields", default: "Couldn't send the request. Please try again." } as Record<string, string>,
     loading: "Loading…", failed: "Couldn't load payment details", retry: "Retry",
     byCrypto: "Crypto (USDT)", byTransfer: "Bank transfer", byCard: "Card", cardTitle: "Pay by card", cardIntro: "Card payments are handled by hand. Email us with the plan and the payment code — we'll reply and help you pay.", email: "Email", writeEmail: "Write an email", payCode: "Payment code", mailSubject: "Card payment", cryptoTitle: "Pay in USDT", getInvoice: "Get address and amount",
     cryptoIntro: "The amount is unique — that's how the payment is found automatically and the plan switches on by itself.",
     send: "Send exactly", network: "Network", wallet: "Wallet address",
-    cryptoWarn: "Only USDT on TON. Best of all — exactly this amount. Telegram Wallet and exchanges take their fee out of the amount — add it on top: at least the plan price must arrive. Another network won't be found — contact support then.",
+    cryptoWarn: "Only USDT on TON. Best of all — exactly this amount. Telegram Wallet and exchanges take their fee out of the amount — add it on top: at least the plan price must arrive. Another network won't be found — contact support@lemeriai.com then.",
     waiting: "Waiting for the payment — we check the blockchain every 15 seconds. Usually 1–3 minutes after sending. You can close this page: the plan switches on by itself.",
-    cryptoExpired: "More than 3 hours have passed. If you've already sent USDT, contact support and we'll check by hand. Otherwise create a new invoice.",
+    cryptoExpired: "More than 3 hours have passed. If you've already sent USDT, contact support@lemeriai.com and we'll check by hand. Otherwise create a new invoice.",
     newInvoice: "New invoice", paidTitle: "Payment received", paidCopy: "Your plan is active. Thank you!", toCabinet: "Go to cabinet",
   },
 };
@@ -206,6 +208,7 @@ export function CheckoutPage({ locale, plan, interval: initialInterval = "month"
         <small>{c.once}</small>
         {interval === "year" && <small>{c.yearlyRenews}</small>}
         <p className="ckLegal">{c.accept} <a href="/legal/terms" target="_blank">{c.terms}</a>, <a href="/legal/refund" target="_blank">{c.refund}</a> {c.and} <a href="/legal/privacy" target="_blank">{c.privacy}</a>.</p>
+        <ContactEmails locale={locale} className="contactEmails ckContacts" />
       </aside>
     </div>
   </main>;

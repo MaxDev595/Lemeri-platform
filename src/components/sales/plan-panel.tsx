@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Check, Clock3, CreditCard, ExternalLink, Sparkles, Gift, RotateCcw } from "lucide-react";
 import { SUPPORT_EMAIL } from "@/lib/billing/p2p";
+import { launchOfferActive } from "@/lib/platform/contacts";
+import { ContactEmails, LaunchOffer } from "@/components/launch-offer";
 import { TRIAL_DAYS, type Access } from "@/lib/billing/plans";
 import { COMING_SOON, PLAN_OFFER, planPriceText, TRIAL_PROMO, YEARLY_SAVE_PERCENT } from "@/lib/billing/offer";
 import { FEATURE_MATRIX } from "@/lib/billing/features";
@@ -83,6 +85,7 @@ export function PlanPanel({ locale, notify, isOwner }: { locale: string; notify:
     {!access.openAccess && !(data.configured.p2p ?? data.configured.stripe) && <p className="sxNote">{ru ? "Оплата пока не подключена." : "Payments aren't set up yet."}</p>}
     {!access.openAccess && data.p2p?.pending && <p className="sxNote"><Clock3 size={14}/>{ru ? `Проверяем ваш перевод (${offer[data.p2p.pending.plan === "CUSTOM" ? "CUSTOM" : "STARTER"].name}, ${data.p2p.pending.interval === "year" ? "за год" : "за месяц"}). Тариф включится после подтверждения — обычно в течение 24 часов.` : `We're checking your transfer (${offer[data.p2p.pending.plan === "CUSTOM" ? "CUSTOM" : "STARTER"].name}, ${data.p2p.pending.interval === "year" ? "yearly" : "monthly"}). The plan switches on once confirmed — usually within 24 hours.`} <a href={`/app/checkout?plan=${data.p2p.pending.plan}`}>{ru ? "Подробнее" : "Details"}</a></p>}
     {!access.openAccess && data.provider !== "stripe" && <PaymentCancel ru={ru} notify={notify} reload={load} refund={data.p2p?.refund ?? null} canRequest={isOwner && access.state === "active" && data.subscription?.provider === "P2P"}/>}
+    {launchOfferActive() && <LaunchOffer locale={ru ? "ru" : "en"} compact />}
     <div className="sxInterval" role="group" aria-label={ru ? "Период оплаты" : "Billing period"}>
       <div className="sxSegmented">
         <button type="button" className={period === "month" ? "on" : ""} aria-pressed={period === "month"} onClick={() => setBillingInterval("month")}>{ru ? "Помесячно" : "Monthly"}</button>
@@ -117,6 +120,7 @@ export function PlanPanel({ locale, notify, isOwner }: { locale: string; notify:
       })}
     </div>
     <PlanCompare ru={ru} current={access.openAccess ? "CUSTOM" : access.plan}/>
+    <ContactEmails locale={ru ? "ru" : "en"} className="contactEmails sxContacts" />
     {!isOwner && <p className="sxMuted">{ru ? "Менять тариф может только владелец." : "Only the owner can change the plan."}</p>}
     <section className="sxSoon"><h3><Clock3 size={15}/>{ru ? "Скоро появится" : "Coming soon"}</h3><p>{ru ? "Не входит в тарифы сейчас — расскажем, когда будет готово." : "Not part of any plan yet."}</p><ul>{COMING_SOON[ru ? "ru" : "en"].map(item => <li key={item}>{item}</li>)}</ul></section>
   </div>;
@@ -234,6 +238,7 @@ function PlanEnded({ ru, hadPaid, isOwner, onPlans }: { ru: boolean; hadPaid: bo
       <h2 id="sx-end-title">{hadPaid ? (ru ? "Подписка закончилась" : "Your subscription has ended") : (ru ? "Пробный период закончился" : "Your free trial has ended")}</h2>
       <p>{ru ? "ИИ-продавец на вашем сайте остановлен: посетители видят форму заявки, ответы ИИ отключены. Выберите тариф, чтобы продолжить — знания, настройки карточки и диалоги сохранены." : "The AI seller on your site is paused: visitors see the request form, AI replies are off. Choose a plan to continue — your knowledge, card settings and conversations are kept."}</p>
       <div className="sxEndPlans">{card("STARTER")}{card("CUSTOM")}</div>
+      {launchOfferActive() && <LaunchOffer locale={ru ? "ru" : "en"} compact />}
       {!isOwner && <p className="sxMuted">{ru ? "Оформить тариф может владелец пространства." : "Only the workspace owner can choose a plan."}</p>}
       <div className="sxEndFoot"><button className="linkButton" onClick={() => { setOpen(false); onPlans(); }}>{ru ? "Сравнить тарифы и оплату за год" : "Compare plans and yearly billing"}</button><button className="btn" onClick={() => setOpen(false)}>{ru ? "Позже" : "Later"}</button></div>
     </section>

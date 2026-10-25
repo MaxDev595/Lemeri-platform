@@ -4,13 +4,15 @@
 
 import { formatUsd, planPriceUsd, TRIAL_DAYS, yearlyMonthlyUsd } from "@/lib/billing/plans";
 import { DEFAULT_MESSAGE_LIMITS } from "@/lib/billing/plans";
+import { SOCIAL_LINKS, SUPPORT_EMAIL, WORK_EMAIL } from "./contacts";
 
 export const LEMERI_ASSISTANT_INSTRUCTIONS = [
   "You are the assistant of Lemeri AI itself, on lemeriai.com and inside the Lemeri cabinet.",
   "Visitors on the landing page are business owners deciding whether to try Lemeri; users in the cabinet are customers who need help with setup.",
   "Explain plainly how Lemeri works, help choose a plan and walk through setup step by step. Suggest the free trial when someone is interested.",
   "Never promise guaranteed growth of sales or conversion. Remind that AI can make mistakes when it matters.",
-  "Payment, refunds and account problems you cannot solve: offer to pass the question to the Lemeri team.",
+  "Payment, refunds and account problems you cannot solve: offer to pass the question to the Lemeri team and give the support address support@lemeriai.com.",
+  "Support: support@lemeriai.com. Cooperation, partnerships and custom projects: work@lemeriai.com. Share these addresses whenever someone asks how to contact Lemeri.",
 ].join(" ");
 
 export function lemeriKnowledge(locale: "ru" | "en") {
@@ -29,7 +31,12 @@ Plans
 - Trial: free for ${TRIAL_DAYS} days, ${DEFAULT_MESSAGE_LIMITS.TRIAL} AI replies, up to 5 knowledge sources, name, greeting, side and light or dark theme of the card.
 - Starter: ${price("STARTER")}. ${DEFAULT_MESSAGE_LIMITS.STARTER} AI replies per month, 50 knowledge sources, documents, manager replies, subtitle, quick questions, auto-open and proactive first messages. The card design itself is fixed: only light or dark theme.
 - Custom: ${price("CUSTOM")}. ${DEFAULT_MESSAGE_LIMITS.CUSTOM} AI replies per month and everything in Starter plus the full visual editor: colours, fonts, avatar, ready styles, premium effects, AI that matches the card to the site design, and no «Lemeri AI» label in the card.
-Yearly payment saves 20%. Payment is prepaid, in USDT on the TON network — the plan switches on automatically within minutes of the exact amount arriving — or by bank transfer (no card form, no automatic charges): the customer transfers the amount shown on the checkout page, presses “I've paid”, and the plan switches on once the payment is confirmed, usually within a business day. Refunds within 14 days. To pay by card, email work@lemeriai.com.
+Yearly payment saves 20%. Payment is prepaid, in USDT on the TON network — the plan switches on automatically within minutes of the exact amount arriving — or by bank transfer (no card form, no automatic charges): the customer transfers the amount shown on the checkout page, presses “I've paid”, and the plan switches on once the payment is confirmed, usually within a business day. Refunds within 14 days. To pay by card, email ${WORK_EMAIL}.
+
+Contacts
+- Support (cabinet, payment, refunds, account): ${SUPPORT_EMAIL}
+- Cooperation, partnerships and custom projects: ${WORK_EMAIL}
+- Social networks: ${SOCIAL_LINKS.map(item => `${item.label} ${item.url}`).join(", ")}
 
 Important
 - AI can make mistakes; Lemeri does not promise guaranteed sales growth.
@@ -48,7 +55,12 @@ Important
 - Trial: бесплатно ${TRIAL_DAYS} дней, ${DEFAULT_MESSAGE_LIMITS.TRIAL} ответов ИИ, до 5 источников знаний; в карточке — имя, приветствие, сторона экрана и светлая или тёмная тема.
 - Starter: ${price("STARTER")}. ${DEFAULT_MESSAGE_LIMITS.STARTER} ответов ИИ в месяц, 50 источников знаний, документы, ответы менеджера из кабинета, подпись, быстрые вопросы, автооткрытие и первое сообщение от ИИ. Дизайн карточки фиксированный: только светлая или тёмная тема.
 - Custom: ${price("CUSTOM")}. ${DEFAULT_MESSAGE_LIMITS.CUSTOM} ответов ИИ в месяц и всё из Starter плюс полный визуальный редактор: цвета, шрифты, аватар, готовые стили, премиум-эффекты, ИИ подбирает дизайн под сайт, карточка без подписи «Lemeri AI».
-Оплата за год — скидка 20%. Оплата — предоплата в USDT в сети TON (тариф включается автоматически через несколько минут после поступления точной суммы) или переводом по реквизитам на странице оплаты (без автосписаний): клиент переводит сумму, нажимает «Я оплатил», и тариф включается после подтверждения, обычно в течение рабочего дня. Возврат в течение 14 дней. Для оплаты картой нужно написать на почту work@lemeriai.com.
+Оплата за год — скидка 20%. Оплата — предоплата в USDT в сети TON (тариф включается автоматически через несколько минут после поступления точной суммы) или переводом по реквизитам на странице оплаты (без автосписаний): клиент переводит сумму, нажимает «Я оплатил», и тариф включается после подтверждения, обычно в течение рабочего дня. Возврат в течение 14 дней. Для оплаты картой нужно написать на почту ${WORK_EMAIL}.
+
+Контакты
+- Поддержка (кабинет, оплата, возврат, аккаунт): ${SUPPORT_EMAIL}
+- Сотрудничество, партнёрство и индивидуальные проекты: ${WORK_EMAIL}
+- Соцсети: ${SOCIAL_LINKS.map(item => `${item.label} ${item.url}`).join(", ")}
 
 Важно
 - ИИ может ошибаться; Lemeri не обещает гарантированного роста продаж.

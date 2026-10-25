@@ -1476,3 +1476,43 @@ html.lenis {
   font-weight: 600;
   line-height: 1.4;
 }
+
+/* «В честь запуска» (LAUNCH_OFFER in lib/platform/contacts.ts) — landing pricing and the cabinet plan page */
+.launchOffer {
+  display: grid;
+  gap: 14px;
+  max-width: 1040px;
+  margin: 0 auto 28px;
+  padding: 22px 24px;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
+  border-radius: var(--r-2xl, 20px);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 12%, var(--surface)), var(--surface) 70%);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 7%, transparent);
+  scroll-margin-top: 96px;
+}
+.launchOffer.compact { max-width: none; margin: 0; padding: 16px 18px; gap: 10px; }
+.launchHead { display: flex; align-items: center; gap: 10px; }
+.launchHead h3 { margin: 0; font-size: var(--fs-20, 20px); line-height: 1.25; letter-spacing: -0.02em; }
+.launchOffer.compact .launchHead h3 { font-size: var(--fs-16, 16px); }
+.launchIcon { display: inline-grid; place-items: center; flex: none; width: 34px; height: 34px; border-radius: 10px; background: var(--accent); color: var(--text-on-accent, #fff); }
+.launchOffer.compact .launchIcon { width: 28px; height: 28px; border-radius: 8px; }
+.launchOffer ul { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.launchOffer li { color: var(--text-2); font-size: var(--fs-15, 15px); line-height: 1.45; }
+.launchOffer.compact li { font-size: var(--fs-14, 14px); }
+.launchOffer li b { color: var(--text); }
+.launchCta { justify-self: start; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+.lnPillLaunch { max-width: 100%; border-radius: 14px; line-height: 1.35; text-align: left; text-decoration: none; border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); color: var(--text); }
+.lnPillLaunch svg:first-child { color: var(--accent); }
+.lnPillLaunch:hover { border-color: var(--accent); }
+
+/* Support and partnership emails (ContactEmails) */
+.contactEmails { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0; color: var(--text-3); font-size: var(--fs-13, 13px); }
+.contactEmails a { color: var(--text-2); text-decoration: none; }
+.contactEmails a:hover { color: var(--accent); text-decoration: underline; }
+.ckContacts { margin-top: 10px; }
+
+/* Social networks (SocialLinks, SOCIAL_LINKS in lib/platform/contacts.ts) */
+.socialLinks { display: flex; gap: 8px; margin-top: 4px; }
+.lnFooter .socialLinks { gap: 8px; }
+.socialLinks a, .lnFooter .socialLinks a { display: inline-grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text-2); transition: color .15s, border-color .15s, transform .15s; }
+.socialLinks a:hover, .lnFooter .socialLinks a:hover { color: var(--accent); border-color: var(--accent); transform: translateY(-1px); }

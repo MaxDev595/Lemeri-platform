@@ -37,7 +37,11 @@ export async function handleIncomingMessage(params: { workspaceId: string; emplo
     db.workspace.findUnique({ where: { id: params.workspaceId }, select: { name: true } }),
     db.workspaceSettings.findUnique({ where: { workspaceId: params.workspaceId }, select: { timezone: true, workingHours: true } }),
   ]);
-  const context = [businessContext(settings?.timezone ?? "Europe/Moscow", settings?.workingHours, conversation), site.context, site.origin ? `Company website: ${site.origin}. Knowledge marked as website pages and the website overview comes from this site and counts as verified.` : ""].filter(Boolean).join(" ");
+  // Lemeri's own assistant (landing page and cabinet) always knows the current contacts
+  // and launch offer — its knowledge base was written once at provisioning.
+  const lemeriFacts = await import("@/lib/platform/settings").then(async m => (await m.readPlatformAssistant()).employeeId === params.employeeId).catch(() => false)
+    ? (await import("@/lib/platform/contacts")).lemeriLiveFacts(locale === "en" ? "en" : "ru") : "";
+  const context = [businessContext(settings?.timezone ?? "Europe/Moscow", settings?.workingHours, conversation), site.context, site.origin ? `Company website: ${site.origin}. Knowledge marked as website pages and the website overview comes from this site and counts as verified.` : "", lemeriFacts].filter(Boolean).join(" ");
   let result: Awaited<ReturnType<AIProvider["generateResponse"]>>;
   try {
     // Deferred modules (docs/FUTURE_FEATURES.md) never reach the model as actions.

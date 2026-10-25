@@ -16,7 +16,9 @@ export function LegalPage({ locale, title, intro, sections, company }: { locale:
       {sections.map((section, index) => <section key={section.title}><h2>{index + 1}. {section.title}</h2>{section.body.map((item, i) => Array.isArray(item) ? <ul key={i}>{item.map(line => <li key={line}>{line}</li>)}</ul> : <p key={i}>{item}</p>)}</section>)}
       <section className="lgContacts"><h2>{ru ? "Контакты" : "Contacts"}</h2>
         <p>{company.entity}{company.id ? `, ${company.id}` : ""}{company.address ? `, ${company.address}` : ""}{company.country ? `, ${company.country}` : ""}</p>
-        <p>{ru ? "Связь" : "Contact"}: {contact} · {company.site}</p>
+        <p>{ru ? "Поддержка" : "Support"}: {contact}</p>
+        <p>{ru ? "Сотрудничество" : "Partnerships"}: <a href={`mailto:${company.workEmail}`}>{company.workEmail}</a></p>
+        <p>{ru ? "Сайт" : "Website"}: {company.site}</p>
       </section>
     </article>
   </main>;

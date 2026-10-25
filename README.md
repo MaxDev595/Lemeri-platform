@@ -5,6 +5,8 @@ One product: an AI sales assistant shown as a chat card on the customer's websit
 - Product context and rules: `docs/CLAUDE_CONTEXT.md`
 - Deferred modules (CRM, team, messengers, integrations, automations, booking…) kept in code behind `LEMIRI_FEATURES` flags: `docs/FUTURE_FEATURES.md`
 - Roadmap: `docs/PRODUCT_ROADMAP.md`
+- Contacts: support — support@lemeriai.com, partnerships — work@lemeriai.com (`src/lib/platform/contacts.ts`)
+- Social: [Telegram](https://t.me/LemeriHub), [Instagram](https://www.instagram.com/lemeri.ai/), [TikTok](https://www.tiktok.com/@lemeriai)
 
 ## Local development
 
