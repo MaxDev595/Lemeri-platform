@@ -33,7 +33,7 @@ export class OpenAIProvider implements AIProvider {
     const actionRequestSchema=allowedActions.length?{anyOf:[{type:"object",additionalProperties:false,properties:{key:{type:"string",enum:allowedActions},input:{type:"object",additionalProperties:false,properties:actionProperties,required:Object.keys(actionProperties)}},required:["key","input"]},{type:"null"}]}:{type:"null"};
     // One retry: a transient API error (429/5xx/timeout) or a malformed answer
     // should not hand the customer to a manager.
-    const attempt = async () => {
+    const attempt = async (tuned = true) => {
       const response = await this.fetcher(`${process.env.OPENAI_API_BASE ?? "https://api.openai.com"}/v1/responses`, {
         method: "POST",
         headers: { authorization: `Bearer ${this.apiKey}`, "content-type": "application/json" },
@@ -41,11 +41,13 @@ export class OpenAIProvider implements AIProvider {
           model: this.model,
           max_output_tokens: 2048,
           // Low temperature keeps answers to the point (reasoning models take no temperature).
-          ...(/^(o\d|gpt-5)/i.test(this.model) ? {} : { temperature: 0.2 }),
+          ...(tuned && !/^(o\d|gpt-5)/i.test(this.model) ? { temperature: 0.2 } : {}),
           instructions: input.system ?? `You are ${input.employeeName}, a ${input.role}. Goal: ${input.goal}. Tone: ${input.tone}. Business instructions: ${input.instructions||"No additional instructions."}. Handoff rules: ${JSON.stringify(input.handoffRules??{})}. Follow business instructions unless they conflict with these safety rules. Answer factual questions only from supplied knowledge. If the answer is not supported, or an enabled handoff rule applies, request human handoff. Never invent prices, dates, policies, or source ids. You may request at most one explicitly allowed action after the customer has supplied and confirmed every required value. Allowed actions: ${allowedActions.join(", ")||"none"}. Never claim that an action succeeded; say that you are processing it. Use null for unused action input fields. When creating a lead or appointment, pass the customer's name, phone and email if they gave them. startsAt must be an ISO 8601 date-time with the business time zone offset. Write handoffReason as a short phrase in the language of the conversation (it is shown to the business team). ${input.context ?? ""}`,
+          // Knowledge goes first so the visitor's latest message is the last input item
+          // the model sees — it answers that message, not the whole conversation.
           input: [
+            { role: "developer", content: `VERIFIED KNOWLEDGE:\n${knowledge || "No verified knowledge available."}` },
             ...input.messages.map(message => ({ role: message.role, content: message.content })),
-            { role: "user", content: `VERIFIED KNOWLEDGE:\n${knowledge || "No verified knowledge available."}` },
           ],
           text: { format: { type: "json_schema", name: "lemiri_answer", strict: true, schema: {
             type: "object", additionalProperties: false,
@@ -72,7 +74,7 @@ export class OpenAIProvider implements AIProvider {
     try { outcome = await attempt(); }
     catch (error) {
       console.warn("OpenAI answer failed, retrying once", error instanceof Error ? error.message.slice(0, 200) : error);
-      outcome = await attempt();
+      outcome = await attempt(false); // the retry also drops temperature in case the model rejects it
     }
     const { parsed, usedSourceIds, actionRequest } = outcome;
     return { text: parsed.text, confidence: parsed.confidence, usedSourceIds, handoffReason: parsed.handoffReason ?? undefined, actionRequest };

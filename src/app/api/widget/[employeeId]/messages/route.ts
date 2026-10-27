@@ -97,7 +97,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ emp
   }
   await triggerAutomations("MESSAGE_RECEIVED", { workspaceId: employee.workspaceId, employeeId, conversationId: conversation.id, data: { channelType: "WEBSITE", text: parsed.data.message, visitorId: parsed.data.visitorId } });
   const state = await db.conversation.findUnique({ where: { id: conversation.id }, select: { status: true } });
-  if (state?.status !== "AI_ACTIVE") {
+  // Only a manager who took the conversation over («Перехватить») silences the AI.
+  // A handoff request (NEEDS_ATTENTION) just notifies the team; the AI keeps answering.
+  if (state?.status === "HUMAN_ACTIVE") {
     await db.notification.create({ data: { workspaceId: employee.workspaceId, type: "MESSAGE", title: t("server.managerMessageTitle"), body: parsed.data.message.slice(0, 1000) } });
     return NextResponse.json({ conversationId: conversation.id, message: t("server.messageToManager"), confidence: 1, handoff: true });
   }

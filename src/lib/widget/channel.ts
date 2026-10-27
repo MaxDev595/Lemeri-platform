@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { decryptCredentials, encryptCredentials } from "@/lib/security/encryption";
-import { SEEN_THROTTLE_MS, type WebsiteChannelConfig } from "./settings";
+import { SEEN_THROTTLE_MS, type WebsiteChannelConfig, type WidgetSettings } from "./settings";
+import { textsToTranslate, translateCardTexts } from "./card-language";
 import { resolveLook } from "./design";
 import { workspaceAccess } from "@/lib/billing/access";
 import { profileFromRules } from "@/lib/ai/profile";
@@ -11,10 +12,19 @@ export async function loadWebsiteWidget(employeeId: string) {
   if (!employee || !channel) return null;
   let config: WebsiteChannelConfig = { allowedOrigins: [] };
   if (channel.configEncrypted) { try { const value = decryptCredentials<WebsiteChannelConfig>(channel.configEncrypted); config = { ...value, allowedOrigins: value.allowedOrigins ?? [] }; } catch { /* treat as empty */ } }
+  // Texts in another language than the owner picked are translated once and saved.
+  const locale = employee.workspace.settings?.locale === "en" ? "en" as const : "ru" as const;
+  const stored = (config.widget ?? {}) as Partial<WidgetSettings>;
+  const lang = stored.proactive?.language ?? locale;
+  const need = textsToTranslate({ greeting: stored.greeting, help: stored.help, status: stored.status, suggestions: stored.suggestions, proactive: stored.proactive?.messages }, lang);
+  if (Object.keys(need).length) {
+    const widget = await translateCardTexts(channel.id, need, lang).catch(() => null);
+    if (widget) config = { ...config, widget: widget as Partial<WidgetSettings> };
+  }
   // The card shows what the current plan allows; stored Custom settings stay in the config.
   const access = await workspaceAccess(employee.workspaceId);
   const profile = profileFromRules(employee.settings?.handoffRules);
-  return { employee: { id: employee.id, name: employee.name }, company: employee.workspace.name, privacyUrl: profile.privacyUrl, locale: employee.workspace.settings?.locale === "en" ? "en" as const : "ru" as const, channelId: channel.id, config, look: resolveLook(config.widget, access.design), access };
+  return { employee: { id: employee.id, name: employee.name }, company: employee.workspace.name, privacyUrl: profile.privacyUrl, locale, channelId: channel.id, config, look: resolveLook(config.widget, access.design), access };
 }
 
 // Remembers which sites load the widget, so the cabinet can confirm the install.

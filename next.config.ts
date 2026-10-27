@@ -8,7 +8,7 @@ const securityHeaders=[
 ];
 const widgetHeaders=[
   {key:"X-Content-Type-Options",value:"nosniff"},{key:"Referrer-Policy",value:"no-referrer"},{key:"Permissions-Policy",value:"camera=(), microphone=(), geolocation=()"},
-  {key:"Content-Security-Policy",value:`default-src 'self'; script-src 'self' 'unsafe-inline'${devEval}; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; frame-ancestors *; base-uri 'none'; form-action 'self'`},
+  {key:"Content-Security-Policy",value:`default-src 'self'; script-src 'self' 'unsafe-inline'${devEval} https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://cloudflareinsights.com; frame-ancestors *; base-uri 'none'; form-action 'self'`},
 ];
 
 const config:NextConfig={

@@ -50,3 +50,13 @@ test("the AI's first message: Starter and Custom, validated, never markup", () =
   // Trial saves keep the stored first message instead of overwriting it.
   assert.deepEqual(mergeForTier(stored, { title: "T", proactive: { enabled: false, messages: [], delay: 0 } }, "basic").proactive, stored.proactive);
 });
+
+test("card texts in another language than the owner picked are found for translation", async () => {
+  const { textsToTranslate, wrongLanguage } = await import("../src/lib/widget/card-language.ts");
+  assert.equal(wrongLanguage("Hi! How can I help?", "ru"), true);
+  assert.equal(wrongLanguage("Здравствуйте! Чем помочь с Lemeri AI?", "ru"), false);
+  assert.equal(wrongLanguage("Сәлеметсіз бе!", "ru"), false);
+  assert.equal(wrongLanguage("Привет", "en"), true);
+  assert.equal(wrongLanguage("24/7", "ru"), false);
+  assert.deepEqual(textsToTranslate({ greeting: "Привет!", status: "online", suggestions: ["Тарифы", "How to install?"], proactive: ["Здравствуйте!"] }, "ru"), { status: "online", suggestions: ["Тарифы", "How to install?"] });
+});
