@@ -67,7 +67,7 @@ export async function register(_: AuthState, formData: FormData): Promise<AuthSt
     console.error("Registration failed",error);
     return { error: registrationFailure(locale, error, phase) };
   }
-  redirect("/onboarding");
+  redirect("/app");
 }
 
 // Employee account: no company yet — they pick a position and join by code on /join.

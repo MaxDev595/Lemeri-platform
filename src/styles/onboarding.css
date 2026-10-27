@@ -473,3 +473,30 @@
     width: 100%;
   }
 }
+
+/* Launch steps (components/setup-steps.tsx): /app setup page and the dashboard */
+.setupStepsWrap { max-width: 1080px; margin: 8px auto 24px; }
+.setupSteps { position: relative; display: grid; gap: 14px; padding: 18px 20px; border: 1px solid var(--line); border-radius: var(--r-2xl, 20px); background: var(--surface); box-shadow: var(--e-1, 0 1px 2px rgba(23, 25, 31, .06)); }
+.page > .setupSteps { margin-bottom: 4px; }
+.setupSteps ol { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; counter-reset: none; }
+.setupSteps li { position: relative; display: flex; align-items: flex-start; gap: 10px; min-width: 0; }
+.setupSteps li:not(:last-child)::after { content: ""; flex: 1 1 12px; min-width: 12px; height: 2px; margin-top: 13px; border-radius: 2px; background: var(--line); }
+.setupSteps li.done:not(:last-child)::after { background: var(--accent); }
+.setupSteps li > div { display: grid; gap: 2px; flex: 0 1 auto; min-width: 0; padding-top: 4px; }
+.setupSteps b { font-size: var(--fs-14, 14px); line-height: 1.3; }
+.setupSteps small { color: var(--text-3); font-size: var(--fs-12, 12px); line-height: 1.35; }
+.setupDot { position: relative; z-index: 1; display: inline-grid; place-items: center; flex: none; width: 28px; height: 28px; border: 2px solid var(--line-strong, var(--line)); border-radius: 50%; background: var(--surface); color: var(--text-3); font-size: var(--fs-13, 13px); font-weight: 700; }
+.setupSteps li.done .setupDot { border-color: var(--accent); background: var(--accent); color: var(--text-on-accent, #fff); }
+.setupSteps li.current .setupDot { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 4px var(--accent-ring, rgba(98, 84, 232, .2)); }
+.setupSteps li.current b { color: var(--accent-text, var(--accent)); }
+.setupSteps li.final.done .setupDot { border-color: var(--ok); background: var(--ok); }
+.setupSteps.ready { border-color: color-mix(in srgb, var(--ok) 45%, var(--line)); background: linear-gradient(135deg, color-mix(in srgb, var(--ok) 8%, var(--surface)), var(--surface) 60%); }
+.setupSteps li.final.done b { color: color-mix(in srgb, var(--ok) 80%, var(--text)); }
+.setupAction { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding-top: 12px; border-top: 1px solid var(--line-soft, var(--line)); }
+.setupAction .primary { display: inline-flex; align-items: center; gap: 8px; }
+.setupAction small { color: var(--text-3); font-size: var(--fs-13, 13px); }
+.setupHide { position: absolute; top: 10px; right: 10px; }
+@media (max-width: 760px) {
+  .setupSteps ol { grid-template-columns: 1fr; gap: 10px; }
+  .setupSteps li:not(:last-child)::after { position: absolute; top: 30px; bottom: -10px; left: 13px; width: 2px; height: auto; min-width: 0; margin: 0; }
+}
