@@ -21,7 +21,8 @@ export async function handleIncomingMessage(params: { workspaceId: string; emplo
   // monthly allowance must never cost model tokens.
   const gate=await aiReplyGate(params.workspaceId);
   if(!gate.ok)return limitedReply({...params,locale,employeeName:employee.name,reason:gate.reason});
-  const history = await db.message.findMany({ where: { conversationId: params.conversationId }, orderBy: { createdAt: "desc" }, take: 12 });
+  // Only this visit counts as context: a visitor returning hours later starts fresh.
+  const history = await db.message.findMany({ where: { conversationId: params.conversationId, createdAt: { gte: new Date(Date.now() - 3 * 3_600_000) } }, orderBy: { createdAt: "desc" }, take: 12 });
   // Short follow-ups («а сколько стоит?») are searched together with the previous question.
   const previousQuestion = history.filter(item => item.direction === "INBOUND" && item.content !== params.content)[0]?.content ?? "";
   const query = `${params.content} ${params.content.length < 60 ? previousQuestion.slice(0, 300) : ""}`.trim();

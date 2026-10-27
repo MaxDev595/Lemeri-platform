@@ -182,6 +182,7 @@ export function WebsiteWidget({ locale, employeeId, employeeName, company = "", 
     if (!conversationId || !visitorId || !embedAuth) return;
     let active = true;
     const poll = async () => {
+      if (pollCursor.current === new Date(0).toISOString()) return; // never load the whole old history
       try {
         const query = new URLSearchParams({ conversationId, visitorId, after: pollCursor.current });
         const response = await fetch(`/api/widget/${employeeId}/messages?${query}`, { headers: { "x-lemiri-widget-token": embedAuth.token, "x-lemiri-parent-origin": embedAuth.origin } });
@@ -220,6 +221,9 @@ export function WebsiteWidget({ locale, employeeId, employeeName, company = "", 
       const { response, json } = await authedFetch("messages", { visitorId, conversationId, messageId: crypto.randomUUID(), message: input, ...(pageRef.current ? { page: pageRef.current } : {}), ...(!conversationId && openedWithProactive.current ? { proactive: true } : {}) });
       if (!response.ok) throw new Error(copy.sendFailed);
       setConversationId(json.conversationId as string);
+      // Polling picks up only what arrives after this reply (manager answers). The visitor
+      // keeps the same conversation across visits; old messages must never pour in.
+      if (pollCursor.current === new Date(0).toISOString() && typeof json.cursor === "string") pollCursor.current = json.cursor;
       if (json.messageId) seenMessageIds.current.add(String(json.messageId));
       setMessages(value => [...value, { id: json.messageId as string | undefined, role: "assistant", text: String(json.message ?? copy.sendFailed) }]);
     } catch (error) {

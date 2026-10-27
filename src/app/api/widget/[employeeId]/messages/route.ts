@@ -88,12 +88,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ emp
     } catch (error) { console.error("Proactive opening was not stored", error instanceof Error ? error.message : error); }
   }
   const messageExternalId = `widget:${employee.workspaceId}:${parsed.data.messageId}`;
-  if (await db.message.findUnique({ where: { externalId: messageExternalId } })) return NextResponse.json({ conversationId: conversation.id, message: t("server.messageAccepted"), duplicate: true });
+  if (await db.message.findUnique({ where: { externalId: messageExternalId } })) return NextResponse.json({ conversationId: conversation.id, cursor: new Date().toISOString(), message: t("server.messageAccepted"), duplicate: true });
   try {
     await db.message.create({ data: { conversationId: conversation.id, direction: "INBOUND", content: parsed.data.message, externalId: messageExternalId } });
   } catch (error) {
     if (!isUniqueConstraintError(error)) throw error;
-    return NextResponse.json({ conversationId: conversation.id, message: t("server.messageAccepted"), duplicate: true });
+    return NextResponse.json({ conversationId: conversation.id, cursor: new Date().toISOString(), message: t("server.messageAccepted"), duplicate: true });
   }
   await triggerAutomations("MESSAGE_RECEIVED", { workspaceId: employee.workspaceId, employeeId, conversationId: conversation.id, data: { channelType: "WEBSITE", text: parsed.data.message, visitorId: parsed.data.visitorId } });
   const state = await db.conversation.findUnique({ where: { id: conversation.id }, select: { status: true } });
@@ -101,7 +101,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ emp
   // A handoff request (NEEDS_ATTENTION) just notifies the team; the AI keeps answering.
   if (state?.status === "HUMAN_ACTIVE") {
     await db.notification.create({ data: { workspaceId: employee.workspaceId, type: "MESSAGE", title: t("server.managerMessageTitle"), body: parsed.data.message.slice(0, 1000) } });
-    return NextResponse.json({ conversationId: conversation.id, message: t("server.messageToManager"), confidence: 1, handoff: true });
+    return NextResponse.json({ conversationId: conversation.id, cursor: new Date().toISOString(), message: t("server.messageToManager"), confidence: 1, handoff: true });
   }
   // Where the card is installed: the signed parent origin (not Lemeri's own hosted chat page) and the visitor's page.
   const ownOrigins = [new URL(request.url).origin, process.env.PUBLIC_APP_URL ? new URL(process.env.PUBLIC_APP_URL).origin : ""];
@@ -113,5 +113,5 @@ export async function POST(request: Request, { params }: { params: Promise<{ emp
   drainJobsAfterResponse();
   // A site study was queued or the overview is missing: do it after this reply.
   if ("siteWork" in result && result.siteWork) { try { after(async () => { const [{ runSiteJobs }, { ensureSiteOverview }] = await Promise.all([import("@/lib/knowledge/site-jobs"), import("@/lib/knowledge/site-study")]); const { locale } = await getWorkspaceTranslator(employee.workspaceId); await runSiteJobs(1).catch(error => console.error("Site study failed", error instanceof Error ? error.message : error)); await ensureSiteOverview(employee.workspaceId, locale === "en" ? "en" : "ru", { force: true }).catch(error => console.error("Site overview failed", error instanceof Error ? error.message : error)); }); } catch { /* outside a request scope */ } }
-  return NextResponse.json({ conversationId: conversation.id, messageId:result.message.id, message: result.message.content, confidence: result.confidence, handoff: result.handoff });
+  return NextResponse.json({ conversationId: conversation.id, cursor: new Date().toISOString(), messageId:result.message.id, message: result.message.content, confidence: result.confidence, handoff: result.handoff });
 }

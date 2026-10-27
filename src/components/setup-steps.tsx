@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { ArrowRight, Check, PartyPopper, X } from "lucide-react";
 
 // «Шаги запуска» at the top of the platform's main page: Регистрация → Онбординг →
-// Создание карточки → «Lemeri AI готов к работе». Shown on /app while the AI seller
-// is being set up (onboarding form below it) and on the dashboard until the card has
-// loaded on the customer's site; the finished state can be hidden.
+// Создание карточки → «Lemeri AI готов к работе». Shown on the dashboard from the
+// first visit (the owner may explore first; the button opens /onboarding) until the
+// card has loaded on the customer's site; also on /onboarding. The finished state can be hidden.
 
 export type SetupStage = "onboarding" | "card" | "ready";
 
@@ -18,7 +18,7 @@ const COPY = {
       { title: "Создание карточки", text: "Вид чата и установка на сайт" },
     ],
     ready: "Lemeri AI готов к работе", readyText: "Карточка работает на вашем сайте — ИИ отвечает посетителям и собирает заявки.",
-    now: "Сейчас", cardCta: "Создать карточку", cardHint: "Шаг засчитается, когда карточка откроется на вашем сайте.", hide: "Скрыть",
+    now: "Сейчас", onboardingCta: "Пройти онбординг", onboardingHint: "3–5 минут. Можно сначала спокойно посмотреть платформу.", cardCta: "Создать карточку", cardHint: "Шаг засчитается, когда карточка откроется на вашем сайте.", hide: "Скрыть",
   },
   en: {
     title: "Launching Lemeri AI", steps: [
@@ -27,11 +27,11 @@ const COPY = {
       { title: "Card", text: "Chat look and install on your site" },
     ],
     ready: "Lemeri AI is ready to work", readyText: "The card is live on your website — the AI answers visitors and collects requests.",
-    now: "Now", cardCta: "Create the card", cardHint: "The step completes once the card opens on your website.", hide: "Hide",
+    now: "Now", onboardingCta: "Start onboarding", onboardingHint: "3–5 minutes. Feel free to look around the platform first.", cardCta: "Create the card", cardHint: "The step completes once the card opens on your website.", hide: "Hide",
   },
 } as const;
 
-export function SetupSteps({ locale, stage, onCard, storageKey }: { locale: string; stage: SetupStage; onCard?: () => void; storageKey?: string }) {
+export function SetupSteps({ locale, stage, onCard, onOnboarding, storageKey }: { locale: string; stage: SetupStage; onCard?: () => void; onOnboarding?: () => void; storageKey?: string }) {
   const c = COPY[locale === "en" ? "en" : "ru"];
   const [hidden, setHidden] = useState(false);
   useEffect(() => { if (stage === "ready" && storageKey) { try { setHidden(window.localStorage.getItem(storageKey) === "1"); } catch { /* storage unavailable */ } } }, [stage, storageKey]);
@@ -52,6 +52,7 @@ export function SetupSteps({ locale, stage, onCard, storageKey }: { locale: stri
         <div><b>{c.ready}</b>{stage === "ready" ? <small>{c.readyText}</small> : null}</div>
       </li>
     </ol>
+    {stage === "onboarding" && onOnboarding ? <div className="setupAction"><button type="button" className="primary" onClick={onOnboarding}>{c.onboardingCta}<ArrowRight size={15} /></button><small>{c.onboardingHint}</small></div> : null}
     {stage === "card" && onCard ? <div className="setupAction"><button type="button" className="primary" onClick={onCard}>{c.cardCta}<ArrowRight size={15} /></button><small>{c.cardHint}</small></div> : null}
     {stage === "ready" && storageKey ? <button type="button" className="iconButton setupHide" onClick={hide} aria-label={c.hide} title={c.hide}><X size={16} /></button> : null}
   </section>;

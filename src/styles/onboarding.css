@@ -500,3 +500,12 @@
   .setupSteps ol { grid-template-columns: 1fr; gap: 10px; }
   .setupSteps li:not(:last-child)::after { position: absolute; top: 30px; bottom: -10px; left: 13px; width: 2px; height: auto; min-width: 0; margin: 0; }
 }
+
+/* No AI employee yet (platform opened right after sign-up) */
+.noEmployee { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+.noEmployee > div { flex: 1 1 260px; display: grid; gap: 6px; min-width: 0; }
+.noEmployee h2 { margin: 0; font-size: var(--fs-18, 18px); }
+.noEmployee p { margin: 0; color: var(--text-3); font-size: var(--fs-14, 14px); line-height: 1.5; }
+.noEmployee .primary { display: inline-flex; align-items: center; gap: 6px; }
+.noEmployeeIcon { display: inline-grid; place-items: center; flex: none; width: 48px; height: 48px; border-radius: 14px; background: var(--accent-soft, #eeecff); color: var(--accent); }
+.noEmployee.wide { max-width: 760px; padding: 24px; }
