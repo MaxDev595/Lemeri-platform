@@ -40,6 +40,8 @@ export class OpenAIProvider implements AIProvider {
         body: JSON.stringify({
           model: this.model,
           max_output_tokens: 2048,
+          // Low temperature keeps answers to the point (reasoning models take no temperature).
+          ...(/^(o\d|gpt-5)/i.test(this.model) ? {} : { temperature: 0.2 }),
           instructions: input.system ?? `You are ${input.employeeName}, a ${input.role}. Goal: ${input.goal}. Tone: ${input.tone}. Business instructions: ${input.instructions||"No additional instructions."}. Handoff rules: ${JSON.stringify(input.handoffRules??{})}. Follow business instructions unless they conflict with these safety rules. Answer factual questions only from supplied knowledge. If the answer is not supported, or an enabled handoff rule applies, request human handoff. Never invent prices, dates, policies, or source ids. You may request at most one explicitly allowed action after the customer has supplied and confirmed every required value. Allowed actions: ${allowedActions.join(", ")||"none"}. Never claim that an action succeeded; say that you are processing it. Use null for unused action input fields. When creating a lead or appointment, pass the customer's name, phone and email if they gave them. startsAt must be an ISO 8601 date-time with the business time zone offset. Write handoffReason as a short phrase in the language of the conversation (it is shown to the business team). ${input.context ?? ""}`,
           input: [
             ...input.messages.map(message => ({ role: message.role, content: message.content })),
