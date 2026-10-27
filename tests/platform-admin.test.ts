@@ -25,3 +25,14 @@ test("Lemeri's own workspace has Custom without a reply allowance", () => {
   const paid = resolveAccess({ subscription: { plan: "CUSTOM", status: "ACTIVE", provider: "P2P", currentPeriodStart: now, currentPeriodEnd: new Date("2026-11-17T10:00:00Z") }, now, env: {} });
   assert.equal(paid.messageLimit, 2000);
 });
+
+test("admin usage list: sites where the card loads, plus allowed ones, without Lemeri itself", async () => {
+  const { usageDomains } = await import("../src/lib/platform/usage-domains.ts");
+  const at = Date.parse("2026-10-27T08:00:00Z");
+  const domains = usageDomains({
+    seen: { "https://shop.kz": at, "https://www.shop.kz": at - 86_400_000, "https://lemeriai.com": at, "https://old.kz": "bad" },
+    allowedOrigins: ["https://shop.kz", "https://new.kz"],
+  }, ["lemeriai.com"]);
+  assert.deepEqual(domains.map(d => [d.host, d.allowed, Boolean(d.lastSeenAt)]), [["shop.kz", true, true], ["www.shop.kz", false, true], ["new.kz", true, false]]);
+  assert.deepEqual(usageDomains(null), []);
+});

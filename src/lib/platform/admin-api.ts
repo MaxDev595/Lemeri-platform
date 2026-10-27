@@ -29,6 +29,8 @@ async function status(auth: Auth) {
       return { payments, sales: stats, transfers, refunds };
     }),
     p2pConfigured: await import("@/lib/billing/p2p").then(m => m.p2pConfig().configured || m.cryptoConfig().configured),
+    // Who uses the AI seller and on which sites (null when the query fails).
+    usage: await import("./usage").then(m => m.assistantUsage(settings.workspaceId)).catch(error => { console.error("Admin usage failed", error instanceof Error ? error.message : error); return null; }),
   };
 }
 

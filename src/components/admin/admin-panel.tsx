@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { AppWindow, ArrowDownLeft, ArrowUpRight, BookOpen, Bot, Check, Copy, Link2, MessageCircle, RefreshCw, X } from "lucide-react";
+import { AppWindow, ArrowDownLeft, ArrowUpRight, BookOpen, Bot, Check, Copy, Globe, Link2, MessageCircle, RefreshCw, Search, X } from "lucide-react";
+import type { AssistantUsage } from "@/lib/platform/usage";
 import { formatAmount } from "@/lib/billing/p2p";
 import { Field, Section, Toggle } from "../sales/ui";
 
@@ -18,6 +19,7 @@ type Status = {
   model: { provider: string; configured: boolean; name: string };
   payments: Array<{ id: string; workspace: string; ownerEmail: string | null; plan: "STARTER" | "CUSTOM"; interval: "month" | "year"; amount: number; currency: string; code: string; payerName: string; note: string; status: "PENDING" | "CONFIRMED" | "REJECTED" | "REFUNDED"; createdAt: string; decidedAt: string | null; method: "transfer" | "crypto"; txId: string | null }>;
   p2pConfigured: boolean;
+  usage?: AssistantUsage | null;
   sales: { total: number; month: number; count: number; monthCount: number; active: { STARTER: number; CUSTOM: number }; accounts: number; refunded?: number; refunds?: number } | null;
   refunds?: RefundItem[];
   transfers: Array<{ txId: string; direction?: "in" | "out"; counterparty?: string | null; counterpartyName?: string | null; comment?: string | null; amount: number; time: string; fromName: string | null; from: string | null; requestId: string | null; workspace: string | null; ownerEmail: string | null; plan: string | null; status: string | null }> | null;
@@ -51,6 +53,14 @@ const T = {
     grant: "Выдать тариф", grantCopy: "Включить тариф аккаунту по email — например, если оплата пришла другим способом.", email: "Email аккаунта", plan: "Тариф", period: "Срок",
     grantDo: "Включить тариф", cancel: "Отмена", errors: { USER_NOT_FOUND: "Аккаунт с таким email не найден", TX_NOT_FOUND: "Транзакция не найдена среди поступлений", TX_USED: "Эта транзакция уже засчитана", INVALID_REQUEST: "Проверьте email" } as Record<string, string>,
     confirmAsk: (amount: string, code: string) => `Подтвердить перевод ${amount} (${code})? Тариф включится сразу.`,
+    usageTitle: "Кто использует ИИ-продавца", usageCopy: "Аккаунты с карточкой чата и сайты, где она загружалась. Зелёная точка — карточка открывалась на сайте за последние 7 дней, жёлтая — раньше, серая — сайт добавлен в разрешённые, но карточку там ещё не видели.",
+    usageFailed: "Не удалось загрузить список — обновите страницу.", usageEmpty: "Пока никто не подключил карточку.", usageNone: "Ничего не найдено.",
+    usageAccounts: "Аккаунтов с карточкой", usageLive: "Работают на сайтах", usageLiveHint: "за 7 дней", usageDomains: "доменов", usageDialogs: "Диалогов на сайтах", usageDialogsHint: "за 30 дней",
+    usageAll: "Все", usageOnLive: "Работают", usageNoSite: "Не на сайте", usageSearch: "Название, email или домен", usageMore: "Показать все",
+    usageNoDomains: "Карточку ещё не видели ни на одном сайте", usageAi: "ИИ", usageOff: "выключен", usageNoAi: "не создан", usageSince: "с", usageLast: "последний", usageOwn: "Lemeri",
+    usageSeen: "открывалась", usageAllowedOnly: "разрешён, не видели", usageNever: "диалогов не было", usageOwnSites: "Лендинг lemeriai.com и кабинет клиентов",
+    dialogsN: (n: number) => n % 10 === 1 && n % 100 !== 11 ? "диалог" : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? "диалога" : "диалогов",
+    ago: (ms: number) => ms < 3_600_000 ? `${Math.max(1, Math.round(ms / 60_000))} мин назад` : ms < 86_400_000 ? `${Math.round(ms / 3_600_000)} ч назад` : `${Math.round(ms / 86_400_000)} дн. назад`,
   },
   en: {
     title: "Lemeri assistant", copy: "Lemeri's own AI assistant: consults landing page visitors and helps customers inside the cabinet. It is the AI seller of the «Lemeri AI» workspace — its prompt, knowledge, card and first message are edited in the usual sections.",
@@ -77,6 +87,14 @@ const T = {
     grant: "Grant a plan", grantCopy: "Switch a plan on for an account by email — e.g. when payment came another way.", email: "Account email", plan: "Plan", period: "Period",
     grantDo: "Switch the plan on", cancel: "Cancel", errors: { USER_NOT_FOUND: "No account with this email", TX_NOT_FOUND: "Transaction not found among deposits", TX_USED: "This transaction is already used", INVALID_REQUEST: "Check the email" } as Record<string, string>,
     confirmAsk: (amount: string, code: string) => `Confirm the ${amount} transfer (${code})? The plan switches on immediately.`,
+    usageTitle: "Who uses the AI seller", usageCopy: "Accounts with a chat card and the sites where it loaded. Green dot — the card opened on the site in the last 7 days, yellow — earlier, grey — the site is allowed but the card hasn't been seen there yet.",
+    usageFailed: "Couldn't load the list — refresh the page.", usageEmpty: "Nobody has connected the card yet.", usageNone: "Nothing found.",
+    usageAccounts: "Accounts with a card", usageLive: "Live on websites", usageLiveHint: "last 7 days", usageDomains: "domains", usageDialogs: "Website conversations", usageDialogsHint: "last 30 days",
+    usageAll: "All", usageOnLive: "Live", usageNoSite: "Not on a site", usageSearch: "Name, email or domain", usageMore: "Show all",
+    usageNoDomains: "The card hasn't been seen on any site yet", usageAi: "AI", usageOff: "paused", usageNoAi: "not created", usageSince: "since", usageLast: "last", usageOwn: "Lemeri",
+    usageSeen: "opened", usageAllowedOnly: "allowed, not seen", usageNever: "no conversations yet", usageOwnSites: "lemeriai.com landing page and customers' cabinets",
+    dialogsN: (n: number) => n === 1 ? "conversation" : "conversations",
+    ago: (ms: number) => ms < 3_600_000 ? `${Math.max(1, Math.round(ms / 60_000))} min ago` : ms < 86_400_000 ? `${Math.round(ms / 3_600_000)} h ago` : `${Math.round(ms / 86_400_000)} days ago`,
   },
 } as const;
 
@@ -94,6 +112,9 @@ export function AdminPanel({ locale, notify, onNavigate }: { locale: string; not
   const [grant, setGrant] = useState<Grant | null>(null);
   const [reasons, setReasons] = useState<Record<string, string>>({});
   const [txFilter, setTxFilter] = useState<"all" | "in" | "out">("all");
+  const [usageFilter, setUsageFilter] = useState<"all" | "live" | "none">("all");
+  const [usageQuery, setUsageQuery] = useState("");
+  const [usageAll, setUsageAll] = useState(false);
   const post = async (body: Record<string, unknown>) => {
     setBusy(true);
     try {
@@ -141,6 +162,43 @@ export function AdminPanel({ locale, notify, onNavigate }: { locale: string; not
         <div className="adminCard"><small>{c.activeSubs}</small>{row("Starter", String(status.sales.active.STARTER))}{row("Custom", String(status.sales.active.CUSTOM))}{row(c.accounts, String(status.sales.accounts))}</div>
       </div>
     </Section>}
+    <Section title={c.usageTitle} copy={c.usageCopy}>
+      {status.usage === null ? <p className="sxMuted">{c.usageFailed}</p> : status.usage ? (() => {
+        const usage = status.usage!;
+        const now = Date.now();
+        const live = (iso: string | null) => Boolean(iso && now - Date.parse(iso) <= 7 * 86_400_000);
+        const q = usageQuery.trim().toLowerCase();
+        const shown = usage.rows.filter(row => usageFilter === "all" || (usageFilter === "live" ? live(row.lastSeenAt) : !row.lastSeenAt))
+          .filter(row => !q || [row.workspace, row.ownerEmail ?? "", row.employee ?? "", ...row.domains.map(d => d.host)].some(text => text.toLowerCase().includes(q)));
+        const list = usageAll || q ? shown : shown.slice(0, 50);
+        const plan = (row: typeof usage.rows[number]) => `${row.plan === "CUSTOM" ? "Custom" : row.plan === "STARTER" ? "Starter" : "Trial"}${row.planStatus && row.planStatus !== "ACTIVE" && row.planStatus !== "TRIALING" ? ` · ${row.planStatus.toLowerCase()}` : ""}`;
+        return <>
+          <div className="adminGrid three">
+            <div className="adminCard"><small>{c.usageAccounts}</small><p className="adminStat"><b>{usage.summary.workspaces}</b></p></div>
+            <div className="adminCard"><small>{c.usageLive}</small><p className="adminStat"><b>{usage.summary.live}</b> {c.usageLiveHint} · {usage.summary.domains} {c.usageDomains}</p></div>
+            <div className="adminCard"><small>{c.usageDialogs}</small><p className="adminStat"><b>{usage.summary.dialogs30}</b> {c.usageDialogsHint}</p></div>
+          </div>
+          {usage.rows.length ? <>
+            <div className="adminTxHead adminUsageHead">
+              <div className="sxSegmented" role="group">{(["all", "live", "none"] as const).map(key => <button key={key} type="button" className={usageFilter === key ? "on" : ""} aria-pressed={usageFilter === key} onClick={() => setUsageFilter(key)}>{key === "all" ? c.usageAll : key === "live" ? c.usageOnLive : c.usageNoSite}</button>)}</div>
+              <label className="adminSearch"><Search size={14}/><input type="search" value={usageQuery} onChange={event => setUsageQuery(event.target.value)} placeholder={c.usageSearch} aria-label={c.usageSearch}/></label>
+            </div>
+            {list.length ? <div className="adminPayments">{list.map(row => <div key={row.workspaceId} className={`adminPayment adminUsage${live(row.lastSeenAt) ? " live" : ""}`}>
+              <div>
+                <b>{row.workspace}{row.own ? <span className="adminTag">{c.usageOwn}</span> : null} · {plan(row)}</b>
+                <small>{row.ownerEmail ?? "—"} · {c.usageAi}: {row.employee ? `${row.employee}${row.employeeActive ? "" : ` (${c.usageOff})`}` : c.usageNoAi} · {c.usageSince} {new Date(row.createdAt).toLocaleDateString(locale === "en" ? "en-GB" : "ru-RU")}</small>
+                {row.domains.length ? <div className="adminDomains">{row.domains.map(d => {
+                  const tone = d.lastSeenAt ? (live(d.lastSeenAt) ? "live" : "old") : "allowed";
+                  return <a key={d.host} className={`adminDomain ${tone}`} href={d.origin} target="_blank" rel="noreferrer" title={d.lastSeenAt ? `${c.usageSeen} ${when(d.lastSeenAt)}` : c.usageAllowedOnly}><i/><Globe size={12}/>{d.host}{d.lastSeenAt ? <em>{c.ago(now - Date.parse(d.lastSeenAt))}</em> : null}</a>;
+                })}</div> : <small className="adminNote">{row.own ? c.usageOwnSites : c.usageNoDomains}</small>}
+              </div>
+              <div className="adminUsageStats"><p className="adminStat"><b>{row.dialogs30}</b> {c.dialogsN(row.dialogs30)}</p><small>{row.lastDialogAt ? `${c.usageLast}: ${when(row.lastDialogAt)}` : c.usageNever}</small></div>
+            </div>)}</div> : <p className="sxMuted">{c.usageNone}</p>}
+            {!usageAll && !q && shown.length > list.length ? <div className="adminActions"><button type="button" className="btn" onClick={() => setUsageAll(true)}>{c.usageMore} ({shown.length})</button></div> : null}
+          </> : <p className="sxMuted">{c.usageEmpty}</p>}
+        </>;
+      })() : <p className="sxMuted">{c.loading}</p>}
+    </Section>
     <Section title={c.refundsTitle} copy={c.refundsCopy}>
       {status.refunds?.length ? <div className="adminPayments">{status.refunds.map(item => {
         const amount = item.currency === "USDT" ? usd(item.amount) : formatAmount(item.amount, item.currency, locale === "en" ? "en" : "ru");

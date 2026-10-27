@@ -421,3 +421,24 @@ input[type=color] { width: 36px; height: 30px; padding: 2px; border: 1px solid v
 .adminTx code { font-size: 12px; }
 .adminCopy { display: inline-grid; place-items: center; width: 22px; height: 22px; min-height: 0; padding: 0; border: 1px solid var(--line-soft); border-radius: 6px; background: transparent; color: var(--text-3); vertical-align: middle; cursor: pointer; }
 .adminCopy:hover { color: var(--text); }
+
+/* Admin «Кто использует ИИ-продавца» (lib/platform/usage.ts) */
+.adminUsageHead { flex-wrap: wrap; gap: 10px; }
+.adminSearch:focus-within { border-color: var(--accent); }
+.adminSearch { display: inline-flex; align-items: center; gap: 6px; min-width: 220px; flex: 1; max-width: 340px; padding: 0 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text-3); }
+.adminSearch input, .adminSearch input:focus { flex: 1; min-width: 0; height: 34px; padding: 0; border: 0; box-shadow: none; background: transparent; color: var(--text); font: inherit; font-size: var(--fs-13); outline: none; }
+.adminUsage > div:first-child { flex: 1 1 360px; }
+.adminUsage > div:first-child > b { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.adminUsage.live { border-color: color-mix(in srgb, var(--ok) 45%, var(--line-soft)); }
+.adminDomains { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.adminDomain { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--text); font-size: var(--fs-12, 12px); text-decoration: none; }
+.adminDomain:hover { border-color: var(--accent); }
+.adminDomain i { width: 7px; height: 7px; border-radius: 50%; background: var(--text-4, #a8adba); }
+.adminDomain.live i { background: var(--ok); }
+.adminDomain.old i { background: var(--warn); }
+.adminDomain.allowed { color: var(--text-3); border-style: dashed; }
+.adminDomain svg { color: var(--text-3); }
+.adminDomain em { color: var(--text-3); font-style: normal; }
+.adminUsageStats { display: grid; justify-items: end; gap: 2px; text-align: right; }
+.adminUsageStats small { color: var(--text-3); font-size: var(--fs-12, 12px); }
+@media (max-width: 640px) { .adminUsageStats { justify-items: start; text-align: left; } .adminSearch { max-width: none; } }
